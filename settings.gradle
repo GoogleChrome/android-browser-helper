@@ -1,1 +1,1 @@
-include ':demo', ':browsersidekick'
+include ':demo', ':androidbrowserhelper'

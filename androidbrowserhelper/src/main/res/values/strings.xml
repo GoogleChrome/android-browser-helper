@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Browser Sidekick</string>
+    <string name="app_name">Android Browser Helper</string>
+    <string name="update_chrome_toast">Please update to Chrome Stable 72 or later.</string>
+    <string name="no_provider_toast">Please install Chrome Stable 72 or later.</string>
 </resources>

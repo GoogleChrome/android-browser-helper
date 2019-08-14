@@ -22,13 +22,12 @@ android {
 
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -38,13 +37,27 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.browser:browser:1.2.0-alpha07'
+    implementation 'androidx.core:core:1.0.2'
+
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:3.0.0'
+    testImplementation 'org.robolectric:robolectric:4.0.1'
+
     androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+    androidTestImplementation 'org.mockito:mockito-core:3.0.0'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.19.0'
+    androidTestImplementation 'junit:junit:4.12'
 }

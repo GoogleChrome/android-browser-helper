@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.test.R;
@@ -35,7 +36,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+import androidx.browser.trusted.sharing.ShareData;
+import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
@@ -109,6 +118,61 @@ public class LauncherActivityTest {
         checkColor(browser);
     }
 
+    @Test
+    public void sendsShareDataFromSendIntent() {
+        String subject = "foo";
+        String text = "bar";
+        Uri uri = Uri.parse("file://baz");
+
+        Intent intent = new Intent(Intent.ACTION_SEND)
+                .putExtra(Intent.EXTRA_SUBJECT, subject)
+                .putExtra(Intent.EXTRA_TEXT, text)
+                .putExtra(Intent.EXTRA_STREAM, uri);
+
+        TestBrowser browser = launch(intent);
+        assertShareParamsInIntent(browser.getIntent(),
+                new ShareData(subject, text, Collections.singletonList(uri)));
+    }
+
+    @Test
+    public void sendsShareDataFromSendMultipleIntent() {
+        String subject = "foo";
+        String text = "bar";
+        List<Uri> uris = Arrays.asList(Uri.parse("file://baz"), Uri.parse("file://qux"));
+
+        Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE)
+                .putExtra(Intent.EXTRA_SUBJECT, subject)
+                .putExtra(Intent.EXTRA_TEXT, text)
+                .putParcelableArrayListExtra(Intent.EXTRA_STREAM, new ArrayList<>(uris));
+
+        TestBrowser browser = launch(intent);
+
+        assertShareParamsInIntent(browser.getIntent(), new ShareData(subject, text, uris));
+    }
+
+    @Test
+    public void sendsShareTargetWithSendIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND)
+                .putExtra(Intent.EXTRA_SUBJECT, "foo")
+                .putExtra(Intent.EXTRA_TEXT, "bar");
+
+        TestBrowser browser = launch(intent);
+        ShareTarget shareTarget = ShareTarget.fromBundle(browser.getIntent()
+                .getBundleExtra(TrustedWebActivityIntentBuilder.EXTRA_SHARE_TARGET));
+        // Comparing just the action to the one in R.string.share_target to make sure the
+        // ShareTarget has reached the TWA. Unit tests for parsing all the other fields from JSON
+        // are elsewhere.
+        assertEquals("https://mypwa.com/share.html", shareTarget.action);
+    }
+
+    private void assertShareParamsInIntent(Intent intent, ShareData shareData) {
+        ShareData data = ShareData.fromBundle(intent.getBundleExtra(
+                TrustedWebActivityIntentBuilder.EXTRA_SHARE_DATA));
+        assertEquals(shareData.title, data.title);
+        assertEquals(shareData.text, data.text);
+        assertEquals(shareData.uris, data.uris);
+    }
+
     private void checkColor(TestBrowser browser) {
         int requestedColor = browser.getIntent()
                 .getIntExtra(CustomTabsIntent.EXTRA_TOOLBAR_COLOR, 0);
@@ -119,8 +183,12 @@ public class LauncherActivityTest {
     }
 
     private TestBrowser launch() {
+        return launch(null);
+    }
+
+    private TestBrowser launch(Intent intent) {
         return TestUtil.getBrowserActivityWhenLaunched(() ->
-                mActivityTestRule.launchActivity(null));
+                mActivityTestRule.launchActivity(intent));
     }
 }
 

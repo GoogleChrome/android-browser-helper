@@ -22,6 +22,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
+
+import org.json.JSONException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +34,8 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
+import androidx.browser.trusted.sharing.ShareData;
+import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
@@ -159,6 +165,8 @@ public class LauncherActivity extends AppCompatActivity {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
+        addShareDataIfPresent(twaBuilder);
+
         mTwaLauncher = new TwaLauncher(this);
         mTwaLauncher.launch(twaBuilder,
                 mSplashScreenStrategy,
@@ -172,6 +180,23 @@ public class LauncherActivity extends AppCompatActivity {
 
         new TwaSharedPreferencesManager(this)
                 .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+    }
+
+    private void addShareDataIfPresent(TrustedWebActivityIntentBuilder twaBuilder) {
+        ShareData shareData = SharingUtils.retrieveShareDataFromIntent(getIntent());
+        if (shareData == null) {
+            return;
+        }
+        if (mMetadata.shareTarget == null) {
+            Log.d(TAG, "Failed to share: share target not defined in the AndroidManifest");
+            return;
+        }
+        try {
+            ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
+            twaBuilder.setShareParams(shareTarget, shareData);
+        } catch (JSONException e) {
+            Log.d(TAG, "Failed to parse share target json: " + e.toString());
+        }
     }
 
     private boolean splashScreenNeeded() {

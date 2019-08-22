@@ -23,6 +23,11 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.test.R;
+import com.google.androidbrowserhelper.trusted.testutils.EnableComponentsTestRule;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceSupportsTwas;
+import com.google.androidbrowserhelper.trusted.testutils.TestUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,9 +37,9 @@ import org.junit.runner.RunWith;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Tests for {@link LauncherActivity}.

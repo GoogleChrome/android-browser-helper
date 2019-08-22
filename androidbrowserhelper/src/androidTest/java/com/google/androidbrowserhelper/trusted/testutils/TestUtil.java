@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.trusted.testutils;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import android.app.Instrumentation;
 import android.os.Handler;
 import android.os.Looper;
+
+import com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;

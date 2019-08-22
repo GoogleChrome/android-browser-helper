@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.trusted.testcomponents;
 
 /**
- * A {@link TestCustomTabsService} that in the manifest also supports Trusted Web Activities. This
- * is so the two services can be turned on and off individually.
+ * A {@link TestCustomTabsService} that supports Trusted Web Activities, but not splash screens.
  */
-public class TestCustomTabsServiceSupportsTwas extends TestCustomTabsService { }
+public class TestCustomTabsServiceNoSplashScreens extends TestCustomTabsService { }

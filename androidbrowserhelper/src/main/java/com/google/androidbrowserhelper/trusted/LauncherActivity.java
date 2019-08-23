@@ -140,6 +140,9 @@ public class LauncherActivity extends AppCompatActivity {
             ChromeUpdatePrompt.promptIfNeeded(this, mTwaLauncher.getProviderPackage());
             sChromeVersionChecked = true;
         }
+
+        new TwaSharedPreferencesManager(this)
+                .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
     }
 
     private boolean splashScreenNeeded() {

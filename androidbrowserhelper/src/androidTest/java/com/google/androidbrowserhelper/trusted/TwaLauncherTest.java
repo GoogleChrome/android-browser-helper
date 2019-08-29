@@ -14,7 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
-import static com.google.androidbrowserhelper.trusted.TestUtil.getBrowserActivityWhenLaunched;
+import static com.google.androidbrowserhelper.trusted.testutils.TestUtil.getBrowserActivityWhenLaunched;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,6 +36,11 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+import com.google.androidbrowserhelper.trusted.testutils.EnableComponentsTestRule;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestActivity;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceSupportsTwas;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +54,7 @@ import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 /**
  * Instrumentation tests for {@link TwaLauncher}
@@ -56,8 +62,6 @@ import androidx.test.runner.AndroidJUnit4;
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class TwaLauncherTest {
-    // TODO(pshmakov): Copy notifiesSplashScreenStrategyOfLaunchInitiation over.
-
     private static final Uri URL = Uri.parse("https://www.test.com/default_url/");
 
     private Context mContext = InstrumentationRegistry.getContext();
@@ -197,14 +201,23 @@ public class TwaLauncherTest {
     }
 
     @Test
+    public void notifiesSplashScreenStrategyOfLaunchInitiation() {
+        SplashScreenStrategy strategy = mock(SplashScreenStrategy.class);
+        TrustedWebActivityIntentBuilder builder = makeBuilder();
+        mTwaLauncher.launch(builder, strategy, null);
+        verify(strategy).onTwaLaunchInitiated(
+                eq(InstrumentationRegistry.getContext().getPackageName()),
+                eq(builder));
+    }
+
+    @Test
     public void doesntLaunch_UntilSplashScreenStrategyFinishesConfiguring() {
         SplashScreenStrategy strategy = mock(SplashScreenStrategy.class);
 
-        // Using spy to verify launchActivity not called to avoid testing directly that activity is
+        // Using spy to verify intent is never built to avoid testing directly that activity is
         // not launched.
         TrustedWebActivityIntentBuilder builder = spy(makeBuilder());
         mTwaLauncher.launch(builder, strategy, null);
-        // TODO(pshmakov): Review this test.
         verify(builder, never()).build(any());
     }
 

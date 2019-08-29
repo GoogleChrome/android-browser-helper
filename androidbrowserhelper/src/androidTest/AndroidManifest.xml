@@ -17,7 +17,7 @@
           package="android.support.customtabs">
     <uses-sdk android:minSdkVersion="16"/>
     <application>
-        <activity android:name="com.google.androidbrowserhelper.trusted.TestActivity"
+        <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestActivity"
                   android:enabled="false">
             <!-- A browsable intent filter is required for the TrustedWebActivityService. -->
             <intent-filter>
@@ -34,14 +34,14 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.google.androidbrowserhelper.trusted.TestCustomTabsService"
+        <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService"
                  android:enabled="false">
             <intent-filter>
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
             </intent-filter>
         </service>
 
-        <service android:name="com.google.androidbrowserhelper.trusted.TestCustomTabsServiceSupportsTwas"
+        <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceSupportsTwas"
                  android:enabled="false">
             <intent-filter>
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
@@ -50,7 +50,7 @@
             </intent-filter>
         </service>
 
-        <service android:name="com.google.androidbrowserhelper.trusted.TestCustomTabsServiceNoSplashScreens"
+        <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceNoSplashScreens"
                  android:enabled="false">
             <intent-filter>
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
@@ -58,7 +58,7 @@
             </intent-filter>
         </service>
 
-        <activity android:name="com.google.androidbrowserhelper.trusted.TestBrowser"
+        <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser"
                   android:theme="@style/Theme.AppCompat.Light"
                   android:exported="true"
                   android:enabled="false">

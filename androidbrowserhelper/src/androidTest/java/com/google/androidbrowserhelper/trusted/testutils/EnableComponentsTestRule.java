@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.trusted.testutils;
 
 import android.content.ComponentName;
 import android.content.Context;

@@ -185,8 +185,7 @@ public class TwaLauncher {
     private void launchWhenSplashScreenReady(TrustedWebActivityIntentBuilder builder,
             @Nullable Runnable completionCallback) {
         Log.d(TAG, "Launching Trusted Web Activity.");
-        Intent intent = builder.build(mSession);
-        ContextCompat.startActivity(mContext, intent, null);
+        builder.build(mSession).launchTrustedWebActivity(mContext);
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
         TrustedWebActivityService.setVerifiedProvider(mContext, mProviderPackage);

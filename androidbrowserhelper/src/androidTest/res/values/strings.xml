@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_target">
+        {
+            \"action\": \"https://mypwa.com/share.html\",
+            \"method\": \"POST\",
+            \"enctype\": \"multipart/form-data\",
+            \"params\": {
+              \"title\": \"received_title\",
+              \"text\": \"received_text\",
+              \"url\": \"received_url\",
+              \"files\": [
+                {
+                  \"name\": \"received_image_files\",
+                  \"accept\": \"image/*\"
+                }
+              ]
+            }
+        }
+    </string>
+</resources>

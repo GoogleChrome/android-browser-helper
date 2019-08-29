@@ -22,11 +22,15 @@ import android.widget.ImageView;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
+import org.json.JSONException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
+import androidx.browser.trusted.sharing.ShareData;
+import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.core.content.ContextCompat;
 
 /**
@@ -132,6 +136,7 @@ public class LauncherActivity extends AppCompatActivity {
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId));
 
+        addShareDataIfPresent(twaBuilder);
 
         mTwaLauncher = new TwaLauncher(this);
         mTwaLauncher.launch(twaBuilder, mSplashScreenStrategy, () -> mBrowserWasLaunched = true);
@@ -139,6 +144,23 @@ public class LauncherActivity extends AppCompatActivity {
         if (!sChromeVersionChecked) {
             ChromeUpdatePrompt.promptIfNeeded(this, mTwaLauncher.getProviderPackage());
             sChromeVersionChecked = true;
+        }
+    }
+
+    private void addShareDataIfPresent(TrustedWebActivityIntentBuilder twaBuilder) {
+        ShareData shareData = SharingUtils.retrieveShareDataFromIntent(getIntent());
+        if (shareData == null) {
+            return;
+        }
+        if (mMetadata.shareTarget == null) {
+            Log.d(TAG, "Failed to share: share target not defined in the AndroidManifest");
+            return;
+        }
+        try {
+            ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
+            twaBuilder.setShareParams(shareTarget, shareData);
+        } catch (JSONException e) {
+            Log.d(TAG, "Failed to parse share target json: " + e.toString());
         }
     }
 

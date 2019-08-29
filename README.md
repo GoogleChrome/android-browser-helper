@@ -1,7 +1,7 @@
-# Sidekick
+# Android Browser Helper
 
-The Sidekick library helps developers use Custom Tabs and Trusted Web
-Activities on top of the AndroidX browser repository.
+The Android Browser Helper library helps developers use Custom Tabs and Trusted
+Web Activities on top of the AndroidX browser support library.
 It contains default implementations of many of the common tasks a
 developer will find themselves requiring, for example:
 

@@ -20,6 +20,7 @@ buildscript {
     repositories {
         google()
         jcenter()
+        
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.2'
@@ -33,9 +34,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "/usr/local/google/code/androidx-master-dev/prebuilts/fullsdk-linux/extras/m2repository/"
-        }
+        
     }
 }
 

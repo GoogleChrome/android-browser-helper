@@ -1,0 +1,90 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+version '0.1.0-alpha4'
+group 'me.bandarra'
+
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties')
+        .newDataInputStream())
+
+// build.gradle
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.source
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.source
+    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    classpath += (project.files(android.getBootClasspath().join(File.pathSeparator))
+            + files(ext.androidJar))
+    options.links("https://developer.android.com/reference/");
+    failOnError false
+}
+afterEvaluate {
+    javadoc.classpath += files(android.libraryVariants.collect
+            { variant ->
+                variant.javaCompile.classpath.files
+            })
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    pkg {
+        repo = 'android-browser-helper'
+        name = 'androidbrowserhelper'
+        userOrg = 'andreban'
+        desc = 'A Companion Library for Web On Android'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/andreban/android-browser-helper'
+        githubRepo = 'andreban/android-browser-helper'
+        githubReleaseNotesFile = 'README.md'
+//        dryRun = true
+        publications = ['Production']
+        configurations = ['archives']
+        version {
+            name = this.version
+            desc = '${this.version}'
+            released  = new Date()
+            vcsTag = this.version
+        }
+    }
+}
+
+publishing {
+    publications {
+        Production(MavenPublication) {
+            // $buildDir/outputs/aar/androidbrowserhelper-release.aar
+            artifact("$buildDir/outputs/aar/androidbrowserhelper-release.aar")
+//            artifact("$buildDir/outputs/aar/app-release.aar")
+            groupId this.group
+            artifactId 'androidbrowserhelper'
+            version this.version
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included in the pom.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}

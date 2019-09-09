@@ -61,3 +61,5 @@ dependencies {
     androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.19.0'
     androidTestImplementation 'junit:junit:4.12'
 }
+
+apply from: 'publish.gradle'

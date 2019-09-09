@@ -20,6 +20,7 @@ import java.util.List;
 
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsService;
+import androidx.browser.customtabs.CustomTabsSession;
 
 /**
  * The behaviour of the Trusted Web Activity Launcher changes based on what features are supported
@@ -71,6 +72,7 @@ public class ChromeLegacyUtils {
     static final int VERSION_SUPPORTS_TRUSTED_WEB_ACTIVITIES = 362600000;
     private static final int VERSION_SUPPORTS_NO_PREWARM = 368300000;
     private static final int VERSION_SUPPORTS_CUSTOM_COLOR = 380900000;
+    private static final int VERSION_SUPPORTS_SIMPLIFIED_MANAGE_DATA = 389000000;
 
     private ChromeLegacyUtils() {}
 
@@ -114,6 +116,19 @@ public class ChromeLegacyUtils {
         if (!SUPPORTED_CHROME_PACKAGES.contains(packageName)) return true;
 
         return checkChromeVersion(pm, packageName, VERSION_SUPPORTS_NO_PREWARM);
+    }
+
+    /**
+     * Returns false if {@link CustomTabsClient#warmup} and
+     * {@link CustomTabsSession#validateRelationship} need to be called prior to starting a manage
+     * data activity.
+     */
+    public static boolean supportsManageSpaceWithoutWarmupAndValidation(PackageManager pm,
+            String packageName) {
+        // Assume other browsers never had this requirement.
+        if (!SUPPORTED_CHROME_PACKAGES.contains(packageName)) return false;
+
+        return checkChromeVersion(pm, packageName, VERSION_SUPPORTS_SIMPLIFIED_MANAGE_DATA);
     }
 
     /**

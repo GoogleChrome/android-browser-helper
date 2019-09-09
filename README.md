@@ -1,5 +1,7 @@
 # Android Browser Helper
 
+![CI Status Badge](https://github.com/GoogleChrome/android-browser-helper/workflows/Android%20CI/badge.svg)
+
 The Android Browser Helper library helps developers use Custom Tabs and Trusted
 Web Activities on top of the AndroidX browser support library.
 It contains default implementations of many of the common tasks a

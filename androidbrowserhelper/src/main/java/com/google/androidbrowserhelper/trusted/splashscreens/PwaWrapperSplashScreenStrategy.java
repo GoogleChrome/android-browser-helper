@@ -17,15 +17,18 @@ package com.google.androidbrowserhelper.trusted.splashscreens;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.androidbrowserhelper.trusted.FeatureDetector;
 import com.google.androidbrowserhelper.trusted.Utils;
 
 import androidx.annotation.ColorInt;
@@ -34,6 +37,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.TrustedWebUtils;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode.ImmersiveMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.splashscreens.SplashScreenParamKey;
 import androidx.browser.trusted.splashscreens.SplashScreenVersion;
@@ -56,7 +61,21 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
 
     private static final String TAG = "SplashScreenStrategy";
 
-    private static SystemBarColorPredictor sSystemBarColorPredictor = new SystemBarColorPredictor();
+    private static final int IMMERSIVE_MODE_UI_FLAGS = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+            | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+            | View.SYSTEM_UI_FLAG_LOW_PROFILE
+            | View.SYSTEM_UI_FLAG_IMMERSIVE;
+
+    private static final int IMMERSIVE_STICKY_MODE_UI_FLAGS = IMMERSIVE_MODE_UI_FLAGS
+            & ~View.SYSTEM_UI_FLAG_IMMERSIVE
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+    private final FeatureDetector mFeatureDetector = new FeatureDetector();
+    private SystemBarColorPredictor mSystemBarColorPredictor =
+            new SystemBarColorPredictor(mFeatureDetector);
 
     private final Activity mActivity;
     @DrawableRes
@@ -127,6 +146,7 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
 
         showSplashScreen();
         if (mSplashImage != null) {
+            setImmersiveModeDuringSplashScreen(providerPackage, builder);
             customizeStatusAndNavBarDuringSplashScreen(providerPackage, builder);
         }
     }
@@ -161,16 +181,40 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
      */
     private void customizeStatusAndNavBarDuringSplashScreen(
             String providerPackage, @Nullable TrustedWebActivityIntentBuilder builder) {
-        Integer navbarColor = sSystemBarColorPredictor.getExpectedNavbarColor(mActivity,
+        Integer navbarColor = mSystemBarColorPredictor.getExpectedNavbarColor(mActivity,
                 providerPackage, builder);
         if (navbarColor != null) {
             Utils.setNavigationBarColor(mActivity, navbarColor);
         }
 
-        Integer statusBarColor = sSystemBarColorPredictor.getExpectedStatusBarColor(mActivity,
+        Integer statusBarColor = mSystemBarColorPredictor.getExpectedStatusBarColor(mActivity,
                 providerPackage, builder);
         if (statusBarColor != null) {
             Utils.setStatusBarColor(mActivity, statusBarColor);
+        }
+    }
+
+    /**
+     * If the provider is going to set immersive mode, the client must set it as well while showing
+     * the splash screen.
+     */
+    private void setImmersiveModeDuringSplashScreen(String providerPackage,
+            TrustedWebActivityIntentBuilder builder) {
+        if (!mFeatureDetector.providerSupportsImmersiveMode(mActivity, providerPackage)) {
+            return;
+        }
+        TrustedWebActivityDisplayMode displayMode = builder.getDisplayMode();
+        if (!(displayMode instanceof ImmersiveMode)) {
+            return;
+        }
+        ImmersiveMode immersiveMode = (ImmersiveMode) displayMode;
+        int flags = immersiveMode.isSticky ? IMMERSIVE_STICKY_MODE_UI_FLAGS
+                : IMMERSIVE_MODE_UI_FLAGS;
+        View decor = mActivity.getWindow().getDecorView();
+        decor.setSystemUiVisibility(decor.getSystemUiVisibility() | flags);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mActivity.getWindow().getAttributes().layoutInDisplayCutoutMode =
+                    immersiveMode.layoutInDisplayCutoutMode;
         }
     }
 

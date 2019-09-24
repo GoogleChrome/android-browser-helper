@@ -15,4 +15,6 @@
 -->
 <resources>
     <string name="app_name">Browser Sidekick Demo</string>
+    <string name="demo_list_activity_name">Android Browser Helper Demo List</string>
+    <string name="launch_twa">Launch TWA Demo</string>
 </resources>

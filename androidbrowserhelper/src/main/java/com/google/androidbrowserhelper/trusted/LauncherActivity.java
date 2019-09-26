@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -107,6 +108,28 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean hasNewTask = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0;
+        boolean hasNewDocument = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
+
+        if (!hasNewTask || hasNewDocument) {
+            // If we're created as part of somebody else's Task, relaunch ourselves with NEW_TASK.
+
+            // We need to clear NEW_DOCUMENT here as well otherwise Intents created with
+            // NEW_DOCUMENT will launch us in a new Task, separate from an existing instance (if the
+            // TWA is currently running). Setting documentLaunchMode="never" didn't stop this
+            // behaviour.
+            Intent newIntent = new Intent(getIntent());
+
+            int flags = getIntent().getFlags();
+            flags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+            flags &= ~Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+            newIntent.setFlags(flags);
+
+            startActivity(newIntent);
+            finish();
+            return;
+        }
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(BROWSER_WAS_LAUNCHED_KEY)) {
             // This activity died in the background after launching Trusted Web Activity, then

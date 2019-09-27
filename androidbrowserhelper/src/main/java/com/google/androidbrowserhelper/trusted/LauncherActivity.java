@@ -113,12 +113,26 @@ public class LauncherActivity extends AppCompatActivity {
         boolean hasNewDocument = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
 
         if (!hasNewTask || hasNewDocument) {
-            // If we're created as part of somebody else's Task, relaunch ourselves with NEW_TASK.
+            // We only want one instance of the TWA running in the user's Recent Apps. This
+            // corresponds to ensuring that the TWA only exists in a single Task.
 
-            // We need to clear NEW_DOCUMENT here as well otherwise Intents created with
-            // NEW_DOCUMENT will launch us in a new Task, separate from an existing instance (if the
-            // TWA is currently running). Setting documentLaunchMode="never" didn't stop this
-            // behaviour.
+            // If the TWA was implemented as single Activity, we could do this with
+            // launchMode=singleTask (or singleInstance), however since the TWA consists of a
+            // LauncherActivity which then starts a browser Activity, things get a bit more
+            // complicated.
+
+            // If we used singleTask on LauncherActivity then whenever a TWA was running and a new
+            // Intent was fired, the browser Activity on top would get clobbered.
+
+            // Therefore, we always ensure that LauncherActivity is launched with New Task. This
+            // means that if the TWA is already running a *new* LauncherActivity will be created on
+            // top of the Browser Activity. The browser then launches an Intent with CLEAR_TOP to
+            // the existing Browser Activity, killing the temporary LauncherActivity and focusing
+            // the TWA.
+
+            // We also need to clear NEW_DOCUMENT here as well otherwise Intents created with
+            // NEW_DOCUMENT will launch us in a new Task, separate from an existing instance.
+            // Setting documentLaunchMode="never" didn't stop this behaviour.
             Intent newIntent = new Intent(getIntent());
 
             int flags = getIntent().getFlags();

@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -107,6 +108,11 @@ public class LauncherActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (restartInNewTask()) {
+            finish();
+            return;
+        }
 
         if (savedInstanceState != null && savedInstanceState.getBoolean(BROWSER_WAS_LAUNCHED_KEY)) {
             // This activity died in the background after launching Trusted Web Activity, then
@@ -236,4 +242,41 @@ public class LauncherActivity extends AppCompatActivity {
         return Uri.parse("https://www.example.com/");
     }
 
+    private boolean restartInNewTask() {
+        boolean hasNewTask = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) != 0;
+        boolean hasNewDocument = (getIntent().getFlags() & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
+
+        if (hasNewTask && !hasNewDocument) return false;
+
+        // The desired behaviour of TWAs is that there's only one running in the user's Recent
+        // Apps. This reflects how many other Android Apps work and corresponds to ensuring that
+        // the TWA only exists in a single Task.
+
+        // If the TWA was implemented as single Activity, we could do this with
+        // launchMode=singleTask (or singleInstance), however since the TWA consists of a
+        // LauncherActivity which then starts a browser Activity, things get a bit more
+        // complicated.
+
+        // If we used singleTask on LauncherActivity then whenever a TWA was running and a new
+        // Intent was fired, the browser Activity on top would get clobbered.
+
+        // Therefore, we always ensure that LauncherActivity is launched with New Task. This
+        // means that if the TWA is already running a *new* LauncherActivity will be created on
+        // top of the Browser Activity. The browser then launches an Intent with CLEAR_TOP to
+        // the existing Browser Activity, killing the temporary LauncherActivity and focusing
+        // the TWA.
+
+        // We also need to clear NEW_DOCUMENT here as well otherwise Intents created with
+        // NEW_DOCUMENT will launch us in a new Task, separate from an existing instance.
+        // Setting documentLaunchMode="never" didn't stop this behaviour.
+        Intent newIntent = new Intent(getIntent());
+
+        int flags = getIntent().getFlags();
+        flags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+        flags &= ~Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+        newIntent.setFlags(flags);
+
+        startActivity(newIntent);
+        return true;
+    }
 }

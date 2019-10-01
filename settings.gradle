@@ -1,1 +1,1 @@
-include ':demo', ':androidbrowserhelper'
+include ':demos:twa-custom-launcher', ':androidbrowserhelper'

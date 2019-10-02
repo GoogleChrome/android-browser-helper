@@ -25,19 +25,13 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name="com.google.androidbrowserhelper.DemoListActivity"
-            android:label="@string/demo_list_activity_name">
+            android:name="com.google.androidbrowserhelper.launchtwa.LaunchTwaActivity"
+            android:label="@string/launch_twa">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <activity
-            android:name="com.google.androidbrowserhelper.launchtwa.LaunchTwaActivity"
-            android:label="@string/launch_twa">
-
         </activity>
     </application>
 

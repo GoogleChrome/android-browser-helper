@@ -138,6 +138,10 @@ public class LauncherActivity extends AppCompatActivity {
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId));
 
+        if (mMetadata.domainsToValidate != null) {
+            twaBuilder.setAdditionalTrustedOrigins(mMetadata.domainsToValidate);
+        }
+
 
         mTwaLauncher = new TwaLauncher(this);
         mTwaLauncher.launch(twaBuilder, mSplashScreenStrategy, () -> mBrowserWasLaunched = true);

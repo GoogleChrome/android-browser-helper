@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">twa-multi-domain</string>
+    <string name="launch_url">https://www.google.com</string>
+    <string name="host_name">www.google.com</string>
+    <string-array name="validation_domains">
+        <item>https://www.google.com</item>
+        <item>https://www.wikipedia.com</item>
+    </string-array>
+</resources>

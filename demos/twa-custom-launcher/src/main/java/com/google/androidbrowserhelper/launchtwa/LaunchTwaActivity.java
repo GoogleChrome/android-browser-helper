@@ -45,10 +45,20 @@ public class LaunchTwaActivity extends AppCompatActivity {
         setContentView(R.layout.activity_launch_twa);
     }
 
+    /**
+     * Launches a Trusted Web Activity without any customizations
+     * @param view the source of the event invoking this method.
+     */
     public void launch(View view) {
         new TwaLauncher(this).launch(LAUNCH_URI);
     }
 
+    /**
+     * Launches a Trusted Web Activity where navigations to non-validate domains will open
+     * in a Custom Tab where the toolbar color has been customized.
+     *
+     * @param view the source of the event invoking this method.
+     */
     public void launchWithCustomColors(View view) {
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI)
                         .setNavigationBarColor(Color.RED)
@@ -57,6 +67,11 @@ public class LaunchTwaActivity extends AppCompatActivity {
         new TwaLauncher(this).launch(builder, null, null);
     }
 
+    /**
+     * Opens a Trusted Web Activity where multiple domains are validated to open in full screen.
+     *
+     * @param view the source of the event invoking this method.
+     */
     public void launcherWithMultipleOrigins(View view) {
         List<String> origins = Arrays.asList(
                 "https://www.wikipedia.org/",
@@ -69,6 +84,11 @@ public class LaunchTwaActivity extends AppCompatActivity {
         new TwaLauncher(this).launch(builder, null, null);
     }
 
+    /**
+     * Open a Trusted Web Activity where the loaded URL will receive a customized Referrer.
+     *
+     * @param view the source of the event invoking this method.
+     */
     public void launchWithCustomReferrer(View view) {
         // The ergonomics will be improved here, since we're basically replicating the work of
         // TwaLauncher, see https://github.com/GoogleChrome/android-browser-helper/issues/13.

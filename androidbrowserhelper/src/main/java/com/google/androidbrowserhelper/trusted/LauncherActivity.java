@@ -138,8 +138,8 @@ public class LauncherActivity extends AppCompatActivity {
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId));
 
-        if (mMetadata.domainsToValidate != null) {
-            twaBuilder.setAdditionalTrustedOrigins(mMetadata.domainsToValidate);
+        if (mMetadata.additionalTrustedOrigins != null) {
+            twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
 

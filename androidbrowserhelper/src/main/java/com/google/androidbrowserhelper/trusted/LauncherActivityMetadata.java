@@ -78,8 +78,8 @@ public class LauncherActivityMetadata {
     /**
      * The domains to be validated, as part of the Digital Asset Links validation
      */
-    private static final String METADATA_DOMAINS_TO_VALIDATE =
-            "android.support.customtabs.trusted.DOMAINS_TO_VALIDATE";
+    private static final String METADATA_ADDITIONAL_TRUSTED_ORIGINS =
+            "android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS";
 
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
@@ -90,7 +90,7 @@ public class LauncherActivityMetadata {
     public final int splashScreenBackgroundColorId;
     @Nullable public final String fileProviderAuthority;
     public final int splashScreenFadeOutDurationMillis;
-    @Nullable public final List<String> domainsToValidate;
+    @Nullable public final List<String> additionalTrustedOrigins;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -102,7 +102,7 @@ public class LauncherActivityMetadata {
         fileProviderAuthority = metaData.getString(METADATA_FILE_PROVIDER_AUTHORITY);
         splashScreenFadeOutDurationMillis =
                 metaData.getInt(METADATA_SPLASH_SCREEN_FADE_OUT_DURATION, 0);
-        domainsToValidate = metaData.getStringArrayList(METADATA_DOMAINS_TO_VALIDATE);
+        additionalTrustedOrigins = metaData.getStringArrayList(METADATA_ADDITIONAL_TRUSTED_ORIGINS);
     }
 
     /**

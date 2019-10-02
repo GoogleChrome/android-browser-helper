@@ -1,9 +1,34 @@
 <resources>
     <string name="app_name">twa-multi-domain</string>
-    <string name="launch_url">https://www.google.com</string>
+    <string name="launch_url">https://github.com/GoogleChrome/android-browser-helper</string>
     <string name="host_name">www.google.com</string>
-    <string-array name="validation_domains">
+    <!-- A list of strings containing the additional origins to be validated with Digital Asset
+         Links. Each domain needs to have its own domain.com/.well-known/assetlinks.json -->
+    <string-array name="additional_trusted_origins">
         <item>https://www.google.com</item>
         <item>https://www.wikipedia.com</item>
     </string-array>
+    <string name="asset_statements">
+    [{
+        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://github.com\"
+        }
+    }],
+    [{
+        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://www.google.com\"
+        }
+    }],
+    [{
+        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://www.wikipedia.com\"
+        }
+    }],
+    </string>
 </resources>

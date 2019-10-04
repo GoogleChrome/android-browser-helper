@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +41,9 @@ import androidx.browser.customtabs.CustomTabsSessionToken;
 public class TestCustomTabsService extends CustomTabsService {
     public static final String CALLBACK_BIND_TO_POST_MESSAGE = "BindToPostMessageService";
     private static TestCustomTabsService sInstance;
+
+    // The TestCustomTabsService isn't necessarily created when we want to set this.
+    private static final AtomicBoolean sCanCreateSessions = new AtomicBoolean(true);
 
     private final CountDownLatch mFileReceivingLatch = new CountDownLatch(1);
 
@@ -64,8 +68,12 @@ public class TestCustomTabsService extends CustomTabsService {
 
     @Override
     protected boolean newSession(CustomTabsSessionToken sessionToken) {
-        mSession = sessionToken;
-        return true;
+        if (sCanCreateSessions.get()) {
+            mSession = sessionToken;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -139,5 +147,9 @@ public class TestCustomTabsService extends CustomTabsService {
         } catch (InterruptedException e) {
             return false;
         }
+    }
+
+    public static void setCanCreateSessions(boolean canCreateSessions) {
+        sCanCreateSessions.set(canCreateSessions);
     }
 }

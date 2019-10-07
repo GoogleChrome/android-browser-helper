@@ -84,6 +84,9 @@ public class TwaLauncherTest {
     @Before
     public void setUp() {
         TwaProviderPicker.restrictToPackageForTesting(mContext.getPackageName());
+
+        // TODO(peconn): Maybe make this a test rule?
+        TestCustomTabsService.setCanCreateSessions(true);
         mActivity = mActivityTestRule.getActivity();
         mTwaLauncher = new TwaLauncher(mActivity);
     }
@@ -127,6 +130,16 @@ public class TwaLauncherTest {
 
         launcher.destroy();
         assertFalse(intent.hasExtra(EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY));
+    }
+
+    @Test
+    public void fallsBackToCustomTab_whenSessionCreationFails() {
+        TestCustomTabsService.setCanCreateSessions(false);
+
+        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
+        TestBrowser browser = getBrowserActivityWhenLaunched(launchRunnable);
+        assertFalse(browser.getIntent().getBooleanExtra(EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY,
+                false));
     }
 
     @Test

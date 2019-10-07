@@ -70,7 +70,8 @@ public class ChromeLegacyUtils {
 
     static final int VERSION_SUPPORTS_TRUSTED_WEB_ACTIVITIES = 362600000;
     private static final int VERSION_SUPPORTS_NO_PREWARM = 368300000;
-    private static final int VERSION_SUPPORTS_CUSTOM_COLOR = 380900000;
+    private static final int VERSION_76 = 380900000;
+    private static final int VERSION_77 = 386500000;
 
     private ChromeLegacyUtils() {}
 
@@ -84,14 +85,13 @@ public class ChromeLegacyUtils {
     }
 
     /**
-     * Whether the browser supports navbar and color customization but doesn't advertise it.
+     * Chrome 76 supports navbar and color customization but doesn't advertise it.
      */
-    public static boolean supportsNavbarAndColorCustomization(PackageManager pm,
-            String packageName) {
+    public static boolean isChrome76(PackageManager pm, String packageName) {
         // Assume other browsers that support this feature will advertise it.
         if (!SUPPORTED_CHROME_PACKAGES.contains(packageName)) return false;
 
-        return checkChromeVersion(pm, packageName, VERSION_SUPPORTS_CUSTOM_COLOR);
+        return checkChromeVersion(pm, packageName, VERSION_76, VERSION_77);
     }
 
     /**
@@ -126,6 +126,19 @@ public class ChromeLegacyUtils {
         if (LOCAL_BUILD_PACKAGES.contains(packageName)) return true;
 
         return getVersionCode(pm, packageName) >= version;
+    }
+
+    /**
+     * Returns true if the given {@code packageName} points to a version of Chrome between
+     * minVersion and maxVersion.
+     */
+    private static boolean checkChromeVersion(PackageManager pm, String packageName,
+            int minVersion, int maxVersion) {
+        // Assume that these two-sided checks are only for past versions, so local build is newer.
+        if (LOCAL_BUILD_PACKAGES.contains(packageName)) return false;
+
+        int versionCode = getVersionCode(pm, packageName);
+        return versionCode >= minVersion && versionCode < maxVersion;
     }
 
     static int getVersionCode(PackageManager pm, String packageName) {

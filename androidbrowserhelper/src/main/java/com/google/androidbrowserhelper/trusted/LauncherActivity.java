@@ -14,6 +14,10 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +31,7 @@ import org.json.JSONException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.browser.trusted.sharing.ShareData;
@@ -134,7 +139,8 @@ public class LauncherActivity extends AppCompatActivity {
         TrustedWebActivityIntentBuilder twaBuilder =
                 new TrustedWebActivityIntentBuilder(getLaunchingUrl())
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId));
+                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
+                        .setDisplayMode(getDisplayMode());
 
         addShareDataIfPresent(twaBuilder);
 
@@ -193,6 +199,23 @@ public class LauncherActivity extends AppCompatActivity {
     @Nullable
     protected Matrix getSplashImageTransformationMatrix() {
         return null;
+    }
+
+    /**
+     * Override to set a custom {@link TrustedWebActivityDisplayMode}, e.g. set a sticky immersive
+     * mode (see {@link TrustedWebActivityDisplayMode.ImmersiveMode#ImmersiveMode}.
+     * By default, sets non-sticky immersive mode with content never rendering in the cutout area,
+     * if "android.support.customtabs.trusted.METADATA_ENABLE_IMMERSIVE_MODE" metadata is set to
+     * "true", otherwise sets the default display mode.
+     */
+    @NonNull
+    protected TrustedWebActivityDisplayMode getDisplayMode() {
+        if (mMetadata.immersiveModeEnabled) {
+            return new TrustedWebActivityDisplayMode.ImmersiveMode(false /*isSticky*/,
+                    LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER);
+        } else {
+            return new TrustedWebActivityDisplayMode.DefaultMode();
+        }
     }
 
     private int getColorCompat(int splashScreenBackgroundColorId) {

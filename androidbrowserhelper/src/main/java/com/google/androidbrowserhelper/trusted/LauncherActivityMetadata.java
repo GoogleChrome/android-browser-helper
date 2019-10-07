@@ -80,6 +80,14 @@ public class LauncherActivityMetadata {
     private static final String METADATA_SHARE_TARGET =
             "android.support.customtabs.trusted.METADATA_SHARE_TARGET";
 
+    /**
+     * If true, Trusted Web Activity will be launched in immersive mode, see
+     * https://developer.android.com/training/system-ui/immersive
+     * For further customization, override {@link LauncherActivity#getDisplayMode()}.
+     */
+    private static final String METADATA_ENABLE_IMMERSIVE_MODE =
+            "android.support.customtabs.trusted.METADATA_ENABLE_IMMERSIVE_MODE";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -90,6 +98,7 @@ public class LauncherActivityMetadata {
     @Nullable public final String fileProviderAuthority;
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final String shareTarget;
+    public final boolean immersiveModeEnabled;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -103,6 +112,7 @@ public class LauncherActivityMetadata {
                 metaData.getInt(METADATA_SPLASH_SCREEN_FADE_OUT_DURATION, 0);
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
+        immersiveModeEnabled = metaData.getBoolean(METADATA_ENABLE_IMMERSIVE_MODE);
     }
 
     /**

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 
+import com.google.androidbrowserhelper.trusted.FeatureDetector;
 import com.google.androidbrowserhelper.trusted.testutils.RobolectricUtils;
 
 import org.junit.Test;
@@ -49,7 +50,8 @@ public class SystemBarColorPredictorTest {
     private final Context mContext = RuntimeEnvironment.application;
     private final TrustedWebActivityIntentBuilder mBuilder = new TrustedWebActivityIntentBuilder(
             Uri.EMPTY);
-    private final SystemBarColorPredictor mPredictor = new SystemBarColorPredictor();
+    private final SystemBarColorPredictor mPredictor = new SystemBarColorPredictor(
+            new FeatureDetector());
 
     @Test
     public void predictsDefaultStatusBarColor_WithoutColorSchemeParams() {

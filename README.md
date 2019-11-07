@@ -11,6 +11,23 @@ developer will find themselves requiring, for example:
 * Code for choosing an appropriate Custom Tabs provider.
 * Creating an Activity to launch the browser's site settings for a TWA.
 
+## Adding Android Browser Helper to an Android project
+
+Android Browser helper is available on the Google Maven. To use it, modify your application's
+`build.gradle` and add the library as a dependency, as described below:
+
+```gradle
+dependencies {
+    //...
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:0.1.0-alpha1'
+}
+
+``` 
+
+**Important:** Since Android Browser Helper depends on a version of `androidx.browser` that is not
+yet stable, the library is still marked as alpha. This will be updated once all the libraries
+it depends on are stable.
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

@@ -28,6 +28,11 @@ dependencies {
 yet stable, the library is still marked as alpha. This will be updated once all the libraries
 it depends on are stable.
 
+**Warning:** Due to API changes on the latest Alpha version of `androidx.browser`, which Android
+Browser Helper depends on, the current version of Android Browser Helper, `0.1.0-alpha1`, is not
+compatible with versions of `androidx.browser` starting from `1.2.0-alpha09`. We are working
+on an `alpha2` version of Android Browser Helper, that will fix the compatibility.
+  
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

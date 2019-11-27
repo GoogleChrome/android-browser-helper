@@ -226,7 +226,9 @@ public class TwaLauncher {
             return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
+
         Intent intent = builder.build(mSession).getIntent();
+        FocusActivity.addToIntent(intent, mContext);
         ContextCompat.startActivity(mContext, intent, null);
 
         // Remember who we connect to as the package that is allowed to delegate notifications

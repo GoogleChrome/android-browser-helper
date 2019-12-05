@@ -192,6 +192,9 @@ public class TwaLauncher {
 
     private void launchWhenSplashScreenReady(TrustedWebActivityIntentBuilder builder,
             @Nullable Runnable completionCallback) {
+        if (mDestroyed) {
+            return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
+        }
         Log.d(TAG, "Launching Trusted Web Activity.");
         Intent intent = builder.build(mSession);
         ContextCompat.startActivity(mContext, intent, null);
@@ -207,6 +210,9 @@ public class TwaLauncher {
      * Performs clean-up.
      */
     public void destroy() {
+        if (mDestroyed) {
+            return;
+        }
         if (mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
         }

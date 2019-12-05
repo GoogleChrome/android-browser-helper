@@ -56,6 +56,10 @@ import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * Instrumentation tests for {@link TwaLauncher}
  */
@@ -244,6 +248,23 @@ public class TwaLauncherTest {
 
         Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), strategy, null);
         assertNotNull(getBrowserActivityWhenLaunched(launchRunnable));
+    }
+
+    @Test
+    public void cancelsLaunch_IfSplashScreenStrategyFinishes_AfterDestroy() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        SplashScreenStrategy strategy = mock(SplashScreenStrategy.class);
+        doAnswer(invocation -> {
+            mTwaLauncher.destroy();
+            ((Runnable) invocation.getArgument(2)).run();
+            latch.countDown();
+            return null;
+        }).when(strategy).configureTwaBuilder(any(), any(), any());
+
+        TrustedWebActivityIntentBuilder builder = spy(makeBuilder());
+        mTwaLauncher.launch(builder, strategy, null);
+        assertTrue(latch.await(3, TimeUnit.SECONDS));
+        verify(builder, never()).build(any());
     }
 
     private TrustedWebActivityIntentBuilder makeBuilder() {

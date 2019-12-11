@@ -1,2 +1,2 @@
 include ':demos:twa-custom-launcher', ':androidbrowserhelper', ':demos:twa-multi-domain'
-include ':demos:twa-basic'
+include ':demos:twa-basic', ':demos:twa-webview-fallback'

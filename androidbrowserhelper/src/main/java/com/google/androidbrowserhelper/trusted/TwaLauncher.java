@@ -224,7 +224,7 @@ public class TwaLauncher {
         mDestroyed = true;
     }
 
-    private FallbackStrategy cctFalbackStrategy =
+    public static final FallbackStrategy cctFalbackStrategy =
             (context, twaBuilder, providerPackage, completionCallback) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
         // providers installed.

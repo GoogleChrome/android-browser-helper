@@ -142,9 +142,11 @@ public class LauncherActivity extends AppCompatActivity {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
-
         mTwaLauncher = new TwaLauncher(this);
-        mTwaLauncher.launch(twaBuilder, mSplashScreenStrategy, () -> mBrowserWasLaunched = true);
+        mTwaLauncher.launch(twaBuilder,
+                mSplashScreenStrategy,
+                () -> mBrowserWasLaunched = true,
+                getFallbackStrategy());
 
         if (!sChromeVersionChecked) {
             ChromeUpdatePrompt.promptIfNeeded(this, mTwaLauncher.getProviderPackage());
@@ -244,6 +246,10 @@ public class LauncherActivity extends AppCompatActivity {
         }
 
         return Uri.parse("https://www.example.com/");
+    }
+
+    protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
+        return TwaLauncher.cctFalbackStrategy;
     }
 
     private boolean restartInNewTask() {

@@ -20,10 +20,12 @@ import com.google.androidbrowserhelper.trusted.LauncherActivity;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
 
 public class MyLauncherActivity extends LauncherActivity {
+
     @Override
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         return (context, twaIntentBuilder, mProviderPackage, completionCallback) -> {
             Intent intent = new Intent(context, WebViewFallbackActivity.class);
+            intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, twaIntentBuilder.getUrl());
             startActivity(intent);
             completionCallback.run();
         };

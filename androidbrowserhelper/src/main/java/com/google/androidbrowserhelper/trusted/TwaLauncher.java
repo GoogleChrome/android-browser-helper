@@ -41,6 +41,20 @@ public class TwaLauncher {
 
     private static final int DEFAULT_SESSION_ID = 96375;
 
+    public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
+            (context, twaBuilder, providerPackage, completionCallback) -> {
+        // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
+        // providers installed.
+        CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
+        if (providerPackage != null) {
+            intent.intent.setPackage(providerPackage);
+        }
+        intent.launchUrl(context, twaBuilder.getUrl());
+        if (completionCallback != null) {
+            completionCallback.run();
+        }
+    };
+
     private final Context mContext;
 
     @Nullable
@@ -58,6 +72,13 @@ public class TwaLauncher {
     private CustomTabsSession mSession;
 
     private boolean mDestroyed;
+
+    public interface FallbackStrategy {
+        void launch(Context context,
+                    TrustedWebActivityIntentBuilder twaBuilder,
+                    @Nullable String providerPackage,
+                    @Nullable Runnable completionCallback);
+    }
 
     /**
      * Creates an instance that will automatically choose the browser to launch a TWA in.
@@ -105,8 +126,36 @@ public class TwaLauncher {
         launch(new TrustedWebActivityIntentBuilder(url), null, null);
     }
 
+
     /**
      * Similar to {@link #launch(Uri)}, but allows more customization.
+     *
+     * @param twaBuilder {@link TrustedWebActivityIntentBuilder} containing the url to open, along with
+     * optional parameters: status bar color, additional trusted origins, etc.
+     * @param splashScreenStrategy {@link SplashScreenStrategy} to use for showing splash screens,
+     * null if splash screen not needed.
+     * @param completionCallback Callback triggered when the url has been opened.
+     * @param fallbackStrategy Called when there is no TWA provider available or when launching
+     * the Trusted Web Activity fails.
+     */
+    public void launch(TrustedWebActivityIntentBuilder twaBuilder,
+                       @Nullable SplashScreenStrategy splashScreenStrategy,
+                       @Nullable Runnable completionCallback,
+                       FallbackStrategy fallbackStrategy) {
+        if (mDestroyed) {
+            throw new IllegalStateException("TwaLauncher already destroyed");
+        }
+
+        if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
+            launchTwa(twaBuilder, splashScreenStrategy, completionCallback, fallbackStrategy);
+        } else {
+            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
+        }
+    }
+
+    /**
+     * Similar to {@link #launch(Uri)}, but allows more customization. Uses a Custom Tabs fallback
+     * when a TWA provider is not available or when launching a TWA fails.
      *
      * @param twaBuilder {@link TrustedWebActivityIntentBuilder} containing the url to open, along with
      * optional parameters: status bar color, additional trusted origins, etc.
@@ -117,34 +166,13 @@ public class TwaLauncher {
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback) {
-        if (mDestroyed) {
-            throw new IllegalStateException("TwaLauncher already destroyed");
-        }
-
-        if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
-            launchTwa(twaBuilder, splashScreenStrategy, completionCallback);
-        } else {
-            launchCct(twaBuilder, completionCallback);
-        }
-    }
-
-    private void launchCct(TrustedWebActivityIntentBuilder twaBuilder,
-            @Nullable Runnable completionCallback) {
-        // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
-        // providers installed.
-        CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
-        if (mProviderPackage != null) {
-            intent.intent.setPackage(mProviderPackage);
-        }
-        intent.launchUrl(mContext, twaBuilder.getUrl());
-        if (completionCallback != null) {
-            completionCallback.run();
-        }
+        launch(twaBuilder, splashScreenStrategy, completionCallback, CCT_FALLBACK_STRATEGY);
     }
 
     private void launchTwa(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
-            @Nullable Runnable completionCallback) {
+            @Nullable Runnable completionCallback,
+           FallbackStrategy fallbackStrategy) {
         if (splashScreenStrategy != null) {
             splashScreenStrategy.onTwaLaunchInitiated(mProviderPackage, twaBuilder);
         }
@@ -159,11 +187,9 @@ public class TwaLauncher {
 
         Runnable onSessionCreationFailedRunnable = () -> {
             // The provider has been unable to create a session for us, we can't launch a
-            // Trusted Web Activity. We could either exit, forcing the user to try again,
-            // hopefully successfully this time or we could launch a Custom Tab giving the user
-            // a subpar experience (compared to a TWA).
-            // We'll open in a CCT, but pay attention to what users want.
-            launchCct(twaBuilder, completionCallback);
+            // Trusted Web Activity. We launch a fallback specially designed to provide the
+            // best user experience.
+            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         };
 
         if (mServiceConnection == null) {

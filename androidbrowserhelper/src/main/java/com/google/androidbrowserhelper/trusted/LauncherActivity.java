@@ -249,7 +249,7 @@ public class LauncherActivity extends AppCompatActivity {
     }
 
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
-        return TwaLauncher.cctFalbackStrategy;
+        return TwaLauncher.CCT_FALLBACK_STRATEGY;
     }
 
     private boolean restartInNewTask() {

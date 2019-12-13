@@ -14,48 +14,43 @@
 
 package com.google.browser.examples.twawebviewfallback;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsIntent;
-
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 public class WebViewFallbackActivity extends AppCompatActivity {
     public static final String KEY_LAUNCH_URI =
             "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity.KEY_LAUNCH_URL";
 
-    private Uri launchUrl;
+    private Uri mLaunchUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.launchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
+        this.mLaunchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
 
-        FrameLayout webViewContainer = new FrameLayout(this);
         WebView webView = new WebView(this);
         webView.setWebViewClient(createWebViewClient());
-        webViewContainer.addView(webView,
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
-        setContentView(webViewContainer,layoutParams);
-        webView.loadUrl(launchUrl.toString());
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        setContentView(webView,layoutParams);
+        webView.loadUrl(mLaunchUrl.toString());
     }
 
     private WebViewClient createWebViewClient() {
@@ -75,6 +70,8 @@ public class WebViewFallbackActivity extends AppCompatActivity {
                 // the current WebViewClient
                 WebView webView = new WebView(view.getContext());
                 webView.setWebViewClient(this);
+                WebSettings webSettings = webView.getSettings();
+                webSettings.setJavaScriptEnabled(true);
                 vg.addView(webView);
 
                 // With the crash recovered, decide what to do next.
@@ -82,13 +79,13 @@ public class WebViewFallbackActivity extends AppCompatActivity {
                 // URL, in this example.
                 Toast.makeText(view.getContext(), "Recovering from crash",
                         Toast.LENGTH_LONG).show();
-                webView.loadUrl(launchUrl.toString());
+                webView.loadUrl(mLaunchUrl.toString());
                 return true;
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri launchUrl = WebViewFallbackActivity.this.launchUrl;
+                Uri launchUrl = WebViewFallbackActivity.this.mLaunchUrl;
                 Uri navigationUrl = request.getUrl();
 
                 // If the user is navigation to a different origin, use CCT to handle the navigation

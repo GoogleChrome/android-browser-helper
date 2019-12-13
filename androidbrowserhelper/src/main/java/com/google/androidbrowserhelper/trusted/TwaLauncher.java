@@ -41,6 +41,20 @@ public class TwaLauncher {
 
     private static final int DEFAULT_SESSION_ID = 96375;
 
+    public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
+            (context, twaBuilder, providerPackage, completionCallback) -> {
+        // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
+        // providers installed.
+        CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
+        if (providerPackage != null) {
+            intent.intent.setPackage(providerPackage);
+        }
+        intent.launchUrl(context, twaBuilder.getUrl());
+        if (completionCallback != null) {
+            completionCallback.run();
+        }
+    };
+
     private final Context mContext;
 
     @Nullable
@@ -58,6 +72,13 @@ public class TwaLauncher {
     private CustomTabsSession mSession;
 
     private boolean mDestroyed;
+
+    public interface FallbackStrategy {
+        void launch(Context context,
+                    TrustedWebActivityIntentBuilder twaBuilder,
+                    @Nullable String providerPackage,
+                    @Nullable Runnable completionCallback);
+    }
 
     /**
      * Creates an instance that will automatically choose the browser to launch a TWA in.
@@ -145,7 +166,7 @@ public class TwaLauncher {
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback) {
-        launch(twaBuilder, splashScreenStrategy, completionCallback, cctFalbackStrategy);
+        launch(twaBuilder, splashScreenStrategy, completionCallback, CCT_FALLBACK_STRATEGY);
     }
 
     private void launchTwa(TrustedWebActivityIntentBuilder twaBuilder,
@@ -224,20 +245,6 @@ public class TwaLauncher {
         mDestroyed = true;
     }
 
-    public static final FallbackStrategy cctFalbackStrategy =
-            (context, twaBuilder, providerPackage, completionCallback) -> {
-        // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
-        // providers installed.
-        CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
-        if (providerPackage != null) {
-            intent.intent.setPackage(providerPackage);
-        }
-        intent.launchUrl(context, twaBuilder.getUrl());
-        if (completionCallback != null) {
-            completionCallback.run();
-        }
-    };
-
     /**
      * Returns package name of the browser this TwaLauncher is launching.
      */
@@ -279,12 +286,5 @@ public class TwaLauncher {
         public void onServiceDisconnected(ComponentName componentName) {
             mSession = null;
         }
-    }
-
-    public interface FallbackStrategy {
-        void launch(Context context,
-                    TrustedWebActivityIntentBuilder twaBuilder,
-                    @Nullable String providerPackage,
-                    @Nullable Runnable completionCallback);
     }
 }

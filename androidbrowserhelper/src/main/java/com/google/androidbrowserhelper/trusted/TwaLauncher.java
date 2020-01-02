@@ -20,17 +20,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
-
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
+import androidx.browser.trusted.Token;
+import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
+
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -49,7 +50,7 @@ public class TwaLauncher {
         if (providerPackage != null) {
             intent.intent.setPackage(providerPackage);
         }
-        intent.launchUrl(context, twaBuilder.getUrl());
+        intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {
             completionCallback.run();
         }
@@ -222,11 +223,15 @@ public class TwaLauncher {
             return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        Intent intent = builder.build(mSession);
+        Intent intent = builder.build(mSession).getIntent();
         ContextCompat.startActivity(mContext, intent, null);
+
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        TrustedWebActivityService.setVerifiedProvider(mContext, mProviderPackage);
+        Token token = Token.create(mProviderPackage, mContext.getPackageManager());
+        TokenStore tokenStore = new SharedPreferencesTokenStore(mContext);
+        tokenStore.store(token);
+
         if (completionCallback != null) {
             completionCallback.run();
         }

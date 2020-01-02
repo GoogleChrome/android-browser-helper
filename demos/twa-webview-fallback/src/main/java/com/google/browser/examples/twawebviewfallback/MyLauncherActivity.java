@@ -25,7 +25,7 @@ public class MyLauncherActivity extends LauncherActivity {
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         return (context, twaIntentBuilder, mProviderPackage, completionCallback) -> {
             Intent intent = new Intent(context, WebViewFallbackActivity.class);
-            intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, twaIntentBuilder.getUrl());
+            intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, twaIntentBuilder.getUri());
             startActivity(intent);
             completionCallback.run();
         };

@@ -76,7 +76,7 @@
         </provider>
 
         <service
-            android:name="androidx.browser.trusted.TrustedWebActivityService"
+            android:name="com.google.androidbrowserhelper.trusted.TrustedWebActivityService"
             android:exported="true">
 
             <intent-filter>

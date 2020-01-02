@@ -91,9 +91,9 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
      * @param drawableId Resource id of the Drawable of an image (e.g. logo) displayed in the
      * splash screen.
      * @param backgroundColor Background color of the splash screen.
-     * @param scaleType see {@link SplashScreenParamKey#SCALE_TYPE}
-     * @param transformationMatrix see {@link SplashScreenParamKey#IMAGE_TRANSFORMATION_MATRIX}.
-     * @param fadeOutDurationMillis see {@link SplashScreenParamKey#FADE_OUT_DURATION_MS}.
+     * @param scaleType see {@link SplashScreenParamKey#KEY_SCALE_TYPE}
+     * @param transformationMatrix see {@link SplashScreenParamKey#KEY_IMAGE_TRANSFORMATION_MATRIX}.
+     * @param fadeOutDurationMillis see {@link SplashScreenParamKey#KEY_FADE_OUT_DURATION_MS}.
      * @param fileProviderAuthority Authority of a FileProvider used for transferring the splash
      * image to the browser.
      */
@@ -117,7 +117,7 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
     @Override
     public void onTwaLaunchInitiated(String providerPackage, TrustedWebActivityIntentBuilder builder) {
         mProviderPackage = providerPackage;
-        mProviderSupportsSplashScreens = TrustedWebUtils.splashScreensAreSupported(mActivity,
+        mProviderSupportsSplashScreens = TrustedWebUtils.areSplashScreensSupported(mActivity,
                 providerPackage, SplashScreenVersion.V1);
 
         if (!mProviderSupportsSplashScreens) {
@@ -221,14 +221,14 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
     @NonNull
     private Bundle makeSplashScreenParamsBundle() {
         Bundle bundle = new Bundle();
-        bundle.putString(SplashScreenParamKey.VERSION, SplashScreenVersion.V1);
-        bundle.putInt(SplashScreenParamKey.FADE_OUT_DURATION_MS, mFadeOutDurationMillis);
-        bundle.putInt(SplashScreenParamKey.BACKGROUND_COLOR, mBackgroundColor);
-        bundle.putInt(SplashScreenParamKey.SCALE_TYPE, mScaleType.ordinal());
+        bundle.putString(SplashScreenParamKey.KEY_VERSION, SplashScreenVersion.V1);
+        bundle.putInt(SplashScreenParamKey.KEY_FADE_OUT_DURATION_MS, mFadeOutDurationMillis);
+        bundle.putInt(SplashScreenParamKey.KEY_BACKGROUND_COLOR, mBackgroundColor);
+        bundle.putInt(SplashScreenParamKey.KEY_SCALE_TYPE, mScaleType.ordinal());
         if (mTransformationMatrix != null) {
             float[] values = new float[9];
             mTransformationMatrix.getValues(values);
-            bundle.putFloatArray(SplashScreenParamKey.IMAGE_TRANSFORMATION_MATRIX,
+            bundle.putFloatArray(SplashScreenParamKey.KEY_IMAGE_TRANSFORMATION_MATRIX,
                     values);
         }
         return bundle;

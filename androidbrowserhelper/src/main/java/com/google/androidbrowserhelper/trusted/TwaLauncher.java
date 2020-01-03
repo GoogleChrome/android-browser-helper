@@ -26,8 +26,6 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
-import androidx.browser.trusted.Token;
-import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
 
@@ -72,6 +70,8 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
+    private SharedPreferencesTokenStore mTokenStore;
+
     private boolean mDestroyed;
 
     public interface FallbackStrategy {
@@ -94,16 +94,19 @@ public class TwaLauncher {
      * support TWAs.
      */
     public TwaLauncher(Context context, @Nullable String providerPackage) {
-        this(context, providerPackage, DEFAULT_SESSION_ID);
+        this(context, providerPackage, DEFAULT_SESSION_ID,
+                new SharedPreferencesTokenStore(context));
     }
 
     /**
      * Same as above, but also accepts a session id. This allows to launch multiple TWAs in the same
      * task.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId) {
+    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
+                       SharedPreferencesTokenStore tokenStore) {
         mContext = context;
         mSessionId = sessionId;
+        mTokenStore = tokenStore;
         if (providerPackage == null) {
             TwaProviderPicker.Action action =
                     TwaProviderPicker.pickProvider(context.getPackageManager());
@@ -228,9 +231,7 @@ public class TwaLauncher {
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        Token token = Token.create(mProviderPackage, mContext.getPackageManager());
-        TokenStore tokenStore = new SharedPreferencesTokenStore(mContext);
-        tokenStore.store(token);
+        mTokenStore.setVerifiedProvider(mProviderPackage, mContext.getPackageManager());
 
         if (completionCallback != null) {
             completionCallback.run();

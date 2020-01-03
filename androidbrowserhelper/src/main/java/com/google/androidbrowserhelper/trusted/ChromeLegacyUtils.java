@@ -148,6 +148,8 @@ public class ChromeLegacyUtils {
     static int getVersionCode(PackageManager pm, String packageName) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // getLongVersionCode contains versionCode in the lower 32bits and versionCodeMajor
+                // in the higher 32 bits. Casting to int will give us the lower 32 bits.
                 return (int) pm.getPackageInfo(packageName, 0).getLongVersionCode();
             }
             return pm.getPackageInfo(packageName, 0).versionCode;

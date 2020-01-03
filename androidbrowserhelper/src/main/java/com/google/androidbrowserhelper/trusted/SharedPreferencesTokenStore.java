@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.util.Base64;
 
 import androidx.annotation.Nullable;
@@ -29,12 +30,12 @@ import androidx.browser.trusted.TokenStore;
 public class SharedPreferencesTokenStore implements TokenStore {
     private static final String SHARED_PREFERENCES_NAME = "com.google.androidbrowserhelper";
     private static final String KEY_TOKEN =
-            "com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore.TOKEN";
+            "SharedPreferencesTokenStore.TOKEN";
 
     private Context mContext;
 
     /**
-     * Creates a new SharedPreferencesTokenStore
+     * Creates a new SharedPreferencesTokenStore.
      *
      * @param mContext The {@link Context} where the {@link SharedPreferences} will be stored.
      */
@@ -59,7 +60,8 @@ public class SharedPreferencesTokenStore implements TokenStore {
             return;
         }
 
-        String encodedToken = Base64.encodeToString(token.serialize(), Base64.DEFAULT);
+        String encodedToken =
+                Base64.encodeToString(token.serialize(), Base64.NO_WRAP | Base64.NO_PADDING);
         preferences.edit()
                 .putString(KEY_TOKEN, encodedToken)
                 .apply();
@@ -81,7 +83,13 @@ public class SharedPreferencesTokenStore implements TokenStore {
             return null;
         }
 
-        byte[] serializedToken = Base64.decode(stringifiedToken, Base64.DEFAULT);
+        byte[] serializedToken =
+                Base64.decode(stringifiedToken, Base64.NO_WRAP | Base64.NO_PADDING);
         return Token.deserialize(serializedToken);
+    }
+
+    public void setVerifiedProvider(String providerPackage, PackageManager packageManager) {
+        Token token = Token.create(providerPackage, packageManager);
+        this.store(token);
     }
 }

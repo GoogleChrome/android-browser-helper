@@ -71,7 +71,7 @@ public class SharedPreferencesTokenStore implements TokenStore {
      * This method returns the {@link Token} previously persisted by a call to {@link #store}.
      * @return The previously persisted {@link Token}, or {@code null} if none exist.
      *
-     * This method will be called on a binder thread by {@link TrustedWebActivityService}.
+     * This method will be called on a binder thread by {@link DelegationService}.
      */
     @Nullable
     @Override

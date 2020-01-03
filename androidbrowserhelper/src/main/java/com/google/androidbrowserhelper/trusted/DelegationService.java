@@ -22,7 +22,7 @@ import androidx.browser.trusted.TokenStore;
  * {@link androidx.browser.trusted.TrustedWebActivityService#getTokenStore()} using a
  * {@link SharedPreferencesTokenStore}.
  */
-public class TrustedWebActivityService extends androidx.browser.trusted.TrustedWebActivityService {
+public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
 
     @NonNull
     @Override

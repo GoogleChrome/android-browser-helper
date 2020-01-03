@@ -19,7 +19,7 @@
     <application>
         <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestActivity"
                   android:enabled="false">
-            <!-- A browsable intent filter is required for the TrustedWebActivityService. -->
+            <!-- A browsable intent filter is required for the DelegationService. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT" />

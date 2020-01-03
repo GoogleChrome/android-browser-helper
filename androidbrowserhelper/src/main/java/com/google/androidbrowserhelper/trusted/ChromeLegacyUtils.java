@@ -14,6 +14,7 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import java.util.Arrays;
 import java.util.List;
@@ -143,8 +144,14 @@ public class ChromeLegacyUtils {
         return getVersionCode(pm, packageName) >= version;
     }
 
+    @SuppressWarnings("deprecation")
     static int getVersionCode(PackageManager pm, String packageName) {
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // getLongVersionCode contains versionCode in the lower 32bits and versionCodeMajor
+                // in the higher 32 bits. Casting to int will give us the lower 32 bits.
+                return (int) pm.getPackageInfo(packageName, 0).getLongVersionCode();
+            }
             return pm.getPackageInfo(packageName, 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             return 0;

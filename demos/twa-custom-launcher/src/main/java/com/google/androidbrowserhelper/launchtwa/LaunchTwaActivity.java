@@ -110,7 +110,7 @@ public class LaunchTwaActivity extends AppCompatActivity {
                             "Couldn't get session from provider.", Toast.LENGTH_LONG).show();
                 }
 
-                Intent intent = builder.build(mSession);
+                Intent intent = builder.build(mSession).getIntent();
                 intent.putExtra(Intent.EXTRA_REFERRER,
                         Uri.parse("android-app://com.google.androidbrowserhelper?twa=true"));
                 startActivity(intent);

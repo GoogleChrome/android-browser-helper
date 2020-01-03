@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
-
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -29,8 +27,9 @@ import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
+
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -49,7 +48,7 @@ public class TwaLauncher {
         if (providerPackage != null) {
             intent.intent.setPackage(providerPackage);
         }
-        intent.launchUrl(context, twaBuilder.getUrl());
+        intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {
             completionCallback.run();
         }
@@ -70,6 +69,8 @@ public class TwaLauncher {
 
     @Nullable
     private CustomTabsSession mSession;
+
+    private SharedPreferencesTokenStore mTokenStore;
 
     private boolean mDestroyed;
 
@@ -93,16 +94,19 @@ public class TwaLauncher {
      * support TWAs.
      */
     public TwaLauncher(Context context, @Nullable String providerPackage) {
-        this(context, providerPackage, DEFAULT_SESSION_ID);
+        this(context, providerPackage, DEFAULT_SESSION_ID,
+                new SharedPreferencesTokenStore(context));
     }
 
     /**
      * Same as above, but also accepts a session id. This allows to launch multiple TWAs in the same
      * task.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId) {
+    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
+                       SharedPreferencesTokenStore tokenStore) {
         mContext = context;
         mSessionId = sessionId;
+        mTokenStore = tokenStore;
         if (providerPackage == null) {
             TwaProviderPicker.Action action =
                     TwaProviderPicker.pickProvider(context.getPackageManager());
@@ -222,11 +226,13 @@ public class TwaLauncher {
             return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        Intent intent = builder.build(mSession);
+        Intent intent = builder.build(mSession).getIntent();
         ContextCompat.startActivity(mContext, intent, null);
+
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        TrustedWebActivityService.setVerifiedProvider(mContext, mProviderPackage);
+        mTokenStore.setVerifiedProvider(mProviderPackage, mContext.getPackageManager());
+
         if (completionCallback != null) {
             completionCallback.run();
         }

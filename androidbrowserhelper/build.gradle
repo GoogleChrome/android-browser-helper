@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.2.0-alpha07'
+    api 'androidx.browser:browser:1.2.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

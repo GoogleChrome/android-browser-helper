@@ -14,11 +14,19 @@
 
 package com.google.androidbrowserhelper.trusted;
 
-import androidx.browser.trusted.TrustedWebActivityService;
+import androidx.annotation.NonNull;
+import androidx.browser.trusted.TokenStore;
 
 /**
- * An extension of {@link TrustedWebActivityService} to allow us to extend its functionality in the
- * future without requiring clients to change their code.
+ * An extension of {@link androidx.browser.trusted.TrustedWebActivityService} that implements
+ * {@link androidx.browser.trusted.TrustedWebActivityService#getTokenStore()} using a
+ * {@link SharedPreferencesTokenStore}.
  */
-public class DelegationService extends TrustedWebActivityService {
+public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
+
+    @NonNull
+    @Override
+    public TokenStore getTokenStore() {
+        return new SharedPreferencesTokenStore(this);
+    }
 }

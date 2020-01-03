@@ -16,7 +16,9 @@
 <resources>
     <color name="themeColor">#303F9F</color>
     <color name="colorPrimary">#303F9F</color>
+    <color name="colorPrimaryDark">#00FF00</color>
     <color name="navigationColor">#303F9F</color>
+    <color name="navigationColorDark">#FF0000</color>
 
     <color name="backgroundColor">#BABABA</color>
 </resources>

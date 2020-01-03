@@ -26,6 +26,8 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
@@ -133,10 +135,18 @@ public class LauncherActivity extends AppCompatActivity {
                     mMetadata.fileProviderAuthority);
         }
 
+        CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(getColorCompat(mMetadata.statusBarColorDarkId))
+                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorDarkId))
+                .build();
+
         TrustedWebActivityIntentBuilder twaBuilder =
                 new TrustedWebActivityIntentBuilder(getLaunchingUrl())
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId));
+                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
+                        .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                        .setColorSchemeParams(
+                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme);
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);

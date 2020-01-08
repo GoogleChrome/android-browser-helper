@@ -22,5 +22,7 @@
         }
         ]
     </string>
-    <string name="provider_authority">com.google.browser.examples.twa_basic.fileprovider</string>
+    <string name="provider_authority">
+        com.google.browser.examples.twa_webview_fallback.fileprovider
+    </string>
 </resources>

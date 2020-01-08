@@ -81,7 +81,7 @@ publishing {
 
             groupId 'com.google.androidbrowserhelper'
             artifactId 'androidbrowserhelper'
-            version '0.1.0-alpha1'
+            version '1.0.0'
 
             // This ensures that the generated POM file contains the correct Android dependencies.
             // The section used the BinTray example as a base:

@@ -22,11 +22,17 @@ public class FocusActivity extends AppCompatActivity {
     private static final String EXTRA_FOCUS_INTENT =
             "androidx.browser.customtabs.extra.FOCUS_INTENT";
 
+    private static Boolean mActivityExistsCached;
+
     public static void addToIntent(Intent containerIntent, Context context) {
         Intent focusIntent = new Intent(context, FocusActivity.class);
 
         // This class may not be included in app's manifest, don't add it in that case.
-        if (focusIntent.resolveActivityInfo(context.getPackageManager(), 0) == null) return;
+        if (mActivityExistsCached == null) {
+            mActivityExistsCached =
+                    focusIntent.resolveActivityInfo(context.getPackageManager(), 0) != null;
+        }
+        if (Boolean.FALSE.equals(mActivityExistsCached)) return;
 
         // This Intent will be launched from the background so we need NEW_TASK, however if an
         // existing task is suitable, that will be brought to the foreground despite the name of the

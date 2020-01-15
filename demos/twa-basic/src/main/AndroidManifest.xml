@@ -73,6 +73,8 @@
 
         </activity>
 
+        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="@string/provider_authority"

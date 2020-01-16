@@ -23,7 +23,7 @@ private const val PARAMS_KEY = "params"
 private const val CALLBACK_KEY = "callback"
 
 /** Holds the parameters and result callback for a call to PlayBilling#querySkuDetailsAsync. */
-data class QuerySkuDetailsCall(
+class QuerySkuDetailsCall(
         val params: SkuDetailsParams,
         val listener: SkuDetailsResponseListener) {
 
@@ -33,6 +33,7 @@ data class QuerySkuDetailsCall(
     }
 
     companion object {
+        @JvmStatic
         fun fromBundle(bundle: Bundle): QuerySkuDetailsCall {
             checkBundle(bundle, CLASS_NAME)
 

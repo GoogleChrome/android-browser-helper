@@ -22,21 +22,21 @@ contains all origins to be validated. Example:
 ```xml
     <string name="asset_statements">
     [{
-        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
             \"site\": \"https://github.com\"
         }
     }],
     [{
-        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
             \"site\": \"https://www.google.com\"
         }
     }],
     [{
-        \"relation\": [\"delegate_permission/common.share_location\"],
+        \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
             \"site\": \"https://www.wikipedia.com\"

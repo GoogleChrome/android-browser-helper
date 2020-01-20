@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'maven-publish'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -38,4 +40,47 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'junit:junit:4.12'
+}
+
+
+publishing {
+    publications {
+        Production(MavenPublication) {
+            pom {
+                name = 'android-browser-helper-billing'
+                url = 'https://github.com/GoogleChrome/android-browser-helper/tree/master/playbilling'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+            }
+
+            artifact("$buildDir/outputs/aar/playbilling-release.aar")
+
+            groupId 'com.google.androidbrowserhelper'
+            artifactId 'billing'
+            version '1.0.0-alpha01'
+
+            // This ensures that the generated POM file contains the correct Android dependencies.
+            // The section used the BinTray example as a base:
+            // https://github.com/bintray/bintray-examples/blob/master/gradle-bintray-plugin-examples/android-gradle-3.0.0-maven-example/app/publish.gradle#L7-L31
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                // Iterate over the implementation dependencies (we don't want the test ones),
+                // adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included in the pom.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
 }

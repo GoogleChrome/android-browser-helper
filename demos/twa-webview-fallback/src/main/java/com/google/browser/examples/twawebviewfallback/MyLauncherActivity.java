@@ -16,7 +16,10 @@ package com.google.browser.examples.twawebviewfallback;
 
 import android.content.Intent;
 
+import androidx.core.content.ContextCompat;
+
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
+import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
 
 public class MyLauncherActivity extends LauncherActivity {
@@ -26,6 +29,13 @@ public class MyLauncherActivity extends LauncherActivity {
         return (context, twaIntentBuilder, mProviderPackage, completionCallback) -> {
             Intent intent = new Intent(context, WebViewFallbackActivity.class);
             intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, twaIntentBuilder.getUri());
+
+            LauncherActivityMetadata metadata = LauncherActivityMetadata.parse(this);
+            intent.putExtra(WebViewFallbackActivity.STATUS_BAR_COLOR,
+                    ContextCompat.getColor(this, metadata.statusBarColorId));
+            intent.putExtra(WebViewFallbackActivity.NAVIGATION_BAR_COLOR,
+                    ContextCompat.getColor(this, metadata.navigationBarColorId));
+
             startActivity(intent);
             completionCallback.run();
         };

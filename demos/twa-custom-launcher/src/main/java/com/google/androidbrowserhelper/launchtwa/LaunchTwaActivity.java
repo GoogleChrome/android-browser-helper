@@ -92,8 +92,6 @@ public class LaunchTwaActivity extends AppCompatActivity {
      * @param view the source of the event invoking this method.
      */
     public void launchWithCustomReferrer(View view) {
-        // The ergonomics will be improved here, since we're basically replicating the work of
-        // TwaLauncher, see https://github.com/GoogleChrome/android-browser-helper/issues/13.
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI);
         Map<String, String> customHeaders = new HashMap<>();
         customHeaders.put(

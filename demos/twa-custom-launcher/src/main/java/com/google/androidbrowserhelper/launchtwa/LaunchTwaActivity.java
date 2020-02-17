@@ -27,7 +27,9 @@ import com.google.androidbrowserhelper.trusted.TwaLauncher;
 import com.google.androidbrowserhelper.trusted.TwaProviderPicker;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -93,33 +95,10 @@ public class LaunchTwaActivity extends AppCompatActivity {
         // The ergonomics will be improved here, since we're basically replicating the work of
         // TwaLauncher, see https://github.com/GoogleChrome/android-browser-helper/issues/13.
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI);
-
-        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(getPackageManager());
-        CustomTabsClient.bindCustomTabsService(this, action.provider,
-                new CustomTabsServiceConnection() {
-            CustomTabsSession mSession;
-            private final static int SESSION_ID = 45;  // An arbitrary constant.
-
-            @Override
-            public void onCustomTabsServiceConnected(ComponentName name,
-                    CustomTabsClient client) {
-                mSession = client.newSession(null, SESSION_ID);
-
-                if (mSession == null) {
-                    Toast.makeText(LaunchTwaActivity.this,
-                            "Couldn't get session from provider.", Toast.LENGTH_LONG).show();
-                }
-
-                Intent intent = builder.build(mSession).getIntent();
-                intent.putExtra(Intent.EXTRA_REFERRER,
-                        Uri.parse("android-app://com.google.androidbrowserhelper?twa=true"));
-                startActivity(intent);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mSession = null;
-            }
-        });
+        Map<String, String> customHeaders = new HashMap<>();
+        customHeaders.put(
+                "Referer", "android-app://com.google.androidbrowserhelper?twa=true");
+        customHeaders.put("my-header-key", "my-header-value");
+        new TwaLauncher(this).launch(builder, null, null, null, customHeaders);
     }
 }

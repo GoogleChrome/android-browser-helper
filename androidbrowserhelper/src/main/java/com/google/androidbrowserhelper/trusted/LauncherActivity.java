@@ -32,6 +32,8 @@ import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
 
+import java.util.Map;
+
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
  * basic modifications to the behaviour.
@@ -156,7 +158,8 @@ public class LauncherActivity extends AppCompatActivity {
         mTwaLauncher.launch(twaBuilder,
                 mSplashScreenStrategy,
                 () -> mBrowserWasLaunched = true,
-                getFallbackStrategy());
+                getFallbackStrategy(),
+                getCustomHeaders());
 
         if (!sChromeVersionChecked) {
             ChromeUpdatePrompt.promptIfNeeded(this, mTwaLauncher.getProviderPackage());
@@ -233,6 +236,13 @@ public class LauncherActivity extends AppCompatActivity {
         if (mSplashScreenStrategy != null) {
             mSplashScreenStrategy.onActivityEnterAnimationComplete();
         }
+    }
+
+    /**
+     * Returns a key and name for headers to be sent open opening the Trusted Web Activity
+     */
+    protected @Nullable Map<String, String> getCustomHeaders() {
+        return null;
     }
 
     /**

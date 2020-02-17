@@ -18,6 +18,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Browser;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -31,6 +34,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
+import java.util.Map;
+
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
  * connection with {@link CustomTabsService}.
@@ -41,18 +46,40 @@ public class TwaLauncher {
     private static final int DEFAULT_SESSION_ID = 96375;
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
-            (context, twaBuilder, providerPackage, completionCallback) -> {
+            (context, twaBuilder, providerPackage, completionCallback, customHeaders) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
         // providers installed.
         CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
         if (providerPackage != null) {
             intent.intent.setPackage(providerPackage);
         }
+        applyCustomHeaders(intent.intent, customHeaders);
+
         intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {
             completionCallback.run();
         }
     };
+
+    private static void applyCustomHeaders(
+            Intent intent, @Nullable Map<String, String> customHeaders) {
+        if (customHeaders == null) {
+            return;
+        }
+
+        Bundle headerBundle = new Bundle();
+        for (Map.Entry<String, String> header: customHeaders.entrySet()) {
+            String key = header.getKey();
+            if (key.equalsIgnoreCase("referer") && Build.VERSION.SDK_INT >= 17) {
+                intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse(header.getValue()));
+                continue;
+            }
+            headerBundle.putString(header.getKey(), header.getValue());
+        }
+        if(!headerBundle.isEmpty()) {
+            intent.putExtra(Browser.EXTRA_HEADERS, headerBundle);
+        }
+    }
 
     private final Context mContext;
 
@@ -78,7 +105,8 @@ public class TwaLauncher {
         void launch(Context context,
                     TrustedWebActivityIntentBuilder twaBuilder,
                     @Nullable String providerPackage,
-                    @Nullable Runnable completionCallback);
+                    @Nullable Runnable completionCallback,
+                    @Nullable Map<String, String> customHeaders);
     }
 
     /**
@@ -145,15 +173,18 @@ public class TwaLauncher {
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
                        @Nullable SplashScreenStrategy splashScreenStrategy,
                        @Nullable Runnable completionCallback,
-                       FallbackStrategy fallbackStrategy) {
+                       FallbackStrategy fallbackStrategy,
+                       @Nullable Map<String, String> customHeaders) {
         if (mDestroyed) {
             throw new IllegalStateException("TwaLauncher already destroyed");
         }
 
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
-            launchTwa(twaBuilder, splashScreenStrategy, completionCallback, fallbackStrategy);
+            launchTwa(twaBuilder, splashScreenStrategy, completionCallback, fallbackStrategy,
+                    customHeaders);
         } else {
-            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
+            fallbackStrategy.launch(
+                    mContext, twaBuilder, mProviderPackage, completionCallback, customHeaders);
         }
     }
 
@@ -170,19 +201,23 @@ public class TwaLauncher {
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback) {
-        launch(twaBuilder, splashScreenStrategy, completionCallback, CCT_FALLBACK_STRATEGY);
+        launch(twaBuilder, splashScreenStrategy, completionCallback, CCT_FALLBACK_STRATEGY,
+                null);
     }
 
     private void launchTwa(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback,
-           FallbackStrategy fallbackStrategy) {
+            FallbackStrategy fallbackStrategy,
+            @Nullable Map<String, String> customHeaders) {
+
         if (splashScreenStrategy != null) {
             splashScreenStrategy.onTwaLaunchInitiated(mProviderPackage, twaBuilder);
         }
 
         Runnable onSessionCreatedRunnable = () ->
-                launchWhenSessionEstablished(twaBuilder, splashScreenStrategy, completionCallback);
+                launchWhenSessionEstablished(
+                        twaBuilder, splashScreenStrategy, completionCallback, customHeaders);
 
         if (mSession != null) {
             onSessionCreatedRunnable.run();
@@ -193,7 +228,8 @@ public class TwaLauncher {
             // The provider has been unable to create a session for us, we can't launch a
             // Trusted Web Activity. We launch a fallback specially designed to provide the
             // best user experience.
-            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
+            fallbackStrategy.launch(
+                    mContext, twaBuilder, mProviderPackage, completionCallback, customHeaders);
         };
 
         if (mServiceConnection == null) {
@@ -207,27 +243,31 @@ public class TwaLauncher {
 
     private void launchWhenSessionEstablished(TrustedWebActivityIntentBuilder twaBuilder,
             @Nullable SplashScreenStrategy splashScreenStrategy,
-            @Nullable Runnable completionCallback) {
+            @Nullable Runnable completionCallback,
+            @Nullable Map<String, String> customHeaders) {
         if (mSession == null) {
             throw new IllegalStateException("mSession is null in launchWhenSessionEstablished");
         }
 
         if (splashScreenStrategy != null) {
             splashScreenStrategy.configureTwaBuilder(twaBuilder, mSession,
-                    () -> launchWhenSplashScreenReady(twaBuilder, completionCallback));
+                    () -> launchWhenSplashScreenReady(
+                            twaBuilder, completionCallback, customHeaders));
         } else {
-            launchWhenSplashScreenReady(twaBuilder, completionCallback);
+            launchWhenSplashScreenReady(twaBuilder, completionCallback, customHeaders);
         }
     }
 
     private void launchWhenSplashScreenReady(TrustedWebActivityIntentBuilder builder,
-            @Nullable Runnable completionCallback) {
+            @Nullable Runnable completionCallback,
+            @Nullable Map<String, String> customHeaders) {
         if (mDestroyed) {
             return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
         Intent intent = builder.build(mSession).getIntent();
         FocusActivity.addToIntent(intent, mContext);
+        applyCustomHeaders(intent, customHeaders);
         ContextCompat.startActivity(mContext, intent, null);
 
         // Remember who we connect to as the package that is allowed to delegate notifications

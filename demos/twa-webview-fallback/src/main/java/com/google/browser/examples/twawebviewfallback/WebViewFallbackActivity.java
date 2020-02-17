@@ -15,6 +15,8 @@
 package com.google.browser.examples.twawebviewfallback;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -27,20 +29,34 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+import androidx.core.content.ContextCompat;
+
+import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
 
 public class WebViewFallbackActivity extends AppCompatActivity {
-    public static final String KEY_LAUNCH_URI =
-            "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity.KEY_LAUNCH_URL";
-    public static final String NAVIGATION_BAR_COLOR =
-            "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity" +
-                    ".NAVIGATION_BAR_COLOR";
-    public static final String STATUS_BAR_COLOR =
-            "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity" +
-                    ".STATUS_BAR_COLOR";
-
+    private static final String KEY_PREFIX =
+            "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity.";
+    public static final String KEY_LAUNCH_URI = KEY_PREFIX + "KEY_LAUNCH_URL";
+    public static final String NAVIGATION_BAR_COLOR = KEY_PREFIX + "NAVIGATION_BAR_COLOR";
+    public static final String STATUS_BAR_COLOR = KEY_PREFIX + "STATUS_BAR_COLOR";
 
     private Uri mLaunchUrl;
     private int mStatusBarColor;
+
+    public static Intent createLaunchIntent(
+            Context context,
+            Uri launchUrl,
+            LauncherActivityMetadata launcherActivityMetadata) {
+        Intent intent = new Intent(context, WebViewFallbackActivity.class);
+        intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, launchUrl);
+
+        intent.putExtra(WebViewFallbackActivity.STATUS_BAR_COLOR,
+                ContextCompat.getColor(context, launcherActivityMetadata.statusBarColorId));
+        intent.putExtra(WebViewFallbackActivity.NAVIGATION_BAR_COLOR,
+                ContextCompat.getColor(context, launcherActivityMetadata.navigationBarColorId));
+        return null;
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -49,11 +65,18 @@ public class WebViewFallbackActivity extends AppCompatActivity {
 
         this.mLaunchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
 
-        int navigationBarColor = this.getIntent().getIntExtra(NAVIGATION_BAR_COLOR, 0);
-        getWindow().setNavigationBarColor(navigationBarColor);
+        if (getIntent().hasExtra(NAVIGATION_BAR_COLOR)) {
+            int navigationBarColor = this.getIntent().getIntExtra(
+                    NAVIGATION_BAR_COLOR, 0);
+            getWindow().setNavigationBarColor(navigationBarColor);
+        }
 
-        mStatusBarColor = this.getIntent().getIntExtra(STATUS_BAR_COLOR, 0);
-        getWindow().setStatusBarColor(mStatusBarColor);
+        if (getIntent().hasExtra(STATUS_BAR_COLOR)) {
+            mStatusBarColor = this.getIntent().getIntExtra(STATUS_BAR_COLOR, 0);
+            getWindow().setStatusBarColor(mStatusBarColor);
+        } else {
+            mStatusBarColor = getWindow().getStatusBarColor();
+        }
 
         WebView webView = new WebView(this);
         webView.setWebViewClient(createWebViewClient());

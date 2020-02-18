@@ -17,6 +17,7 @@ package com.google.browser.examples.twawebviewfallback;
 import android.content.Intent;
 
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
+import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
 
 public class MyLauncherActivity extends LauncherActivity {
@@ -24,8 +25,8 @@ public class MyLauncherActivity extends LauncherActivity {
     @Override
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         return (context, twaIntentBuilder, mProviderPackage, completionCallback) -> {
-            Intent intent = new Intent(context, WebViewFallbackActivity.class);
-            intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, twaIntentBuilder.getUri());
+            Intent intent = WebViewFallbackActivity.createLaunchIntent(
+                    this, twaIntentBuilder.getUri(), LauncherActivityMetadata.parse(this));
             startActivity(intent);
             completionCallback.run();
         };

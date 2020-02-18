@@ -52,7 +52,7 @@
 
         </activity>
 
-        <activity android:name=".WebViewFallbackActivity"></activity>
+        <activity android:name=".WebViewFallbackActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

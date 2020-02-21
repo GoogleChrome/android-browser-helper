@@ -12,7 +12,7 @@ If you have a Trusted Web Activity related question, the best place to ask it is
 [trusted-web-activity](https://stackoverflow.com/questions/tagged/trusted-web-activity) tag, which is also monitored by the team.
 
 **Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+A clear and concise description of what the problem is. Ex. It would be really cool if [...]
 
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.

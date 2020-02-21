@@ -24,8 +24,14 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
+**Did this ever used to work**
+If applicable, add information on the version where this worked previously.
+
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
+
+**Code Snippets**
+If applicable, add or link to code snippets describing how the API is being used.
 
 **Smartphone (please complete the following information):**
  - Device: [e.g. Pixel 3]

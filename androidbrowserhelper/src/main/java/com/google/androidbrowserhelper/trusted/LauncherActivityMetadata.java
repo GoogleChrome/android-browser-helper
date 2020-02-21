@@ -17,11 +17,13 @@ package com.google.androidbrowserhelper.trusted;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -107,7 +109,7 @@ public class LauncherActivityMetadata {
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final List<String> additionalTrustedOrigins;
 
-    private LauncherActivityMetadata(@NonNull Bundle metaData) {
+    private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
         statusBarColorId = metaData.getInt(METADATA_STATUS_BAR_COLOR_ID, DEFAULT_COLOR_ID);
         statusBarColorDarkId = metaData.getInt(METADATA_STATUS_BAR_COLOR_DARK_ID, statusBarColorId);
@@ -120,13 +122,21 @@ public class LauncherActivityMetadata {
         fileProviderAuthority = metaData.getString(METADATA_FILE_PROVIDER_AUTHORITY);
         splashScreenFadeOutDurationMillis =
                 metaData.getInt(METADATA_SPLASH_SCREEN_FADE_OUT_DURATION, 0);
-        additionalTrustedOrigins = metaData.getStringArrayList(METADATA_ADDITIONAL_TRUSTED_ORIGINS);
+        if (metaData.containsKey(METADATA_ADDITIONAL_TRUSTED_ORIGINS)) {
+            int additionalTrustedOriginsResourceId
+                    = metaData.getInt(METADATA_ADDITIONAL_TRUSTED_ORIGINS);
+            additionalTrustedOrigins =
+                    Arrays.asList(resources.getStringArray(additionalTrustedOriginsResourceId));
+        } else {
+            additionalTrustedOrigins = null;
+        }
     }
 
     /**
      * Creates LauncherActivityMetadata instance based on metadata of the passed Activity.
      */
     public static LauncherActivityMetadata parse(Activity activity) {
+        Resources resources = activity.getResources();
         Bundle metaData = null;
         try {
             metaData = activity.getPackageManager().getActivityInfo(
@@ -136,6 +146,6 @@ public class LauncherActivityMetadata {
             // Will only happen if the package provided (the one we are running in) is not
             // installed - so should never happen.
         }
-        return new LauncherActivityMetadata(metaData == null ? new Bundle() : metaData);
+        return new LauncherActivityMetadata(metaData == null ? new Bundle() : metaData, resources);
     }
 }

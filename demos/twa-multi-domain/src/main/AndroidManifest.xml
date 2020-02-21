@@ -32,7 +32,7 @@
             <!-- Additional origins to be validated with Digital AssetLinks are listed under
                 this meta-tag, which points to a string-array in strings.xml -->
             <meta-data android:name="android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS"
-                android:value="@array/additional_trusted_origins" />
+                android:resource="@array/additional_trusted_origins" />
 
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="@string/launch_url" />

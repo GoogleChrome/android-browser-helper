@@ -52,6 +52,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core:1.0.2'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:3.0.0'

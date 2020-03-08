@@ -39,6 +39,37 @@ public class LaunchTwaActivity extends AppCompatActivity {
     private static final Uri LAUNCH_URI =
             Uri.parse("https://github.com/GoogleChrome/android-browser-helper");
 
+    private final TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(
+            LAUNCH_URI);
+
+    private final CustomTabsServiceConnection customTabsServiceConnection = new CustomTabsServiceConnection() {
+        CustomTabsSession mSession;
+        private final static int SESSION_ID = 45;  // An arbitrary constant.
+
+        @Override
+        public void onCustomTabsServiceConnected(ComponentName name,
+                                                 CustomTabsClient client) {
+            mSession = client.newSession(null, SESSION_ID);
+
+            if (mSession == null) {
+                Toast.makeText(LaunchTwaActivity.this,
+                        "Couldn't get session from provider.", Toast.LENGTH_LONG).show();
+            }
+
+            Intent intent = builder.build(mSession).getIntent();
+            intent.putExtra(Intent.EXTRA_REFERRER,
+                    Uri.parse("android-app://com.google.androidbrowserhelper?twa=true"));
+            startActivity(intent);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mSession = null;
+        }
+    };
+
+    private boolean serviceBound = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +78,7 @@ public class LaunchTwaActivity extends AppCompatActivity {
 
     /**
      * Launches a Trusted Web Activity without any customizations
+     *
      * @param view the source of the event invoking this method.
      */
     public void launch(View view) {
@@ -54,15 +86,15 @@ public class LaunchTwaActivity extends AppCompatActivity {
     }
 
     /**
-     * Launches a Trusted Web Activity where navigations to non-validate domains will open
-     * in a Custom Tab where the toolbar color has been customized.
+     * Launches a Trusted Web Activity where navigations to non-validate domains will open in a Custom
+     * Tab where the toolbar color has been customized.
      *
      * @param view the source of the event invoking this method.
      */
     public void launchWithCustomColors(View view) {
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI)
-                        .setNavigationBarColor(Color.RED)
-                        .setToolbarColor(Color.BLUE);
+                .setNavigationBarColor(Color.RED)
+                .setToolbarColor(Color.BLUE);
 
         new TwaLauncher(this).launch(builder, null, null);
     }
@@ -92,34 +124,21 @@ public class LaunchTwaActivity extends AppCompatActivity {
     public void launchWithCustomReferrer(View view) {
         // The ergonomics will be improved here, since we're basically replicating the work of
         // TwaLauncher, see https://github.com/GoogleChrome/android-browser-helper/issues/13.
-        TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI);
 
         TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(getPackageManager());
-        CustomTabsClient.bindCustomTabsService(this, action.provider,
-                new CustomTabsServiceConnection() {
-            CustomTabsSession mSession;
-            private final static int SESSION_ID = 45;  // An arbitrary constant.
+        if (!serviceBound) {
+            CustomTabsClient
+                    .bindCustomTabsService(this, action.provider, customTabsServiceConnection);
+            serviceBound = true;
+        }
+    }
 
-            @Override
-            public void onCustomTabsServiceConnected(ComponentName name,
-                    CustomTabsClient client) {
-                mSession = client.newSession(null, SESSION_ID);
-
-                if (mSession == null) {
-                    Toast.makeText(LaunchTwaActivity.this,
-                            "Couldn't get session from provider.", Toast.LENGTH_LONG).show();
-                }
-
-                Intent intent = builder.build(mSession).getIntent();
-                intent.putExtra(Intent.EXTRA_REFERRER,
-                        Uri.parse("android-app://com.google.androidbrowserhelper?twa=true"));
-                startActivity(intent);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                mSession = null;
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceBound) {
+            unbindService(customTabsServiceConnection);
+            serviceBound = false;
+        }
     }
 }

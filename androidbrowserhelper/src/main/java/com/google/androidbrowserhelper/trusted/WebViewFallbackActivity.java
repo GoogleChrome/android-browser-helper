@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.browser.examples.twawebviewfallback;
+package com.google.androidbrowserhelper.trusted;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,11 +33,10 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
-
-import com.google.androidbrowserhelper.trusted.LauncherActivityMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,17 +85,25 @@ public class WebViewFallbackActivity extends AppCompatActivity {
             throw new IllegalArgumentException("launchUrl scheme must be 'https'");
         }
 
-        if (getIntent().hasExtra(KEY_NAVIGATION_BAR_COLOR)) {
-            int navigationBarColor = this.getIntent().getIntExtra(
-                    KEY_NAVIGATION_BAR_COLOR, 0);
-            getWindow().setNavigationBarColor(navigationBarColor);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (getIntent().hasExtra(KEY_NAVIGATION_BAR_COLOR)) {
+                int navigationBarColor = this.getIntent().getIntExtra(
+                        KEY_NAVIGATION_BAR_COLOR, 0);
+                    getWindow().setNavigationBarColor(navigationBarColor);
+            }
         }
 
         if (getIntent().hasExtra(KEY_STATUS_BAR_COLOR)) {
             mStatusBarColor = this.getIntent().getIntExtra(KEY_STATUS_BAR_COLOR, 0);
-            getWindow().setStatusBarColor(mStatusBarColor);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().setStatusBarColor(mStatusBarColor);
+            }
         } else {
-            mStatusBarColor = getWindow().getStatusBarColor();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mStatusBarColor = getWindow().getStatusBarColor();
+            } else {
+                mStatusBarColor = Color.WHITE;
+            }
         }
 
         if (getIntent().hasExtra(KEY_EXTRA_ORIGINS)) {
@@ -197,11 +206,8 @@ public class WebViewFallbackActivity extends AppCompatActivity {
                 return true;
             }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            private boolean shouldOverrideUrlLoading(Uri navigationUrl) {
                 Uri launchUrl = WebViewFallbackActivity.this.mLaunchUrl;
-                Uri navigationUrl = request.getUrl();
-
                 // If the user is navigation to a different origin, use CCT to handle the navigation
                 //
                 // URIs with the `data` scheme are handled in the WebView.
@@ -217,7 +223,18 @@ public class WebViewFallbackActivity extends AppCompatActivity {
                     return true;
                 }
 
-                return super.shouldOverrideUrlLoading(view, request);
+                return false;
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return this.shouldOverrideUrlLoading(Uri.parse(url));
+            }
+
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return this.shouldOverrideUrlLoading(request.getUrl());
             }
 
             private boolean matchExtraOrigins(Uri navigationUri) {

@@ -96,6 +96,13 @@ public class LauncherActivityMetadata {
     private static final String METADATA_ADDITIONAL_TRUSTED_ORIGINS =
             "android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS";
 
+    /**
+     * Which kind of fallback strategy to use when Trusted Web Activity is not available. Possible
+     * values are "customtabs" and "webview". An unknown value will trigger the customtabs fallback.
+     */
+    private static final String METADATA_FALLBACK_STRATEGY =
+            "android.support.customtabs.trusted.FALLBACK_STRATEGY";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -108,6 +115,7 @@ public class LauncherActivityMetadata {
     @Nullable public final String fileProviderAuthority;
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final List<String> additionalTrustedOrigins;
+    @Nullable public final String fallbackStrategyType;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -130,6 +138,7 @@ public class LauncherActivityMetadata {
         } else {
             additionalTrustedOrigins = null;
         }
+        fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
     }
 
     /**

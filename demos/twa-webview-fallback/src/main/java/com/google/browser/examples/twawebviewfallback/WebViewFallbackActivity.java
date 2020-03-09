@@ -19,9 +19,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
-import android.webkit.CookieManager;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WebViewFallbackActivity extends AppCompatActivity {
+    private static final String TAG = WebViewFallbackActivity.class.getSimpleName();
     private static final String KEY_PREFIX =
             "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity.";
     private static final String KEY_LAUNCH_URI = KEY_PREFIX + "LAUNCH_URL";
@@ -78,6 +79,9 @@ public class WebViewFallbackActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         this.mLaunchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
+        if (!"https".equals(this.mLaunchUrl.getScheme())) {
+            throw new IllegalArgumentException("launchUrl scheme must be 'https'");
+        }
 
         if (getIntent().hasExtra(KEY_NAVIGATION_BAR_COLOR)) {
             int navigationBarColor = this.getIntent().getIntExtra(
@@ -97,6 +101,11 @@ public class WebViewFallbackActivity extends AppCompatActivity {
             if (extraOrigins != null) {
                 for (String extraOrigin : extraOrigins) {
                     Uri extraOriginUri = Uri.parse(extraOrigin);
+                    if (!"https".equalsIgnoreCase(extraOriginUri.getScheme())) {
+                        Log.w(TAG, "Only 'https' origins are accepted. Ignoring extra origin: "
+                                + extraOrigin);
+                        continue;
+                    }
                     mExtraOrigins.add(extraOriginUri);
                 }
             }
@@ -188,7 +197,12 @@ public class WebViewFallbackActivity extends AppCompatActivity {
                 Uri navigationUrl = request.getUrl();
 
                 // If the user is navigation to a different origin, use CCT to handle the navigation
-                if (!uriOriginsMatch(navigationUrl, launchUrl) &&
+                //
+                // URIs with the `data` scheme are handled in the WebView.
+                // The "Demo" item in https://jakearchibald.github.io/svgomg/ is one example of this
+                // usage
+                if (!"data".equals(navigationUrl.getScheme()) &&
+                        !uriOriginsMatch(navigationUrl, launchUrl) &&
                         !matchExtraOrigins(navigationUrl)) {
                     CustomTabsIntent intent  = new CustomTabsIntent.Builder()
                             .setToolbarColor(mStatusBarColor)
@@ -210,8 +224,9 @@ public class WebViewFallbackActivity extends AppCompatActivity {
             }
 
             private boolean uriOriginsMatch(Uri uriA, Uri uriB) {
-                return uriA.getScheme().equals(uriB.getScheme()) &&
-                        uriA.getHost().equals(uriB.getHost());
+                return uriA.getScheme().equalsIgnoreCase(uriB.getScheme()) &&
+                        uriA.getHost().equalsIgnoreCase(uriB.getHost()) &&
+                        uriA.getPort() == uriB.getPort();
             }
         };
     }

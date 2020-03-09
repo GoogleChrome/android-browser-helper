@@ -17,6 +17,7 @@
          Links. Each domain needs to have its own domain.com/.well-known/assetlinks.json -->
     <string-array name="additional_trusted_origins">
         <item>https://pm5-monitor-c63a2.firebaseapp.com/</item>
+        <item>https://jakearchibald.github.io/</item>
     </string-array>
     <string name="asset_statements">
         [{

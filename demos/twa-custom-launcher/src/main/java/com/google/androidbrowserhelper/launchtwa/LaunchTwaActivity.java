@@ -26,6 +26,7 @@ import com.google.androidbrowserhelper.demo.R;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
 import com.google.androidbrowserhelper.trusted.TwaProviderPicker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +42,11 @@ public class LaunchTwaActivity extends AppCompatActivity {
 
     private final TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(
             LAUNCH_URI);
+
+    /**
+     * A bag to put all TwaLauncher in so we can dispose all at once.
+     */
+    private List<TwaLauncher> launchers = new ArrayList<>();
 
     private final CustomTabsServiceConnection customTabsServiceConnection = new CustomTabsServiceConnection() {
         CustomTabsSession mSession;
@@ -82,7 +88,9 @@ public class LaunchTwaActivity extends AppCompatActivity {
      * @param view the source of the event invoking this method.
      */
     public void launch(View view) {
-        new TwaLauncher(this).launch(LAUNCH_URI);
+        TwaLauncher launcher = new TwaLauncher(this);
+        launcher.launch(LAUNCH_URI);
+        launchers.add(launcher);
     }
 
     /**
@@ -96,7 +104,10 @@ public class LaunchTwaActivity extends AppCompatActivity {
                 .setNavigationBarColor(Color.RED)
                 .setToolbarColor(Color.BLUE);
 
-        new TwaLauncher(this).launch(builder, null, null);
+
+        TwaLauncher launcher = new TwaLauncher(this);
+        launcher.launch(builder, null, null);
+        launchers.add(launcher);
     }
 
     /**
@@ -113,7 +124,10 @@ public class LaunchTwaActivity extends AppCompatActivity {
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(LAUNCH_URI)
                 .setAdditionalTrustedOrigins(origins);
 
-        new TwaLauncher(this).launch(builder, null, null);
+
+        TwaLauncher launcher = new TwaLauncher(this);
+        launcher.launch(builder, null, null);
+        launchers.add(launcher);
     }
 
     /**
@@ -136,6 +150,9 @@ public class LaunchTwaActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        for (TwaLauncher launcher : launchers) {
+            launcher.destroy();
+        }
         if (serviceBound) {
             unbindService(customTabsServiceConnection);
             serviceBound = false;

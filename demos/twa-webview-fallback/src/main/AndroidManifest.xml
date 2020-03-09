@@ -56,7 +56,8 @@
 
         </activity>
 
-        <activity android:name=".WebViewFallbackActivity" />
+        <activity android:name=".WebViewFallbackActivity"
+            android:configChanges="orientation|screenSize" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

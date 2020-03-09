@@ -17,6 +17,7 @@ package com.google.browser.examples.twawebviewfallback;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -159,6 +160,11 @@ public class WebViewFallbackActivity extends AppCompatActivity {
         if (mWebView != null) {
             mWebView.saveState(outState);
         }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
     }
 
     private WebViewClient createWebViewClient() {

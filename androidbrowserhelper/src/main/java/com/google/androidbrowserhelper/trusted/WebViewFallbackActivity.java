@@ -87,9 +87,8 @@ public class WebViewFallbackActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (getIntent().hasExtra(KEY_NAVIGATION_BAR_COLOR)) {
-                int navigationBarColor = this.getIntent().getIntExtra(
-                        KEY_NAVIGATION_BAR_COLOR, 0);
-                    getWindow().setNavigationBarColor(navigationBarColor);
+                int navigationBarColor = this.getIntent().getIntExtra(KEY_NAVIGATION_BAR_COLOR, 0);
+                getWindow().setNavigationBarColor(navigationBarColor);
             }
         }
 

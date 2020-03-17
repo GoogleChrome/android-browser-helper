@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -144,12 +145,12 @@ public class LauncherActivityMetadata {
     /**
      * Creates LauncherActivityMetadata instance based on metadata of the passed Activity.
      */
-    public static LauncherActivityMetadata parse(Activity activity) {
-        Resources resources = activity.getResources();
+    public static LauncherActivityMetadata parse(Context context) {
+        Resources resources = context.getResources();
         Bundle metaData = null;
         try {
-            metaData = activity.getPackageManager().getActivityInfo(
-                    new ComponentName(activity, activity.getClass()),
+            metaData = context.getPackageManager().getActivityInfo(
+                    new ComponentName(context, context.getClass()),
                     PackageManager.GET_META_DATA).metaData;
         } catch (PackageManager.NameNotFoundException e) {
             // Will only happen if the package provided (the one we are running in) is not

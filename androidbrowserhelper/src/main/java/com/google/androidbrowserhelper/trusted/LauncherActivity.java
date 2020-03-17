@@ -262,14 +262,7 @@ public class LauncherActivity extends AppCompatActivity {
 
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {
-            return (context, twaBuilder, providerPackage, completionCallback) -> {
-                Intent intent = WebViewFallbackActivity.createLaunchIntent(LauncherActivity.this,
-                        twaBuilder.getUri(), LauncherActivityMetadata.parse(LauncherActivity.this));
-                context.startActivity(intent);
-                if (completionCallback != null) {
-                    completionCallback.run();
-                }
-            };
+            return TwaLauncher.WEBVIEW_FALLBACK_STRATEGY;
         }
         return TwaLauncher.CCT_FALLBACK_STRATEGY;
     }

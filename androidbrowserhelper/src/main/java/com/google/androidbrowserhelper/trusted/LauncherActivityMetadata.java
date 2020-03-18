@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -96,6 +97,13 @@ public class LauncherActivityMetadata {
     private static final String METADATA_ADDITIONAL_TRUSTED_ORIGINS =
             "android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS";
 
+    /**
+     * Which kind of fallback strategy to use when Trusted Web Activity is not available. Possible
+     * values are "customtabs" and "webview". An unknown value will trigger the customtabs fallback.
+     */
+    private static final String METADATA_FALLBACK_STRATEGY =
+            "android.support.customtabs.trusted.FALLBACK_STRATEGY";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -108,6 +116,7 @@ public class LauncherActivityMetadata {
     @Nullable public final String fileProviderAuthority;
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final List<String> additionalTrustedOrigins;
+    @Nullable public final String fallbackStrategyType;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -130,17 +139,18 @@ public class LauncherActivityMetadata {
         } else {
             additionalTrustedOrigins = null;
         }
+        fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
     }
 
     /**
      * Creates LauncherActivityMetadata instance based on metadata of the passed Activity.
      */
-    public static LauncherActivityMetadata parse(Activity activity) {
-        Resources resources = activity.getResources();
+    public static LauncherActivityMetadata parse(Context context) {
+        Resources resources = context.getResources();
         Bundle metaData = null;
         try {
-            metaData = activity.getPackageManager().getActivityInfo(
-                    new ComponentName(activity, activity.getClass()),
+            metaData = context.getPackageManager().getActivityInfo(
+                    new ComponentName(context, context.getClass()),
                     PackageManager.GET_META_DATA).metaData;
         } catch (PackageManager.NameNotFoundException e) {
             // Will only happen if the package provided (the one we are running in) is not

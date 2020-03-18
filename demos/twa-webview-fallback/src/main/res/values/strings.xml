@@ -19,12 +19,25 @@
         <item>https://pm5-monitor-c63a2.firebaseapp.com/</item>
         <item>https://jakearchibald.github.io/</item>
     </string-array>
+
     <string name="asset_statements">
         [{
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
             \"target\": {
                 \"namespace\": \"web\",
                 \"site\": \"https://pwa-directory.appspot.com/\"}
+        }],
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://pm5-monitor-c63a2.firebaseapp.com/\"}
+        }],
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://jakearchibald.github.io/\"}
         }]
     </string>
     <string name="provider_authority">

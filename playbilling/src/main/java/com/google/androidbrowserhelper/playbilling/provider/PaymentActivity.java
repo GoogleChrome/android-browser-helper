@@ -74,7 +74,7 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
         finish();
     }
 
-    private Intent resultsIntent() {
+    private static Intent resultsIntent() {
         Intent intent = new Intent();
         intent.putExtra("methodName", METHOD_NAME);
         intent.putExtra("details", DETAILS);

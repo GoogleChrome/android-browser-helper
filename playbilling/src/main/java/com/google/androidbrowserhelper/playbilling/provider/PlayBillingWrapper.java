@@ -16,6 +16,9 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
+/**
+ * A {@link BillingWrapper} that communicates with the Play Billing libraries.
+ */
 public class PlayBillingWrapper implements BillingWrapper {
     private final Activity mActivity;
     private final Listener mListener;

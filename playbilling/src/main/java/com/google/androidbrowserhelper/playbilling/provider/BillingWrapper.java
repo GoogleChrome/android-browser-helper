@@ -7,7 +7,7 @@ import java.util.List;
 import androidx.annotation.Nullable;
 
 /**
- * Wraps communication with Play Billing to provider a simpler interface and allowing mocking in
+ * Wraps communication with Play Billing to provide a simpler interface and allowing mocking in
  * tests.
  */
 interface BillingWrapper {

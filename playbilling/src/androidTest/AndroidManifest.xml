@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.androidbrowserhelper.playbilling">
+
+    <application>
+        <activity
+            android:theme="@style/Theme.AppCompat"
+            android:name=".provider.PaymentActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="org.chromium.intent.action.PAY" />
+            </intent-filter>
+
+            <meta-data
+                android:name="org.chromium.default_payment_method_name"
+                android:value="https://beer.conn.dev" />
+        </activity>
+    </application>
+</manifest>

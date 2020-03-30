@@ -1,2 +1,3 @@
 include ':demos:twa-custom-launcher', ':androidbrowserhelper', ':demos:twa-multi-domain', ':playbilling'
 include ':demos:twa-basic', ':demos:twa-webview-fallback'
+include ':demos:payment-provider'

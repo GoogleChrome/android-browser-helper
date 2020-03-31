@@ -24,8 +24,11 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 
 /**
- * Implements a {@link TokenStore} that uses {@link SharedPreferences} as the storage mechanistm
+ * Implements a {@link TokenStore} that uses {@link SharedPreferences} as the storage mechanism
  * for the {@link Token}.
+ * Since it is backed by SharedPreferences, all instances of this class share state (if you call
+ * {@link #setVerifiedProvider} on one, subsequent calls to {@link #load()} on other instances will
+ * return the new value).
  */
 public class SharedPreferencesTokenStore implements TokenStore {
     private static final String SHARED_PREFERENCES_NAME = "com.google.androidbrowserhelper";

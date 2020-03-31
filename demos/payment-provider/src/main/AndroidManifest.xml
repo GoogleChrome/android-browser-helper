@@ -32,6 +32,16 @@
                 android:name="org.chromium.default_payment_method_name"
                 android:value="https://beer.conn.dev" />
         </activity>
+
+        <!-- This service checks who calls it at runtime. -->
+        <service
+            android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentService"
+            android:exported="true"
+            tools:ignore="ExportedService" >
+            <intent-filter>
+                <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

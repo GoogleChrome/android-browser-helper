@@ -1,5 +1,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.util.Log;
+
 import com.android.billingclient.api.SkuDetails;
 
 import java.util.List;

@@ -1,6 +1,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,13 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ComponentName component = getCallingActivity();
+        if (component == null ||
+                !PaymentVerifier.shouldAllowPayments(this, component.getPackageName(), TAG)) {
+            failed();
+            return;
+        }
 
         mWrapper = BillingWrapperFactory.get(this, this);
         mWrapper.connect();

@@ -16,6 +16,27 @@ With this relationship set up, when the user presses the pay button on the websi
 will try to launch the `PaymentProviderActivity` (defined in our `playbilling` module and included
 in this app's `AndroidManifest.xml`).
 
+## Restricting use to Trusted Web Activity
+
+Along with the Payment Activity, this demo includes the `IsReadyToPayService`.
+The purpose of this service is to answer `org.chromium.intent.action.IS_READY_TO_PAY` Intents and
+tell the browser whether the app is willing to take payments.
+
+For other apps accepting payments, this step may not be necessary and they could be willing to
+accept payments at any time.
+However, for Trusted Web Activities, they should also only respond to requests from the browser that is showing the Trusted Web Activity.
+
+A Trusted Web Activity could turn this behaviour off if they wanted to act as a Payment Provider
+to other apps as well, although that should be a choice made by the developer.
+They would also have to encode a whitelist of applications they will accept payment
+requests from (we get around this by only allowing the browser displaying the Trusted Web
+Activity).
+
+If the Service returns no, then the Activity will finish itself immediately with
+`Activity.RESULT_CANCELED`.
+(This will also occur if the Activity is launched through `startActivity`, not
+`startActivityForResult`.)
+
 ## Current State
 
 At the moment, the Activity will launch and attempt to buy one of Play Billing's
@@ -36,3 +57,8 @@ could try:
 
 * See if you app appears in Chrome's Settings under *Payment Methods > Payment apps*.
 * Ensure the package name in `manifest.json` matches that in your `build.gradle`.
+
+## Links
+
+* [Docs on creating an Android Payment App](https://developers.google.com/web/fundamentals/payments/payment-apps-developer-guide/android-payment-apps).
+* [Sample Android Payment App](https://github.com/GoogleChromeLabs/android-web-payment).

@@ -43,7 +43,6 @@ public class WrapperActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         sResultCode = resultCode;
-        Log.d("Peter", "Finishing");
         finish();
         sFinishLatch.countDown();
     }

@@ -23,25 +23,21 @@ public class MockBillingWrapper implements BillingWrapper {
 
     @Override
     public void connect() {
-        Log.d("Peter", "a");
         mConnectLatch.countDown();
     }
 
     @Override
     public void querySkuDetails(List<String> skus) {
-        Log.d("Peter", "b");
         mQuerySkuDetailsLatch.countDown();
     }
 
     @Override
     public List<SkuDetails> getSkuDetailsList() {
-        Log.d("Peter", "c");
         return mSkuDetailsList;
     }
 
     @Override
     public boolean launchPaymentFlow(SkuDetails sku) {
-        Log.d("Peter", "d");
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }

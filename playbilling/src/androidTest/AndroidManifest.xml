@@ -21,8 +21,7 @@
             android:exported="true"
             android:theme="@style/Theme.AppCompat" />
 
-        <service
-            android:name=".provider.IsReadyToPayService">
+        <service android:name=".provider.PaymentService">
         </service>
     </application>
 </manifest>

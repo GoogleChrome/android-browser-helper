@@ -2,13 +2,12 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.google.androidbrowserhelper.playbilling.IIsReadyToPayService;
-import com.google.androidbrowserhelper.playbilling.IIsReadyToPayServiceCallback;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 
+import org.chromium.IsReadyToPayService;
+import org.chromium.IsReadyToPayServiceCallback;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -27,22 +26,21 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
- * Tests for {@link IsReadyToPayService}.
- *
+ * Tests for {@link PaymentService}.
  */
 @RunWith(AndroidJUnit4.class)
-public class IsReadyToPayServiceTest {
+public class PaymentServiceTest {
     @Rule
     public ServiceTestRule mServiceTestRule = new ServiceTestRule();
 
     private Context mContext;
-    private IIsReadyToPayService mService;
+    private IsReadyToPayService mService;
     private SharedPreferencesTokenStore mTokenStore;
 
     private CountDownLatch mServiceIsReadyToPayLatch = new CountDownLatch(1);
     private CountDownLatch mServiceIsNotReadyToPayLatch = new CountDownLatch(1);
-    private IIsReadyToPayServiceCallback mServiceCallback =
-            new IIsReadyToPayServiceCallback.Stub() {
+    private IsReadyToPayServiceCallback mServiceCallback =
+            new IsReadyToPayServiceCallback.Stub() {
         @Override
         public void handleIsReadyToPay(boolean isReadyToPay) throws RemoteException {
             if (isReadyToPay) {
@@ -59,10 +57,10 @@ public class IsReadyToPayServiceTest {
         mTokenStore = new SharedPreferencesTokenStore(mContext);
 
         Intent intent = new Intent();
-        intent.setClass(mContext, IsReadyToPayService.class);
+        intent.setClass(mContext, PaymentService.class);
 
         try {
-            mService = IIsReadyToPayService.Stub.asInterface(mServiceTestRule.bindService(intent));
+            mService = IsReadyToPayService.Stub.asInterface(mServiceTestRule.bindService(intent));
         } catch (TimeoutException e) {
             fail();
         }

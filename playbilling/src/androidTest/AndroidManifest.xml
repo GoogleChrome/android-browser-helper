@@ -3,9 +3,9 @@
 
     <application>
         <activity
-            android:theme="@style/Theme.AppCompat"
             android:name=".provider.PaymentActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat">
 
             <intent-filter>
                 <action android:name="org.chromium.intent.action.PAY" />
@@ -15,6 +15,11 @@
                 android:name="org.chromium.default_payment_method_name"
                 android:value="https://beer.conn.dev" />
         </activity>
+
+        <activity
+            android:name=".provider.WrapperActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat" />
 
         <service
             android:name=".provider.IsReadyToPayService">

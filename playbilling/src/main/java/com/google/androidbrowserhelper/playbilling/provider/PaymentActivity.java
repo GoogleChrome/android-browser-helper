@@ -29,7 +29,12 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO: Add check to PaymentVerifier#shouldAllowPayments here.
+        ComponentName component = getCallingActivity();
+        if (component == null ||
+                !PaymentVerifier.shouldAllowPayments(this, component.getPackageName(), TAG)) {
+            failed();
+            return;
+        }
 
         mWrapper = BillingWrapperFactory.get(this, this);
         mWrapper.connect();

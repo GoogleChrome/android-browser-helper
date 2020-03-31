@@ -15,5 +15,9 @@
                 android:name="org.chromium.default_payment_method_name"
                 android:value="https://beer.conn.dev" />
         </activity>
+
+        <service
+            android:name=".provider.IsReadyToPayService">
+        </service>
     </application>
 </manifest>

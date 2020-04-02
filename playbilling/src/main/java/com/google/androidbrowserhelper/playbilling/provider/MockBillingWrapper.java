@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.Nullable;
+
 /**
  * A {@link BillingWrapper} that can be be controlled for tests.
  */
 public class MockBillingWrapper implements BillingWrapper {
     private Listener mListener;
 
+    private List<String> mQueriedSkuDetails;
     private List<SkuDetails> mSkuDetailsList;
     private boolean mPaymentFlowSuccessful;
 
@@ -28,6 +31,7 @@ public class MockBillingWrapper implements BillingWrapper {
 
     @Override
     public void querySkuDetails(List<String> skus) {
+        mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
     }
 
@@ -80,6 +84,10 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public void setPaymentFlowWillBeSuccessful(boolean successful) {
         mPaymentFlowSuccessful = successful;
+    }
+
+    public List<String> getQueriedSkuDetails() {
+        return mQueriedSkuDetails;
     }
 
     private static boolean wait(CountDownLatch latch) throws InterruptedException {

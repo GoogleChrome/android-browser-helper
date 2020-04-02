@@ -1,14 +1,12 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.android.billingclient.api.SkuDetails;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
@@ -17,22 +15,29 @@ import androidx.appcompat.app.AppCompatActivity;
 public class PaymentActivity extends AppCompatActivity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
 
-    private final static List<String> ALL_SKUS = Arrays.asList(
-            "android.test.purchased", "android.test.canceled", "android.test.item_unavailable");
-
     private static final String METHOD_NAME = "https://beer.conn.dev";
-    private static final String DETAILS = "{}";
 
     private BillingWrapper mWrapper;
+    private MethodData mMethodData;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ComponentName component = getCallingActivity();
-        if (component == null ||
-                !PaymentVerifier.shouldAllowPayments(this, component.getPackageName(), TAG)) {
-            failed();
+        if (component == null) {
+            fail("Must be launched with startActivityForResult.");
+            return;
+        }
+
+        if (!PaymentVerifier.shouldAllowPayments(this, component.getPackageName(), TAG)) {
+            fail("Launching app is not verified.");
+            return;
+        }
+
+        mMethodData = MethodData.fromIntent(getIntent());
+        if (mMethodData == null) {
+            fail("Could not parse SKU.");
             return;
         }
 
@@ -42,13 +47,12 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
 
     @Override
     public void onDisconnected() {
-        Log.d(TAG, "Billing Client disconnected.");
-        failed();
+        fail("BillingClient disconnected.");
     }
 
     @Override
     public void onConnected() {
-        mWrapper.querySkuDetails(ALL_SKUS);
+        mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku));
     }
 
     @Override
@@ -56,36 +60,31 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
         List<SkuDetails> details = mWrapper.getSkuDetailsList();
 
         if (details == null || details.isEmpty()) {
-            Log.w(TAG, "No SKUs returned.");
-            failed();
+            fail("Play Billing returned did not find SKUs.");
             return;
         }
 
         if (mWrapper.launchPaymentFlow(mWrapper.getSkuDetailsList().get(0))) return;
 
-        Log.w(TAG, "Payment attempt failed (have you already bought it?).");
-        failed();
+        fail("Payment attempt failed (have you already bought the item?).");
     }
 
     @Override
     public void onPurchasesUpdated() {
-        paid();
+        setResultAndFinish(PaymentResult.success());
     }
 
-    private void paid() {
-        setResult(Activity.RESULT_OK, resultsIntent());
-        finish();
+    private void fail(String reason) {
+        setResultAndFinish(PaymentResult.failure(reason));
     }
 
-    private void failed() {
-        setResult(Activity.RESULT_CANCELED, resultsIntent());
-        finish();
-    }
+    private void setResultAndFinish(PaymentResult result) {
+        result.log();
 
-    private static Intent resultsIntent() {
         Intent intent = new Intent();
         intent.putExtra("methodName", METHOD_NAME);
-        intent.putExtra("details", DETAILS);
-        return intent;
+        intent.putExtra("details", result.getDetails());
+        setResult(result.getActivityResult(), intent);
+        finish();
     }
 }

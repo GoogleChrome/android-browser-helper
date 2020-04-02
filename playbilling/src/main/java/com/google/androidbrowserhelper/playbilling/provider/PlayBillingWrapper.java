@@ -68,13 +68,10 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .setType(BillingClient.SkuType.INAPP)
                 .build();
 
-        mClient.querySkuDetailsAsync(params, new SkuDetailsResponseListener() {
-            @Override
-            public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> list) {
-                // TODO: Check result
-                mSkuDetailsList = list;
-                mListener.onGotSkuDetails();
-            }
+        mClient.querySkuDetailsAsync(params, (billingResult, list) -> {
+            // TODO: Check result
+            mSkuDetailsList = list;
+            mListener.onGotSkuDetails();
         });
     }
 

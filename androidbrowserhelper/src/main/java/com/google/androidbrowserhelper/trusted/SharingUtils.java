@@ -47,12 +47,14 @@ public class SharingUtils {
         if (!Intent.ACTION_SEND.equals(action) && !Intent.ACTION_SEND_MULTIPLE.equals(action)) {
             return null;
         }
-        List<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-        if (uris == null) {
+        List<Uri> uris = null;
+        if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
             if (uri != null) {
                 uris = Collections.singletonList(uri);
             }
+        } else {
+            uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
         }
         return new ShareData(intent.getStringExtra(Intent.EXTRA_SUBJECT),
                 intent.getStringExtra(Intent.EXTRA_TEXT), uris);

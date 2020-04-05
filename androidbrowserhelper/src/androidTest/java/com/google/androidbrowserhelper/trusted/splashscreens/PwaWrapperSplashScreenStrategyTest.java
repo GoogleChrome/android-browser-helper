@@ -155,17 +155,17 @@ public class PwaWrapperSplashScreenStrategyTest {
         strategy.configureTwaBuilder(builder, mSession, latch::countDown);
         assertTrue(latch.await(3, TimeUnit.SECONDS));
 
-        Intent intent = builder.build(mSession);
+        Intent intent = builder.build(mSession).getIntent();
         Bundle bundle = intent.getBundleExtra(EXTRA_SPLASH_SCREEN_PARAMS);
 
-        assertEquals(bgColor, bundle.getInt(SplashScreenParamKey.BACKGROUND_COLOR));
-        assertEquals(scaleType.ordinal(), bundle.getInt(SplashScreenParamKey.SCALE_TYPE));
-        assertEquals(fadeOutDuration, bundle.getInt(SplashScreenParamKey.FADE_OUT_DURATION_MS));
+        assertEquals(bgColor, bundle.getInt(SplashScreenParamKey.KEY_BACKGROUND_COLOR));
+        assertEquals(scaleType.ordinal(), bundle.getInt(SplashScreenParamKey.KEY_SCALE_TYPE));
+        assertEquals(fadeOutDuration, bundle.getInt(SplashScreenParamKey.KEY_FADE_OUT_DURATION_MS));
 
         float[] matrixValues = new float[9];
         matrix.getValues(matrixValues);
         assertArrayEquals(matrixValues, bundle.getFloatArray(
-                SplashScreenParamKey.IMAGE_TRANSFORMATION_MATRIX), 1e-3f);
+                SplashScreenParamKey.KEY_IMAGE_TRANSFORMATION_MATRIX), 1e-3f);
     }
 
     @Test

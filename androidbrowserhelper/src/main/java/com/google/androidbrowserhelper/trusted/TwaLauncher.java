@@ -232,8 +232,10 @@ public class TwaLauncher {
 
     private void launchWhenSplashScreenReady(TrustedWebActivityIntentBuilder builder,
             @Nullable Runnable completionCallback) {
-        if (mDestroyed) {
-            return;  // Destroyed while preparing the splash screen (e.g. user closed the app).
+        if (mDestroyed || mSession == null) {
+            return;  // Service was disconnected and / or TwaLauncher was destroyed while preparing
+                     // the splash screen (e.g. user closed the app). See https://crbug.com/1052367
+                     // for further details.
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
         Intent intent = builder.build(mSession).getIntent();

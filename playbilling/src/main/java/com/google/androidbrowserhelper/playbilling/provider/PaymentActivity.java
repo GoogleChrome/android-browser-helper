@@ -3,7 +3,9 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
+import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.SkuDetails;
 
 import java.util.Collections;
@@ -70,8 +72,12 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
     }
 
     @Override
-    public void onPurchasesUpdated() {
-        setResultAndFinish(PaymentResult.success());
+    public void onPurchaseFlowComplete(int result) {
+        if (result == BillingClient.BillingResponseCode.OK) {
+            setResultAndFinish(PaymentResult.success("success"));
+        } else {
+            fail("Purchase flow ended with result: " + result);
+        }
     }
 
     private void fail(String reason) {

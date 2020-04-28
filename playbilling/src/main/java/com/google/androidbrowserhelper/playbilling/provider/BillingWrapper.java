@@ -25,7 +25,7 @@ interface BillingWrapper {
         void onGotSkuDetails();
 
         /** Will be called after a call to {@link #launchPaymentFlow} that returns {@code true}. */
-        void onPurchasesUpdated();
+        void onPurchaseFlowComplete(int result);
     }
 
     /** Connect to the Play Billing client. */
@@ -44,8 +44,8 @@ interface BillingWrapper {
     List<SkuDetails> getSkuDetailsList();
 
     /**
-     * Launches the Payment Flow. If it returns {@code true}, {@link Listener#onPurchasesUpdated()}
-     * should be called.
+     * Launches the Payment Flow. If it returns {@code true},
+     * {@link Listener#onPurchaseFlowComplete} should be called.
      */
     boolean launchPaymentFlow(SkuDetails sku);
 }

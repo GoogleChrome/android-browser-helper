@@ -10,7 +10,6 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class PlayBillingWrapper implements BillingWrapper {
             new PurchasesUpdatedListener() {
         @Override
         public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
-            mListener.onPurchasesUpdated();
+            mListener.onPurchaseFlowComplete(billingResult.getResponseCode());
         }
     };
 

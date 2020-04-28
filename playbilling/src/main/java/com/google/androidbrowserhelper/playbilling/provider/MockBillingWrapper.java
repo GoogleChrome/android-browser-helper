@@ -2,6 +2,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.util.Log;
 
+import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.SkuDetails;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnPurchasesUpdated() {
-        mListener.onPurchasesUpdated();
+        mListener.onPurchaseFlowComplete(BillingClient.BillingResponseCode.OK);
     }
 
     public boolean waitForConnect() throws InterruptedException {

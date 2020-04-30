@@ -46,7 +46,7 @@ public class NotificationDelegationService extends DelegationService {
             Notification.Builder builder =
                     Notification.Builder.recoverBuilder(this, notification);
 
-            // From Android O and above, the sound is set on the Channel instad of the notification.
+            // From Android O and above, the sound is set on the Channel instead of the notification.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 builder.setChannelId(channelName);
                 NotificationChannel channel = new NotificationChannel(

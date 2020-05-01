@@ -34,10 +34,10 @@ public class NotificationDelegationService extends DelegationService {
             int platformId,
             @NonNull Notification notification,
             @NonNull String channelName) {
-        NotificationManager mNotificationManager = (NotificationManager) getApplicationContext()
-                .getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Uri alarmSound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+        Uri airhornUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
                 this.getPackageName() + "/" + R.raw.airhorn);
 
         // Notification.Builder.recoverBuilder() was introduce in Nougat, so we prefer it when
@@ -49,20 +49,27 @@ public class NotificationDelegationService extends DelegationService {
             // From Android O and above, the sound is set on the Channel instad of the notification.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 builder.setChannelId(channelName);
+
+                // The first parameter of the call below is an ID for the channel and the second
+                // is a human readable string for the name. We're using the same value for both
+                // in this example.
                 NotificationChannel channel = new NotificationChannel(
                         channelName, channelName, NotificationManager.IMPORTANCE_HIGH);
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                         .build();
-                channel.setSound(alarmSound, audioAttributes);
+                channel.setSound(airhornUri, audioAttributes);
+
+                // Warning: NotificationChannels are immutable. This call will create a notification
+                // channel if one does not already exist, but it won't update an existing one.
                 mNotificationManager.createNotificationChannel(channel);
             }
 
-            builder.setSound(alarmSound);
+            builder.setSound(airhornUri);
             notification = builder.build();
         } else {
-            notification.sound = alarmSound;
+            notification.sound = airhornUri;
         }
 
         mNotificationManager.notify(platformTag, platformId, notification);

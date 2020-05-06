@@ -104,6 +104,13 @@ public class LauncherActivityMetadata {
     private static final String METADATA_FALLBACK_STRATEGY =
             "android.support.customtabs.trusted.FALLBACK_STRATEGY";
 
+    /**
+     * The display mode to use when launching the Trusted Web Activity. Possible values are
+     * "default", "immersive" and "sticky-immersive".
+     */
+    private static final String METADATA_DISPLAY_MODE =
+            "android.support.customtabs.trusted.DISPLAY_MODE";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -117,6 +124,7 @@ public class LauncherActivityMetadata {
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
+    @Nullable public final String displayMode;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -140,6 +148,7 @@ public class LauncherActivityMetadata {
             additionalTrustedOrigins = null;
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
+        displayMode = metaData.getString(METADATA_DISPLAY_MODE);
     }
 
     /**

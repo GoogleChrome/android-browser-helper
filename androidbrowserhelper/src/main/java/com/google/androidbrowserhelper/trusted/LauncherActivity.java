@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.trusted;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -26,11 +27,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
+
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -148,7 +152,8 @@ public class LauncherActivity extends AppCompatActivity {
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
                         .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                         .setColorSchemeParams(
-                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme);
+                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
+                        .setDisplayMode(getDisplayMode());
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
@@ -265,6 +270,26 @@ public class LauncherActivity extends AppCompatActivity {
             return TwaLauncher.WEBVIEW_FALLBACK_STRATEGY;
         }
         return TwaLauncher.CCT_FALLBACK_STRATEGY;
+    }
+
+    protected TrustedWebActivityDisplayMode getDisplayMode() {
+        if (mMetadata.displayMode == null) {
+            return new TrustedWebActivityDisplayMode.DefaultMode();
+        }
+
+        switch (mMetadata.displayMode) {
+            case "immersive": {
+                return new TrustedWebActivityDisplayMode.ImmersiveMode(
+                        false, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+            }
+            case "sticky-immersive": {
+                return new TrustedWebActivityDisplayMode.ImmersiveMode(
+                        true, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+            }
+            default: {
+                return new TrustedWebActivityDisplayMode.DefaultMode();
+            }
+        }
     }
 
     private boolean restartInNewTask() {

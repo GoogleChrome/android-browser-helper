@@ -23,9 +23,12 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 
 /**
  * Parses and holds on to metadata parameters associated with {@link LauncherActivity}.
@@ -124,7 +127,7 @@ public class LauncherActivityMetadata {
     public final int splashScreenFadeOutDurationMillis;
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
-    @Nullable public final String displayMode;
+    public final TrustedWebActivityDisplayMode displayMode;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -148,7 +151,16 @@ public class LauncherActivityMetadata {
             additionalTrustedOrigins = null;
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
-        displayMode = metaData.getString(METADATA_DISPLAY_MODE);
+        displayMode = getDisplayMode(metaData);
+    }
+
+    private static TrustedWebActivityDisplayMode getDisplayMode(@NonNull Bundle metaData) {
+        String displayMode = metaData.getString(METADATA_DISPLAY_MODE);
+        if ("immersive".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.ImmersiveMode(
+                    false, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+        }
+        return new TrustedWebActivityDisplayMode.DefaultMode();
     }
 
     /**

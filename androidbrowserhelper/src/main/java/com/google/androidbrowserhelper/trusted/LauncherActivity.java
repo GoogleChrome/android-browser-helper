@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.trusted;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -26,11 +27,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
+
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -148,7 +152,8 @@ public class LauncherActivity extends AppCompatActivity {
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
                         .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                         .setColorSchemeParams(
-                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme);
+                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
+                        .setDisplayMode(getDisplayMode());
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
@@ -260,11 +265,31 @@ public class LauncherActivity extends AppCompatActivity {
         return Uri.parse("https://www.example.com/");
     }
 
+    /**
+     * Returns the fallback strategy to be used if there's no Trusted Web Activity support on the
+     * device. By default, used the "android.support.customtabs.trusted.DEFAULT_URL" metadata from
+     * the manifest. If the value is not present, it uses a CustomTabs fallback.
+     *
+     * Override this for creating a custom fallback approach, such as launching a different WebView
+     * fallback implementation ot starting a native Activity.
+     */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {
             return TwaLauncher.WEBVIEW_FALLBACK_STRATEGY;
         }
         return TwaLauncher.CCT_FALLBACK_STRATEGY;
+    }
+
+    /**
+     * Returns the display mode the TrustedWebWebActivity should be launched with. Defaults to the
+     * "android.support.customtabs.trusted.DISPLAY_MODE" metadata from the manifest or the "default"
+     * mode if the metadata is not present.
+     *
+     * Override this for starting the Trusted Web Activity with different display mode, with special
+     * handling of screen cut-outs, for instance.
+     */
+    protected TrustedWebActivityDisplayMode getDisplayMode() {
+        return this.mMetadata.displayMode;
     }
 
     private boolean restartInNewTask() {

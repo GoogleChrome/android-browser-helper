@@ -155,12 +155,13 @@ public class TwaProviderPicker {
      * supports.
      */
     public static Action pickProvider(
-            PackageManager pm, @Nullable Uri appStartUri, @Nullable String ownPackageName) {
+            PackageManager pm, @Nullable Uri appStartUri) {
         String bestCctProvider = null;
         String bestBrowserProvider = null;
 
         // First we query for browser applications - or applications that handle browser Intents.
-        List<ResolveInfo> possibleProviders = queryPackageManager(pm, Uri.parse("https://"));
+        // TODO(peconn): Should we use "https://" instead?
+        List<ResolveInfo> possibleProviders = queryPackageManager(pm, Uri.parse("http://"));
 
         // If a startUri is defined, we query for applications that can handle it and use the
         // intersection of both groups as handlers for this app.
@@ -173,9 +174,6 @@ public class TwaProviderPicker {
 
         for (ResolveInfo possibleProvider : possibleProviders) {
             String providerName = possibleProvider.activityInfo.packageName;
-            if (ownPackageName != null && ownPackageName.equals(providerName)) {
-                continue;
-            }
 
             @LaunchMode int launchMode = customTabsServices.containsKey(providerName)
                     ? customTabsServices.get(providerName) : LaunchMode.BROWSER;
@@ -210,7 +208,7 @@ public class TwaProviderPicker {
      * supports.
      */
     public static Action pickProvider(PackageManager pm) {
-        return pickProvider(pm, null, null);
+        return pickProvider(pm, null);
     }
 
     /**

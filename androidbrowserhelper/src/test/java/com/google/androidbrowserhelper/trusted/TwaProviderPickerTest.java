@@ -66,6 +66,7 @@ public class TwaProviderPickerTest {
     private static final String CHROME = "com.android.chrome";
     private static final int CHROME_72_VERSION = 362600000;
     private static final int CHROME_71_VERSION = 357800000;
+    private static final Uri START_URI = Uri.parse("https://example.com");
 
     @Before
     public void setUp() {
@@ -179,17 +180,57 @@ public class TwaProviderPickerTest {
         assertEquals(TWA_PROVIDER1, action.provider);
     }
 
-    private void installBrowser(String packageName) {
+    /**
+     * Tests that if startUri is defined, a browser that handles both browser Intents and Intents
+     * that handle startUrl is chosen.
+     */
+    @Test
+    public void choosesChromeWhenStartUriIsDefined() {
+        installChrome(CHROME_72_VERSION);
+        installIntentHandler(START_URI, CHROME);
+        TwaProviderPicker.Action action =
+                TwaProviderPicker.pickProvider(mPackageManager, START_URI);
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+    }
+
+    /**
+     * Tests that an that application declares to handle browser Intents but doesn't handle startUri
+     * Intents is ignored.
+     */
+    @Test
+    public void ignoresBrowsersThatDontHandleStartUri() {
+        installBrowser(BROWSER1);
+        TwaProviderPicker.Action action =
+                TwaProviderPicker.pickProvider(mPackageManager, START_URI);
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertNull(action.provider);
+    }
+
+    /**
+     * Tests that an that application that handles startUri but not browser Intents is ignored.
+     */
+    @Test
+    public void ignoresStartUriHandlersThatAreNotBrowsers() {
+        installIntentHandler(START_URI, BROWSER1);
+        TwaProviderPicker.Action action =
+                TwaProviderPicker.pickProvider(mPackageManager, START_URI);
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertNull(action.provider);
+    }
+
+    private void installIntentHandler(Uri intentData, String packageName) {
         Intent intent = new Intent()
-                .setData(Uri.parse("http://"))
+                .setData(intentData)
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE);
-
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.packageName = packageName;
-
         mShadowPackageManager.addResolveInfoForIntent(intent, resolveInfo);
+    }
+
+    private void installBrowser(String packageName) {
+        installIntentHandler(Uri.parse("http://"), packageName);
     }
 
     private void installCustomTabsProvider(String packageName) {

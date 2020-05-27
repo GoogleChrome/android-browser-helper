@@ -96,16 +96,11 @@ public class TwaProviderPicker {
         }
     }
 
-    /**
-     * Chooses an appropriate provider (see class description) and the launch mode that browser
-     * supports.
-     */
-    public static Action pickProvider(PackageManager pm) {
-        // TODO(peconn): Should we use "https://" instead?
+    public static Action pickProvider(PackageManager pm, Uri dataUri) {
         Intent queryBrowsersIntent = new Intent()
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE)
-                .setData(Uri.parse("http://"));
+                .setData(dataUri);
 
         if (sPackageNameForTesting != null) {
             queryBrowsersIntent.setPackage(sPackageNameForTesting);
@@ -169,6 +164,15 @@ public class TwaProviderPicker {
 
         Log.d(TAG, "Found no TWA providers, using first browser: " + bestBrowserProvider);
         return new Action(LaunchMode.BROWSER, bestBrowserProvider);
+    }
+
+    /**
+     * Chooses an appropriate provider (see class description) and the launch mode that browser
+     * supports.
+     */
+    public static Action pickProvider(PackageManager pm) {
+        // TODO(peconn): Should we use "https://" instead?
+        return pickProvider(pm, Uri.parse("http://"));
     }
 
     /**

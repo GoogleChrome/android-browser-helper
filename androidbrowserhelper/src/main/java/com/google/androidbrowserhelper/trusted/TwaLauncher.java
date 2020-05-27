@@ -95,17 +95,18 @@ public class TwaLauncher {
      * Creates an instance that will automatically choose the browser to launch a TWA in.
      * If no browser supports TWA, will launch a usual Custom Tab (see {@link TwaProviderPicker}.
      */
-    public TwaLauncher(Context context) {
-        this(context, null);
+    public TwaLauncher(Context context, Uri launchUri) {
+        this(context, null, launchUri);
     }
 
     /**
      * Same as above, but also allows to specify a browser to launch. If specified, it is assumed to
      * support TWAs.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage) {
+    public TwaLauncher(Context context, @Nullable String providerPackage, Uri launchUri) {
         this(context, providerPackage, DEFAULT_SESSION_ID,
-                new SharedPreferencesTokenStore(context));
+                new SharedPreferencesTokenStore(context),
+                launchUri);
     }
 
     /**
@@ -113,7 +114,7 @@ public class TwaLauncher {
      * task.
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
-                       SharedPreferencesTokenStore tokenStore) {
+                       SharedPreferencesTokenStore tokenStore, Uri launchUri) {
         mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;

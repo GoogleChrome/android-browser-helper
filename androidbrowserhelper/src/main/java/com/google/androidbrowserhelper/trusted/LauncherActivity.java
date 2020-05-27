@@ -159,7 +159,7 @@ public class LauncherActivity extends AppCompatActivity {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
-        mTwaLauncher = new TwaLauncher(this);
+        mTwaLauncher = new TwaLauncher(this, Uri.parse(mMetadata.defaultUrl));
         mTwaLauncher.launch(twaBuilder,
                 mSplashScreenStrategy,
                 () -> mBrowserWasLaunched = true,

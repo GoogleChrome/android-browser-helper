@@ -26,6 +26,8 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
+import androidx.browser.trusted.Token;
+import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
 
@@ -80,7 +82,7 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
-    private SharedPreferencesTokenStore mTokenStore;
+    private TokenStore mTokenStore;
 
     private boolean mDestroyed;
 
@@ -114,7 +116,7 @@ public class TwaLauncher {
      * task.
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
-                       SharedPreferencesTokenStore tokenStore, Uri launchUri) {
+                               TokenStore tokenStore, Uri launchUri) {
         mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;
@@ -245,7 +247,7 @@ public class TwaLauncher {
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        mTokenStore.setVerifiedProvider(mProviderPackage, mContext.getPackageManager());
+        mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
 
         if (completionCallback != null) {
             completionCallback.run();

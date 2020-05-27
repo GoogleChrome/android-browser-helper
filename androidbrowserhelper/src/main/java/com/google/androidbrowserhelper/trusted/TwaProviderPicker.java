@@ -96,7 +96,12 @@ public class TwaProviderPicker {
         }
     }
 
-    public static Action pickProvider(PackageManager pm, Uri dataUri) {
+    /**
+     * Chooses an appropriate provider (see class description) and the launch mode that browser
+     * supports.
+     */
+    public static Action pickProvider(
+            PackageManager pm, Uri dataUri, @Nullable String ownPackageName) {
         Intent queryBrowsersIntent = new Intent()
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE)
@@ -137,6 +142,9 @@ public class TwaProviderPicker {
 
         for (ResolveInfo possibleProvider : possibleProviders) {
             String providerName = possibleProvider.activityInfo.packageName;
+            if (ownPackageName != null && ownPackageName.equals(providerName)) {
+                continue;
+            }
 
             @LaunchMode int launchMode = customTabsServices.containsKey(providerName)
                     ? customTabsServices.get(providerName) : LaunchMode.BROWSER;
@@ -172,7 +180,7 @@ public class TwaProviderPicker {
      */
     public static Action pickProvider(PackageManager pm) {
         // TODO(peconn): Should we use "https://" instead?
-        return pickProvider(pm, Uri.parse("http://"));
+        return pickProvider(pm, Uri.parse("http://"), null);
     }
 
     /**

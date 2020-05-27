@@ -88,7 +88,7 @@ public class LaunchTwaActivity extends AppCompatActivity {
      * @param view the source of the event invoking this method.
      */
     public void launch(View view) {
-        TwaLauncher launcher = new TwaLauncher(this);
+        TwaLauncher launcher = new TwaLauncher(this, LAUNCH_URI);
         launcher.launch(LAUNCH_URI);
         launchers.add(launcher);
     }
@@ -105,7 +105,7 @@ public class LaunchTwaActivity extends AppCompatActivity {
                 .setToolbarColor(Color.BLUE);
 
 
-        TwaLauncher launcher = new TwaLauncher(this);
+        TwaLauncher launcher = new TwaLauncher(this, LAUNCH_URI);
         launcher.launch(builder, null, null);
         launchers.add(launcher);
     }
@@ -125,7 +125,7 @@ public class LaunchTwaActivity extends AppCompatActivity {
                 .setAdditionalTrustedOrigins(origins);
 
 
-        TwaLauncher launcher = new TwaLauncher(this);
+        TwaLauncher launcher = new TwaLauncher(this, LAUNCH_URI);
         launcher.launch(builder, null, null);
         launchers.add(launcher);
     }

@@ -119,8 +119,8 @@ public class TwaLauncher {
         mSessionId = sessionId;
         mTokenStore = tokenStore;
         if (providerPackage == null) {
-            TwaProviderPicker.Action action =
-                    TwaProviderPicker.pickProvider(context.getPackageManager());
+            TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(
+                    context.getPackageManager(), launchUri, context.getPackageName());
             mProviderPackage = action.provider;
             mLaunchMode = action.launchMode;
         } else {

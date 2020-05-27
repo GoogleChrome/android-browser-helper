@@ -25,6 +25,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,6 @@ import java.util.Map;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.TrustedWebUtils;
 
 /**
  * Chooses a Browser/Custom Tabs/Trusted Web Activity provider and appropriate launch mode.
@@ -96,27 +96,19 @@ public class TwaProviderPicker {
         }
     }
 
-    /**
-     * Chooses an appropriate provider (see class description) and the launch mode that browser
-     * supports.
-     */
-    public static Action pickProvider(
-            PackageManager pm, Uri dataUri, @Nullable String ownPackageName) {
-        Intent queryBrowsersIntent = new Intent()
+    private static List<ResolveInfo> queryPackageManager(PackageManager pm, Uri uri) {
+        Intent query = new Intent()
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE)
-                .setData(dataUri);
+                .setData(uri);
 
         if (sPackageNameForTesting != null) {
-            queryBrowsersIntent.setPackage(sPackageNameForTesting);
+            query.setPackage(sPackageNameForTesting);
         }
-
-        String bestCctProvider = null;
-        String bestBrowserProvider = null;
 
         // These packages will be in order of Android's preference.
         List<ResolveInfo> possibleProviders
-                = pm.queryIntentActivities(queryBrowsersIntent, PackageManager.MATCH_DEFAULT_ONLY);
+                = pm.queryIntentActivities(query, PackageManager.MATCH_DEFAULT_ONLY);
 
         // According to the documentation, the flag we want to use above is MATCH_DEFAULT_ONLY.
         // This would match all the browsers installed on the user's system whose intent handler
@@ -134,8 +126,47 @@ public class TwaProviderPicker {
         // This will result in the user's default browser being in the list twice, however that
         // shouldn't affect the correctness of the following code.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            possibleProviders.addAll(pm.queryIntentActivities(queryBrowsersIntent,
-                    PackageManager.MATCH_ALL));
+            possibleProviders.addAll(pm.queryIntentActivities(query, PackageManager.MATCH_ALL));
+        }
+
+        return possibleProviders;
+    }
+
+    /**
+     * Returns the intersection of the items on two ResolveInfo lists by packageName.
+     */
+    private static List<ResolveInfo> intersectResolveInfos(
+            List<ResolveInfo> list1, List<ResolveInfo> list2) {
+        List<ResolveInfo> resultsList = new ArrayList<>();
+        for (ResolveInfo r1: list1) {
+            String packageName1 = r1.activityInfo.packageName;
+            for (ResolveInfo r2: list2) {
+                if (packageName1.equals(r2.activityInfo.packageName)) {
+                    resultsList.add(r1);
+                    break;
+                }
+            }
+        }
+        return resultsList;
+    }
+
+    /**
+     * Chooses an appropriate provider (see class description) and the launch mode that browser
+     * supports.
+     */
+    public static Action pickProvider(
+            PackageManager pm, @Nullable Uri appStartUri, @Nullable String ownPackageName) {
+        String bestCctProvider = null;
+        String bestBrowserProvider = null;
+
+        // First we query for browser applications - or applications that handle browser Intents.
+        List<ResolveInfo> possibleProviders = queryPackageManager(pm, Uri.parse("https://"));
+
+        // If a startUri is defined, we query for applications that can handle it and use the
+        // intersection of both groups as handlers for this app.
+        if (appStartUri != null) {
+            List<ResolveInfo> startUrlProviders = queryPackageManager(pm, appStartUri);
+            possibleProviders = intersectResolveInfos(possibleProviders, startUrlProviders);
         }
 
         Map<String, Integer> customTabsServices = getLaunchModesForCustomTabsServices(pm);
@@ -179,8 +210,7 @@ public class TwaProviderPicker {
      * supports.
      */
     public static Action pickProvider(PackageManager pm) {
-        // TODO(peconn): Should we use "https://" instead?
-        return pickProvider(pm, Uri.parse("http://"), null);
+        return pickProvider(pm, null, null);
     }
 
     /**

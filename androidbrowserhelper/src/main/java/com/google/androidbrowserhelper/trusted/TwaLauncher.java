@@ -43,13 +43,18 @@ public class TwaLauncher {
     private static final int DEFAULT_SESSION_ID = 96375;
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
-            (context, twaBuilder, providerPackage, completionCallback) -> {
+            (context, twaBuilder, launchMode, providerPackage, completionCallback) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
         // providers installed.
         CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
-        if (providerPackage != null) {
+
+        // We only set the providerPackage if launch mode is Custom Tabs. This is due to an issue
+        // where non-browser apps are detected as browsers, causing issues upon launch.
+        // See https://github.com/GoogleChrome/android-browser-helper/issues/89 for mode details.
+        if (launchMode == TwaProviderPicker.LaunchMode.CUSTOM_TAB && providerPackage != null) {
             intent.intent.setPackage(providerPackage);
         }
+
         intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {
             completionCallback.run();
@@ -57,7 +62,7 @@ public class TwaLauncher {
     };
 
     public static final FallbackStrategy WEBVIEW_FALLBACK_STRATEGY =
-            (context, twaBuilder, providerPackage, completionCallback) -> {
+            (context, twaBuilder, launchMode, providerPackage, completionCallback) -> {
         Intent intent = WebViewFallbackActivity.createLaunchIntent(context,
                 twaBuilder.getUri(), LauncherActivityMetadata.parse(context));
         context.startActivity(intent);
@@ -82,13 +87,14 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
-    private SharedPreferencesTokenStore mTokenStore;
+    private TokenStore mTokenStore;
 
     private boolean mDestroyed;
 
     public interface FallbackStrategy {
         void launch(Context context,
                     TrustedWebActivityIntentBuilder twaBuilder,
+                    @TwaProviderPicker.LaunchMode int launchMode,
                     @Nullable String providerPackage,
                     @Nullable Runnable completionCallback);
     }
@@ -165,7 +171,8 @@ public class TwaLauncher {
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
             launchTwa(twaBuilder, splashScreenStrategy, completionCallback, fallbackStrategy);
         } else {
-            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
+            fallbackStrategy.launch(
+                    mContext, twaBuilder, mLaunchMode, mProviderPackage, completionCallback);
         }
     }
 
@@ -204,8 +211,10 @@ public class TwaLauncher {
         Runnable onSessionCreationFailedRunnable = () -> {
             // The provider has been unable to create a session for us, we can't launch a
             // Trusted Web Activity. We launch a fallback specially designed to provide the
-            // best user experience.
-            fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
+            // best user experience. We set the LaunchMode as Custom Tabs as browsers that support
+            // TWAs should also support CCT.
+            fallbackStrategy.launch(mContext, twaBuilder, TwaProviderPicker.LaunchMode.CUSTOM_TAB,
+                    mProviderPackage, completionCallback);
         };
 
         if (mServiceConnection == null) {

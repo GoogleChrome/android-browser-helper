@@ -179,9 +179,49 @@ public class TwaProviderPickerTest {
         assertEquals(TWA_PROVIDER1, action.provider);
     }
 
-    private void installBrowser(String packageName) {
+    /**
+     * Tests that if an app that handles http:// but is not a browser is ignored.
+     */
+    @Test
+    public void ignoresNonBrowser() {
+        installNonBrowser(BROWSER1);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertNull(action.provider);
+    }
+
+    /**
+     * Tests that if an app that is a browser is preferred over an app that handles http://
+     * but is not a browser.
+     */
+    @Test
+    public void choosesBrowserOverNonBrowser() {
+        installNonBrowser(BROWSER1);
+        installBrowser(BROWSER2);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertEquals(BROWSER2, action.provider);
+    }
+
+    private void installNonBrowser(String packageName) {
         Intent intent = new Intent()
                 .setData(Uri.parse("http://"))
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE);
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.packageName = packageName;
+
+        mShadowPackageManager.addResolveInfoForIntent(intent, resolveInfo);
+    }
+
+    private void installBrowser(String packageName) {
+        Intent intent = new Intent()
+                .setData(Uri.fromParts("http", "", null))
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE);
 

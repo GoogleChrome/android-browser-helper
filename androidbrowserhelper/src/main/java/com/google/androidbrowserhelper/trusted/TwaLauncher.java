@@ -82,7 +82,7 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
-    private SharedPreferencesTokenStore mTokenStore;
+    private TokenStore mTokenStore;
 
     private boolean mDestroyed;
 

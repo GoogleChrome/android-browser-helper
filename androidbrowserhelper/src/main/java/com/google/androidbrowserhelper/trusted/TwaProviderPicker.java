@@ -101,12 +101,12 @@ public class TwaProviderPicker {
      * supports.
      */
     public static Action pickProvider(PackageManager pm) {
-        // TODO(peconn): Should we use "https://" instead?
+        // Setting the Intent Data as seen at
+        // https://cs.android.com/android/platform/superproject/+/master:packages/apps/PermissionController/src/com/android/packageinstaller/role/model/BrowserRoleBehavior.java
         Intent queryBrowsersIntent = new Intent()
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE)
-                .setData(Uri.parse("http://"));
-
+                .setData(Uri.fromParts("http", "", null));
         if (sPackageNameForTesting != null) {
             queryBrowsersIntent.setPackage(sPackageNameForTesting);
         }

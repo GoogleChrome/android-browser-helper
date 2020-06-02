@@ -26,6 +26,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
+import androidx.browser.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
@@ -42,6 +43,8 @@ public class TwaLauncher {
 
     private static final int DEFAULT_SESSION_ID = 96375;
 
+    private static final String ARC_FEATURE = "org.chromium.arc";
+
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
@@ -49,6 +52,10 @@ public class TwaLauncher {
         CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
         if (providerPackage != null) {
             intent.intent.setPackage(providerPackage);
+        }
+        // Add the TWA flag to the intent if the app is running on ARC++ on Chrome OS.
+        if (context.getPackageManager().hasSystemFeature(ARC_FEATURE)) {
+            intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
         intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {

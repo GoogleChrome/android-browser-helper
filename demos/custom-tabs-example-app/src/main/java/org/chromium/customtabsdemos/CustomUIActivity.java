@@ -17,7 +17,10 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -150,8 +153,7 @@ public class CustomUIActivity extends AppCompatActivity implements View.OnClickL
         }
 
         if (mCustomBackButtonCheckBox.isChecked()) {
-            intentBuilder.setCloseButtonIcon(
-                    BitmapFactory.decodeResource(getResources(), R.drawable.ic_arrow_back));
+            intentBuilder.setCloseButtonIcon(toBitmap(getDrawable(R.drawable.ic_arrow_back)));
         }
 
         intentBuilder.setStartAnimations(this, R.anim.slide_in_right, R.anim.slide_out_left);
@@ -168,5 +170,21 @@ public class CustomUIActivity extends AppCompatActivity implements View.OnClickL
         actionIntent.putExtra(ActionBroadcastReceiver.KEY_ACTION_SOURCE, actionSourceId);
         return PendingIntent.getBroadcast(
                 getApplicationContext(), actionSourceId, actionIntent, 0);
+    }
+
+    /**
+     * Return a Bitmap representation of the Drawable. Based on Android KTX.
+     */
+    private Bitmap toBitmap(Drawable drawable) {
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        Rect oldBounds = new Rect(drawable.getBounds());
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(new Canvas(bitmap));
+
+        drawable.setBounds(oldBounds);
+        return bitmap;
     }
 }

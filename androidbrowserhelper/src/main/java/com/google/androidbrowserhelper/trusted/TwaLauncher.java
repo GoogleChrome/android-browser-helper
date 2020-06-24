@@ -221,7 +221,8 @@ public class TwaLauncher {
 
         mServiceConnection.setSessionCreationRunnables(
                 onSessionCreatedRunnable, onSessionCreationFailedRunnable);
-        CustomTabsClient.bindCustomTabsService(mContext, mProviderPackage, mServiceConnection);
+        CustomTabsClient.bindCustomTabServicePreservePriority(
+                mContext, mProviderPackage, mServiceConnection);
     }
 
     private void launchWhenSessionEstablished(TrustedWebActivityIntentBuilder twaBuilder,

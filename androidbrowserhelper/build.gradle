@@ -17,6 +17,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
+def VERSION = "1.3.1";
+
 android {
     compileSdkVersion 30
 
@@ -24,7 +26,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
-        versionName "1.3.1-alpha01"
+        versionName VERSION
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -81,7 +83,7 @@ publishing {
 
             groupId 'com.google.androidbrowserhelper'
             artifactId 'androidbrowserhelper'
-            version '1.3.1-alpha01'
+            version VERSION
 
             // This ensures that the generated POM file contains the correct Android dependencies.
             // The section used the BinTray example as a base:

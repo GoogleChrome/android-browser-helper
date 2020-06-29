@@ -154,6 +154,7 @@ public class LauncherActivity extends AppCompatActivity {
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode());
+                       .setScreenOrientation(mMetadata.screenOrientation);
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);

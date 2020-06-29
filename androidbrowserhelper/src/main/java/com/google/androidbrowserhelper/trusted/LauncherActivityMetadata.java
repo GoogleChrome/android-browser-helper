@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,6 +35,8 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
  * Parses and holds on to metadata parameters associated with {@link LauncherActivity}.
  */
 public class LauncherActivityMetadata {
+
+    private static final String TAG = "LauncherActivityMetadata";
 
     /**
      * Url to launch in a Trusted Web Activity, unless other url provided in a VIEW intent.
@@ -114,6 +117,22 @@ public class LauncherActivityMetadata {
     private static final String METADATA_DISPLAY_MODE =
             "android.support.customtabs.trusted.DISPLAY_MODE";
 
+
+    /**
+     * The screen orientation to use when launching the Trusted Web Activity. Possible values are
+     * "any",
+     * "natural",
+     * "landscape",
+     * "landscape-primary",
+     * "landscape-secondary",
+     * "portrait",
+     * "portrait-primary",
+     * "portrait-secondary".
+     */
+    private static final String METADATA_SCREEN_ORIENTATION =
+            "android.support.customtabs.trusted.SCREEN_ORIENTATION";
+
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -128,6 +147,7 @@ public class LauncherActivityMetadata {
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
+    public final String screenOrientation;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -152,6 +172,8 @@ public class LauncherActivityMetadata {
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
         displayMode = getDisplayMode(metaData);
+        screenOrientation = metaData.getString(METADATA_SCREEN_ORIENTATION);
+        Log.d(TAG, " screenOrientation (" + screenOrientation + ").");
     }
 
     private static TrustedWebActivityDisplayMode getDisplayMode(@NonNull Bundle metaData) {

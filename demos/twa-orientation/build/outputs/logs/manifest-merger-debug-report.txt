@@ -1,0 +1,273 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+MERGED from [:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:17:1-36:12
+MERGED from [androidx.appcompat:appcompat:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/ff2a86ca87eda252dfe1319c54d53913/appcompat-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.browser:browser:1.3.0-alpha05] /home/scli/.gradle/caches/transforms-2/files-2.1/52370424e4edfbaf7813775e96f5d5d3/browser-1.3.0-alpha05/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30a750ecc88098c2c138c82b24f245f4/fragment-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c10ea27e53f741b47412bbfdab74120a/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/10ee121aad316911660c26378c3d5e07/drawerlayout-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a24c9eb75af32f06bb42aee820bf6bbf/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a075fff4bab4f27910242c63faee10d6/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/40375e0a13e7da05a29429d285275d5b/jetified-activity-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/6b9941f38d1f738e92504ac71057b70d/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/3b2be9d10c872d46c788b6a26baf0a59/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cf47211c29f3d46233053dff73be8bb2/customview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:17:1-26:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30f57287a48e8bfefe83c7f396b3c408/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/d8351c8c6399f618347f735b709e67e6/versionedparcelable-1.1.0/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/93841fff0305e4fa6150464508c770cf/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/758360d8c396013514967a3067c0decc/lifecycle-runtime-2.1.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c53786579cfc40fca339fbba36117ed9/lifecycle-viewmodel-2.1.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9a275c02f7f23991f9ecf01a2317e7cb/jetified-savedstate-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/58fda21f144ebc67f1032e2e97e2539f/lifecycle-livedata-2.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/f0fa602651fa0aa6197a6228ef1be92c/lifecycle-livedata-core-2.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9f6f80a61b168ce52e2291785048c36b/core-runtime-2.0.0/AndroidManifest.xml:17:1-22:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+	package
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:15:5-58
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:1-106:12
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:14:11-69
+application
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:17:5-105:19
+MERGED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:24:5-89
+MERGED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:24:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/d8351c8c6399f618347f735b709e67e6/versionedparcelable-1.1.0/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/d8351c8c6399f618347f735b709e67e6/versionedparcelable-1.1.0/AndroidManifest.xml:24:5-25:19
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:24:18-86
+	android:supportsRtl
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:22:9-35
+	android:label
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:20:9-41
+	android:roundIcon
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:21:9-54
+	android:icon
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:19:9-43
+	android:allowBackup
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:18:9-35
+	android:theme
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:23:9-54
+meta-data#asset_statements
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:24:9-26:59
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:26:13-56
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:25:13-44
+activity#com.google.androidbrowserhelper.trusted.LauncherActivity
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:28:9-78:20
+	android:screenOrientation
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:30:13-50
+	android:label
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:29:13-45
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:28:19-90
+meta-data#android.support.customtabs.trusted.DEFAULT_URL
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:31:13-32:69
+	android:value
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:32:17-66
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:31:24-85
+meta-data#android.support.customtabs.trusted.STATUS_BAR_COLOR
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:34:13-36:58
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:36:17-55
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:35:17-83
+meta-data#android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:38:13-40:62
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:40:17-59
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:39:17-88
+meta-data#android.support.customtabs.trusted.NAVIGATION_BAR_COLOR
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:42:13-44:61
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:44:17-58
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:43:17-87
+meta-data#android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:46:13-48:65
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:48:17-62
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:47:17-92
+meta-data#android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:50:13-51:54
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:51:17-52
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:50:24-95
+meta-data#android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:53:13-54:60
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:54:17-58
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:53:24-104
+meta-data#android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:56:13-57:38
+	android:value
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:57:17-36
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:56:24-105
+meta-data#android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:59:13-60:61
+	android:value
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:60:17-59
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:59:24-97
+meta-data#android.support.customtabs.trusted.SCREEN_ORIENTATION
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:62:13-63:44
+	android:value
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:63:17-42
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:62:24-92
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:65:13-68:29
+action#android.intent.action.MAIN
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:66:17-69
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:66:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:67:17-77
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:67:27-74
+intent-filter#action:name:android.intent.action.VIEW+category:name:android.intent.category.BROWSABLE+category:name:android.intent.category.DEFAULT+data:host:twa-tests.firebaseapp.com+data:scheme:https
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:70:13-76:29
+	android:autoVerify
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:70:28-53
+action#android.intent.action.VIEW
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:17-68
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:25-66
+category#android.intent.category.DEFAULT
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:17-76
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:27-73
+category#android.intent.category.BROWSABLE
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:17-77
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:27-75
+data
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:17-75:63
+	android:host
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:75:21-61
+	android:scheme
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:23-45
+activity#com.google.androidbrowserhelper.trusted.FocusActivity
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:80:9-90
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:80:19-87
+provider#androidx.core.content.FileProvider
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:82:9-90:20
+	android:grantUriPermissions
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:85:13-47
+	android:authorities
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:84:13-61
+	android:exported
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:86:13-37
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:83:13-62
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:87:13-89:53
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:89:17-50
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:88:17-67
+service#com.google.browser.examples.twa_orientation.NotificationDelegationService
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:92:9-104:19
+	android:enabled
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:94:13-35
+	android:exported
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:95:13-36
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:93:13-58
+meta-data#android.support.customtabs.trusted.SMALL_ICON
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:97:13-98:69
+	android:resource
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:98:17-66
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:97:24-84
+intent-filter#action:name:android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE+category:name:android.intent.category.DEFAULT
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:100:13-103:29
+action#android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE
+ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:101:17-105
+	android:name
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:101:25-103
+uses-sdk
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+MERGED from [:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:22:5-24:41
+MERGED from [:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:22:5-24:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/ff2a86ca87eda252dfe1319c54d53913/appcompat-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/ff2a86ca87eda252dfe1319c54d53913/appcompat-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.browser:browser:1.3.0-alpha05] /home/scli/.gradle/caches/transforms-2/files-2.1/52370424e4edfbaf7813775e96f5d5d3/browser-1.3.0-alpha05/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.browser:browser:1.3.0-alpha05] /home/scli/.gradle/caches/transforms-2/files-2.1/52370424e4edfbaf7813775e96f5d5d3/browser-1.3.0-alpha05/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30a750ecc88098c2c138c82b24f245f4/fragment-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30a750ecc88098c2c138c82b24f245f4/fragment-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c10ea27e53f741b47412bbfdab74120a/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c10ea27e53f741b47412bbfdab74120a/jetified-appcompat-resources-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/10ee121aad316911660c26378c3d5e07/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/10ee121aad316911660c26378c3d5e07/drawerlayout-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a24c9eb75af32f06bb42aee820bf6bbf/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a24c9eb75af32f06bb42aee820bf6bbf/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a075fff4bab4f27910242c63faee10d6/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/a075fff4bab4f27910242c63faee10d6/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/40375e0a13e7da05a29429d285275d5b/jetified-activity-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/40375e0a13e7da05a29429d285275d5b/jetified-activity-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/6b9941f38d1f738e92504ac71057b70d/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/6b9941f38d1f738e92504ac71057b70d/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/3b2be9d10c872d46c788b6a26baf0a59/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/3b2be9d10c872d46c788b6a26baf0a59/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cf47211c29f3d46233053dff73be8bb2/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cf47211c29f3d46233053dff73be8bb2/customview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30f57287a48e8bfefe83c7f396b3c408/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/30f57287a48e8bfefe83c7f396b3c408/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/d8351c8c6399f618347f735b709e67e6/versionedparcelable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/d8351c8c6399f618347f735b709e67e6/versionedparcelable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/93841fff0305e4fa6150464508c770cf/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/93841fff0305e4fa6150464508c770cf/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/758360d8c396013514967a3067c0decc/lifecycle-runtime-2.1.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/758360d8c396013514967a3067c0decc/lifecycle-runtime-2.1.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c53786579cfc40fca339fbba36117ed9/lifecycle-viewmodel-2.1.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/c53786579cfc40fca339fbba36117ed9/lifecycle-viewmodel-2.1.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9a275c02f7f23991f9ecf01a2317e7cb/jetified-savedstate-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.savedstate:savedstate:1.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9a275c02f7f23991f9ecf01a2317e7cb/jetified-savedstate-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/58fda21f144ebc67f1032e2e97e2539f/lifecycle-livedata-2.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/58fda21f144ebc67f1032e2e97e2539f/lifecycle-livedata-2.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/f0fa602651fa0aa6197a6228ef1be92c/lifecycle-livedata-core-2.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/f0fa602651fa0aa6197a6228ef1be92c/lifecycle-livedata-core-2.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9f6f80a61b168ce52e2291785048c36b/core-runtime-2.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] /home/scli/.gradle/caches/transforms-2/files-2.1/9f6f80a61b168ce52e2291785048c36b/core-runtime-2.0.0/AndroidManifest.xml:20:5-44
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		ADDED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+		INJECTED from /home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+queries
+ADDED from [:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:26:5-34:15
+intent
+ADDED from [:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:27:9-33:18

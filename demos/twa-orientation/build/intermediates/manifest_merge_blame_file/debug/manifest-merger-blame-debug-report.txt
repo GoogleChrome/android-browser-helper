@@ -1,0 +1,219 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3    Copyright 2019 Google LLC
+4    Licensed under the Apache License, Version 2.0 (the "License");
+5    you may not use this file except in compliance with the License.
+6    You may obtain a copy of the License at
+7    https://www.apache.org/licenses/LICENSE-2.0
+8    Unless required by applicable law or agreed to in writing, software
+9    distributed under the License is distributed on an "AS IS" BASIS,
+10    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+11    See the License for the specific language governing permissions and
+12    limitations under the License.
+13-->
+14<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+15    package="com.google.browser.examples.twa_orientation"
+16    android:versionCode="1"
+17    android:versionName="1.0" >
+18
+19    <uses-sdk
+20        android:minSdkVersion="21"
+20-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+21        android:targetSdkVersion="30" />
+21-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml
+22
+23    <queries>
+23-->[:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:26:5-34:15
+24        <intent>
+24-->[:androidbrowserhelper] /home/scli/sclimwi/android-browser-helper/androidbrowserhelper/build/intermediates/library_manifest/debug/AndroidManifest.xml:27:9-33:18
+25            <action android:name="android.intent.action.VIEW" />
+25-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:17-68
+25-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:25-66
+26
+27            <category android:name="android.intent.category.BROWSABLE" />
+27-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:17-77
+27-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:27-75
+28
+29            <data android:scheme="https" />
+29-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:17-75:63
+29-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:23-45
+30        </intent>
+31    </queries>
+32
+33    <application
+33-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:17:5-105:19
+34        android:allowBackup="true"
+34-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:18:9-35
+35        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+35-->[androidx.core:core:1.1.0] /home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/AndroidManifest.xml:24:18-86
+36        android:debuggable="true"
+37        android:icon="@mipmap/ic_launcher"
+37-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:19:9-43
+38        android:label="@string/app_name"
+38-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:20:9-41
+39        android:roundIcon="@mipmap/ic_launcher_round"
+39-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:21:9-54
+40        android:supportsRtl="true"
+40-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:22:9-35
+41        android:testOnly="true"
+42        android:theme="@style/Theme.LauncherActivity" >
+42-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:23:9-54
+43        <meta-data
+43-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:24:9-26:59
+44            android:name="asset_statements"
+44-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:25:13-44
+45            android:resource="@string/asset_statements" />
+45-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:26:13-56
+46
+47        <activity
+47-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:28:9-78:20
+48            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+48-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:28:19-90
+49            android:label="@string/app_name"
+49-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:29:13-45
+50            android:screenOrientation="landscape" >
+50-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:30:13-50
+51            <meta-data
+51-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:31:13-32:69
+52                android:name="android.support.customtabs.trusted.DEFAULT_URL"
+52-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:31:24-85
+53                android:value="https://twa-tests.firebaseapp.com" />
+53-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:32:17-66
+54            <meta-data
+54-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:34:13-36:58
+55                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
+55-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:35:17-83
+56                android:resource="@color/colorPrimary" />
+56-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:36:17-55
+57            <meta-data
+57-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:38:13-40:62
+58                android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR_DARK"
+58-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:39:17-88
+59                android:resource="@color/colorPrimaryDark" />
+59-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:40:17-59
+60            <meta-data
+60-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:42:13-44:61
+61                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
+61-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:43:17-87
+62                android:resource="@color/navigationColor" />
+62-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:44:17-58
+63            <meta-data
+63-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:46:13-48:65
+64                android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
+64-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:47:17-92
+65                android:resource="@color/navigationColorDark" />
+65-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:48:17-62
+66            <meta-data
+66-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:50:13-51:54
+67                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
+67-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:50:24-95
+68                android:resource="@drawable/splash" />
+68-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:51:17-52
+69            <meta-data
+69-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:53:13-54:60
+70                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
+70-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:53:24-104
+71                android:resource="@color/backgroundColor" />
+71-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:54:17-58
+72            <meta-data
+72-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:56:13-57:38
+73                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
+73-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:56:24-105
+74                android:value="300" />
+74-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:57:17-36
+75            <meta-data
+75-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:59:13-60:61
+76                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+76-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:59:24-97
+77                android:value="@string/provider_authority" />
+77-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:60:17-59
+78            <meta-data
+78-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:62:13-63:44
+79                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+79-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:62:24-92
+80                android:value="landscape" />
+80-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:63:17-42
+81
+82            <intent-filter>
+82-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:65:13-68:29
+83                <action android:name="android.intent.action.MAIN" />
+83-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:66:17-69
+83-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:66:25-66
+84
+85                <category android:name="android.intent.category.LAUNCHER" />
+85-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:67:17-77
+85-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:67:27-74
+86            </intent-filter>
+87            <intent-filter android:autoVerify="true" >
+87-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:70:13-76:29
+87-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:70:28-53
+88                <action android:name="android.intent.action.VIEW" />
+88-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:17-68
+88-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:71:25-66
+89
+90                <category android:name="android.intent.category.DEFAULT" />
+90-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:17-76
+90-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:27-73
+91                <category android:name="android.intent.category.BROWSABLE" />
+91-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:17-77
+91-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:73:27-75
+92
+93                <data
+93-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:17-75:63
+94                    android:host="twa-tests.firebaseapp.com"
+94-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:75:21-61
+95                    android:scheme="https" />
+95-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:74:23-45
+96            </intent-filter>
+97        </activity>
+98        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+98-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:80:9-90
+98-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:80:19-87
+99
+100        <provider
+100-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:82:9-90:20
+101            android:name="androidx.core.content.FileProvider"
+101-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:83:13-62
+102            android:authorities="@string/provider_authority"
+102-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:84:13-61
+103            android:exported="false"
+103-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:86:13-37
+104            android:grantUriPermissions="true" >
+104-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:85:13-47
+105            <meta-data
+105-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:87:13-89:53
+106                android:name="android.support.FILE_PROVIDER_PATHS"
+106-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:88:17-67
+107                android:resource="@xml/filepaths" />
+107-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:89:17-50
+108        </provider>
+109
+110        <service
+110-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:92:9-104:19
+111            android:name="com.google.browser.examples.twa_orientation.NotificationDelegationService"
+111-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:93:13-58
+112            android:enabled="true"
+112-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:94:13-35
+113            android:exported="true" >
+113-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:95:13-36
+114            <meta-data
+114-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:97:13-98:69
+115                android:name="android.support.customtabs.trusted.SMALL_ICON"
+115-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:97:24-84
+116                android:resource="@drawable/ic_notification_icon" />
+116-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:98:17-66
+117
+118            <intent-filter>
+118-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:100:13-103:29
+119                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
+119-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:101:17-105
+119-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:101:25-103
+120
+121                <category android:name="android.intent.category.DEFAULT" />
+121-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:17-76
+121-->/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/src/main/AndroidManifest.xml:72:27-73
+122            </intent-filter>
+123        </service>
+124    </application>
+125
+126</manifest>

@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/build/intermediates/incremental/mergeDebugResources/merged.dir/values-v18/values-v18.xml",
+            "map": [
+                {
+                    "source": "/home/scli/.gradle/caches/transforms-2/files-2.1/ff2a86ca87eda252dfe1319c54d53913/appcompat-1.1.0/res/values-v18/values-v18.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "48",
+                        "endOffsets": "99"
+                    }
+                }
+            ]
+        }
+    ]
+}

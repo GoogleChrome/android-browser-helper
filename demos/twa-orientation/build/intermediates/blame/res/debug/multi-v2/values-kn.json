@@ -1,0 +1,60 @@
+{
+    "logs": [
+        {
+            "outputFile": "/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/build/intermediates/incremental/mergeDebugResources/merged.dir/values-kn/values-kn.xml",
+            "map": [
+                {
+                    "source": "/home/scli/.gradle/caches/transforms-2/files-2.1/ff2a86ca87eda252dfe1319c54d53913/appcompat-1.1.0/res/values-kn/values-kn.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,219,331,444,532,639,765,843,920,1011,1103,1198,1292,1393,1486,1581,1675,1766,1857,1938,2054,2164,2263,2376,2481,2595,2759,2859",
+                        "endColumns": "113,111,112,87,106,125,77,76,90,91,94,93,100,92,94,93,90,90,80,115,109,98,112,104,113,163,99,81",
+                        "endOffsets": "214,326,439,527,634,760,838,915,1006,1098,1193,1287,1388,1481,1576,1670,1761,1852,1933,2049,2159,2258,2371,2476,2590,2754,2854,2936"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,33",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,219,331,444,532,639,765,843,920,1011,1103,1198,1292,1393,1486,1581,1675,1766,1857,1938,2054,2164,2263,2376,2481,2595,2759,3290",
+                        "endColumns": "113,111,112,87,106,125,77,76,90,91,94,93,100,92,94,93,90,90,80,115,109,98,112,104,113,163,99,81",
+                        "endOffsets": "214,326,439,527,634,760,838,915,1006,1098,1193,1287,1388,1481,1576,1670,1761,1852,1933,2049,2159,2258,2371,2476,2590,2754,2854,3367"
+                    }
+                },
+                {
+                    "source": "/home/scli/.gradle/caches/transforms-2/files-2.1/be48699bb34d424ed4807f4677c5cb3f/browser-1.3.0-alpha05/res/values-kn/values-kn.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,169,269,385",
+                        "endColumns": "113,99,115,100",
+                        "endOffsets": "164,264,380,481"
+                    },
+                    "to": {
+                        "startLines": "29,30,31,32",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "2859,2973,3073,3189",
+                        "endColumns": "113,99,115,100",
+                        "endOffsets": "2968,3068,3184,3285"
+                    }
+                },
+                {
+                    "source": "/home/scli/.gradle/caches/transforms-2/files-2.1/cdcb21ce1a8a7fa61d511923b4b75aa1/core-1.1.0/res/values-kn/values-kn.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "34",
+                        "startColumns": "4",
+                        "startOffsets": "3372",
+                        "endColumns": "100",
+                        "endOffsets": "3468"
+                    }
+                }
+            ]
+        }
+    ]
+}

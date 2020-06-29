@@ -1,0 +1,10 @@
+#Thu Jul 09 16:55:49 CDT 2020
+base.2=/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/build/intermediates/dex/debug/mergeLibDexDebug/out/classes_0.dex
+path.2=classes_0.dex
+base.1=/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/build/intermediates/dex/debug/mergeProjectDexDebug/out/classes.dex
+path.1=classes.dex
+base.0=/home/scli/sclimwi/android-browser-helper/demos/twa-orientation/build/intermediates/dex/debug/mergeExtDexDebug/out/classes.dex
+renamed.2=classes3.dex
+renamed.1=classes2.dex
+renamed.0=classes.dex
+path.0=classes.dex

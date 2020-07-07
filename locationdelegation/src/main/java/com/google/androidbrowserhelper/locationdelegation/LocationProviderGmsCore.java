@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.locationdelegation;
 
 import android.content.Context;
 import android.location.Location;
@@ -64,7 +64,6 @@ public class LocationProviderGmsCore
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        assert mGoogleApiClient != null;
     }
 
     public static boolean isGooglePlayServicesAvailable(Context context) {
@@ -109,7 +108,6 @@ public class LocationProviderGmsCore
             Log.e(TAG, " mLocationProviderApi.requestLocationUpdates() " + e);
             notifyLocationErrorWithMessage(
                     "Failed to request location updates: " + e.toString());
-            assert false;
         }
     }
 
@@ -174,7 +172,8 @@ public class LocationProviderGmsCore
         try {
             mCallback.runExtraCallback(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.e(TAG,"Caught RemoteException sending location update callback." );
+            stop();
         }
     }
 
@@ -184,7 +183,8 @@ public class LocationProviderGmsCore
             locationResult.putString("message", message);
             mCallback.runExtraCallback(EXTRA_NEW_ERROR_AVAILABLE_CALLBACK, locationResult);
         } catch (RemoteException e) {
-            e.printStackTrace();
+            Log.e(TAG,"Caught RemoteException sending location error callback." );
+            stop();
         }
     }
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.locationdelegation;
 
 import android.Manifest;
 import android.content.Context;
@@ -29,6 +29,8 @@ import android.text.TextUtils;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 import androidx.core.app.ActivityCompat;
+
+import com.google.androidbrowserhelper.trusted.DelegationService;
 
 /**
  * This is a simple transparent activity that will bring up the permission prompt. On either approve
@@ -78,7 +80,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
         }
         try {
             callback.runExtraCallback(
-                    DelegationService.CHECK_LOCATION_PERMISSION_COMMAND_NAME, result);
+                    LocationDelegationExtraCommandHandler.CHECK_LOCATION_PERMISSION_COMMAND_NAME, result);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

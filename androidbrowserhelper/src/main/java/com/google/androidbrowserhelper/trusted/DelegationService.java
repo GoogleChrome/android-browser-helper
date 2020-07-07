@@ -21,18 +21,16 @@ import androidx.annotation.Nullable;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An extension of {@link androidx.browser.trusted.TrustedWebActivityService} that implements
  * {@link androidx.browser.trusted.TrustedWebActivityService#getTokenStore()} using a
  * {@link SharedPreferencesTokenStore}.
  */
 public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
-    static final String CHECK_LOCATION_PERMISSION_COMMAND_NAME = "checkAndroidLocationPermission";
-    private static final String START_LOCATION_COMMAND_NAME = "startLocation";
-    private static final String STOP_LOCATION_COMMAND_NAME = "stopLocation";
-    private static final String EXTRA_COMMAND_SUCCESS = "success";
-
-    private boolean mIsProviderGmsCore;
+    private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
 
     @NonNull
     @Override
@@ -44,53 +42,16 @@ public class DelegationService extends androidx.browser.trusted.TrustedWebActivi
     @Override
     public Bundle onExtraCommand(
             String commandName, Bundle args, @Nullable TrustedWebActivityCallbackRemote callback) {
-        Bundle result = new Bundle();
-        result.putBoolean(EXTRA_COMMAND_SUCCESS, false);
-        switch (commandName) {
-            case CHECK_LOCATION_PERMISSION_COMMAND_NAME:
-                if (callback == null) break;
-                requestPermission(callback);
-
-                result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
-                break;
-            case START_LOCATION_COMMAND_NAME:
-                if (callback == null) break;
-                startLocationProvider(callback, args.getBoolean("enableHighAccuracy"));
-
-                result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
-                break;
-            case STOP_LOCATION_COMMAND_NAME:
-                stopLocationProvider();
-
-                result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
-                break;
+        for (ExtraCommandHandler handler : mExtraCommandHandlers) {
+            Bundle result = handler.handleExtraCommand(this, commandName, args, callback);
+            if (result.getBoolean(ExtraCommandHandler.EXTRA_COMMAND_SUCCESS)) {
+                return result;
+            }
         }
-        return result;
+        return Bundle.EMPTY;
     }
 
-    private void requestPermission(@NonNull TrustedWebActivityCallbackRemote callback) {
-        PermissionRequestActivity.requestLocationPermission(this, callback);
-    }
-
-
-    private void startLocationProvider(
-            @NonNull TrustedWebActivityCallbackRemote locationChangeCallback,
-            boolean enableHighAccuracy) {
-        mIsProviderGmsCore = LocationProviderGmsCore.isGooglePlayServicesAvailable(this);
-        if (mIsProviderGmsCore) {
-            LocationProviderGmsCore.getInstance(this).start(
-                    locationChangeCallback, enableHighAccuracy);
-        } else {
-            LocationProviderAndroid.getInstance().start(
-                    this, locationChangeCallback, enableHighAccuracy);
-        }
-    }
-
-    private void stopLocationProvider() {
-        if (mIsProviderGmsCore) {
-            LocationProviderGmsCore.getInstance(this).stop();
-        } else {
-            LocationProviderAndroid.getInstance().stop();
-        }
+    public void registerExtraCommandHandler(ExtraCommandHandler handler) {
+        mExtraCommandHandlers.add(handler);
     }
 }

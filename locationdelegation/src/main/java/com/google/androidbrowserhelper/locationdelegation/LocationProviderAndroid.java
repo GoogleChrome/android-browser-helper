@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.androidbrowserhelper.trusted;
+package com.google.androidbrowserhelper.locationdelegation;
 
 import android.content.Context;
 import android.location.Criteria;
@@ -123,11 +123,9 @@ public class LocationProviderAndroid implements LocationListener {
             // Propagate an error to JavaScript, this can happen in case of WebView
             // when the embedding app does not have sufficient permissions.
             notifyLocationErrorWithMessage("Application does not have sufficient geolocation permissions.");
-
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Caught IllegalArgumentException registering for location updates.");
             unregisterFromLocationUpdates();
-            assert false;
         }
     }
 
@@ -188,6 +186,7 @@ public class LocationProviderAndroid implements LocationListener {
             mCallback.runExtraCallback(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
         } catch (RemoteException e) {
             Log.e(TAG,"Caught RemoteException sending location update callback." );
+            stop();
         }
     }
 
@@ -197,6 +196,7 @@ public class LocationProviderAndroid implements LocationListener {
             locationResult.putString("message", message);
             mCallback.runExtraCallback(EXTRA_NEW_LOCATION_ERROR_CALLBACK, locationResult);
         } catch (RemoteException e) {
+            Log.e(TAG,"Caught RemoteException sending location error callback." );
             stop();
         }
     }

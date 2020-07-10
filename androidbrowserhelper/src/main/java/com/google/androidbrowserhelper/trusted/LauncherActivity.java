@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
@@ -110,6 +111,8 @@ public class LauncherActivity extends AppCompatActivity {
     @Nullable
     private PwaWrapperSplashScreenStrategy mSplashScreenStrategy;
 
+    private CustomTabsCallback mCustomTabsCallback = new QualityEnforcer();
+
     @Nullable
     private TwaLauncher mTwaLauncher;
 
@@ -161,6 +164,7 @@ public class LauncherActivity extends AppCompatActivity {
 
         mTwaLauncher = new TwaLauncher(this);
         mTwaLauncher.launch(twaBuilder,
+                mCustomTabsCallback,
                 mSplashScreenStrategy,
                 () -> mBrowserWasLaunched = true,
                 getFallbackStrategy());

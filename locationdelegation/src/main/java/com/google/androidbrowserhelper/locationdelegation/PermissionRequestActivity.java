@@ -30,8 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 import androidx.core.app.ActivityCompat;
 
-import com.google.androidbrowserhelper.trusted.DelegationService;
-
 /**
  * This is a simple transparent activity that will bring up the permission prompt. On either approve
  * or disapprove, this will send the result via the {@link Messenger} provided with the intent, and

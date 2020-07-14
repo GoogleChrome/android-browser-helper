@@ -19,6 +19,7 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -92,6 +93,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
  * [3] https://developer.android.com/reference/android/support/v4/content/FileProvider
  */
 public class LauncherActivity extends AppCompatActivity {
+    private static final String TAG = "TWALauncherActivity";
 
     private static final String BROWSER_WAS_LAUNCHED_KEY =
             "android.support.customtabs.trusted.BROWSER_WAS_LAUNCHED_KEY";

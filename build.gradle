@@ -22,7 +22,6 @@ buildscript {
     repositories {
         google()
         jcenter()
-
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.3'
@@ -34,6 +33,7 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url '/home/scli/more-android-sdk/extra/m2repository' }
         google()
         jcenter()
     }

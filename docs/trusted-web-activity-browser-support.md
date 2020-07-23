@@ -1,10 +1,9 @@
 Trusted Web Activity Browser Support
 ====================================
 
-**Important:** This is an unnofficial list of Trusted Web Activity support across
-browsers. The list is not exhaustive and is maintained by the community.
-Please file an [issue][14] if the information is incorrect, incomplete of if you'd
-like to see other browsers added.
+**Important:** We do our best to keep this up to date - if you spot anything missing or
+incorrect, please file an [issue][14].
+
 
 |Browser          |Basic Support              |Splash Screen|Notification Delegation|
 |:---------------:|:-------------------------:|:-----------:|:---------------------:|

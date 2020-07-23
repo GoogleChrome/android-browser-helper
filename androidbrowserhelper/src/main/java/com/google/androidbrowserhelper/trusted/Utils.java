@@ -16,11 +16,14 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
@@ -98,5 +101,42 @@ public class Utils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    /**
+     * Verifies if the application has the required meta-tag, `web_manifest_url`, and the
+     * `web_app_manifest.json` file, required to enable the Trusted Web Activity on Chrome OS.
+     * Important: The content the meta-tag and the JSON fire are not validated.
+     */
+    public static boolean hasChromeOsSupport(Context context) {
+        // We first check if /app/res/web_app_manifest.json is available
+        int id = context.getResources().getIdentifier(
+                "web_app_manifest.json", "raw", context.getPackageName());
+        // If an attribute with that name doesn't exist the result is 0 (which is an invalid ID for
+        // attributes)
+        if (id == 0) {
+            Log.e("ChromeOS-Support", "Could not find '/res/raw/web_app_manifest.json'");
+            return false;
+        }
+
+        // Then, we check if the 'web_manifest_url' meta-tag has been defined.
+        try {
+            ApplicationInfo applicationInfo = context.getPackageManager()
+                    .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            String webManifestUrl = applicationInfo.metaData.getString("web_manifest_url");
+            if (webManifestUrl == null) {
+                Log.e("ChromeOS-Support",
+                        "Could not the 'web_manifest_url' meta-tag in 'AndroidManifest.xml'.'");
+            }
+            context.getPackageManager().getResourcesForApplication(context.getPackageName());
+            return false;
+        } catch (PackageManager.NameNotFoundException ex) {
+            // This should never happen, as we're retrieving info for the app itself, but we log
+            // and allow returning true nevertheless.
+            Log.e("ChromeOS-Support", "Error retrieving application meta-data");
+        }
+
+        // If both have been defined, we can have Chrome OS support.
+        return true;
     }
 }

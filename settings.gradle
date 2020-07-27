@@ -1,5 +1,11 @@
-include ':demos:twa-custom-launcher', ':androidbrowserhelper', ':demos:twa-multi-domain', ':playbilling'
-include ':demos:twa-basic', ':demos:twa-webview-fallback'
+include ':androidbrowserhelper'
+include ':playbilling'
+
 include ':demos:custom-tabs-example-app'
 include ':demos:payment-provider'
+include ':demos:twa-basic'
+include ':demos:twa-custom-launcher'
+include ':demos:twa-multi-domain'
 include ':demos:twa-notification-delegation'
+include ':demos:twa-play-billing'
+include ':demos:twa-webview-fallback'

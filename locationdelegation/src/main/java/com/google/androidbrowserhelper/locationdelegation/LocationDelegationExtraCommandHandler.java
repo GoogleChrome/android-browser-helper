@@ -28,10 +28,10 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
     private static final String START_LOCATION_COMMAND_NAME = "startLocation";
     private static final String STOP_LOCATION_COMMAND_NAME = "stopLocation";
 
-    private boolean mIsProviderGmsCore;
+    private LocationProvider mLocationProvider;
 
     public Bundle handleExtraCommand(Context context, String commandName, Bundle args,
-                                     @Nullable TrustedWebActivityCallbackRemote callback) {
+            @Nullable TrustedWebActivityCallbackRemote callback) {
         Bundle result = new Bundle();
         result.putBoolean(EXTRA_COMMAND_SUCCESS, false);
         switch (commandName) {
@@ -56,29 +56,25 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
         return result;
     }
 
-    private void requestPermission(Context context, @NonNull TrustedWebActivityCallbackRemote callback) {
+    private void requestPermission(Context context,
+            @NonNull TrustedWebActivityCallbackRemote callback) {
         PermissionRequestActivity.requestLocationPermission(context, callback);
     }
 
-
-    private void startLocationProvider(Context context,
-                                       @NonNull TrustedWebActivityCallbackRemote locationChangeCallback,
+    private void startLocationProvider(
+            Context context, @NonNull TrustedWebActivityCallbackRemote locationChangeCallback,
             boolean enableHighAccuracy) {
-        mIsProviderGmsCore = LocationProviderGmsCore.isGooglePlayServicesAvailable(context);
-        if (mIsProviderGmsCore) {
-            LocationProviderGmsCore.getInstance(context).start(
-                    locationChangeCallback, enableHighAccuracy);
-        } else {
-            LocationProviderAndroid.getInstance().start(
-                    context, locationChangeCallback, enableHighAccuracy);
-        }
+        getLocationProvider(context).start(locationChangeCallback, enableHighAccuracy);
     }
 
     private void stopLocationProvider(Context context) {
-        if (mIsProviderGmsCore) {
-            LocationProviderGmsCore.getInstance(context).stop();
-        } else {
-            LocationProviderAndroid.getInstance().stop();
+        getLocationProvider(context).stop();
+    }
+
+    private LocationProvider getLocationProvider(Context context) {
+        if (mLocationProvider == null){
+            mLocationProvider = LocationProvider.create(context);
         }
+        return mLocationProvider;
     }
 }

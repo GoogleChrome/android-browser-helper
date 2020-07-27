@@ -18,7 +18,6 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,15 +34,11 @@ import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 /**
  * This is a LocationProvider using Google Play Services.
- * <p>
  * https://developers.google.com/android/reference/com/google/android/gms/location/package-summary
  */
-public class LocationProviderGmsCore
+public class LocationProviderGmsCore extends LocationProvider
         implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
     private static final String TAG = "TWA_LocationProviderGms";
-
-    private static final String EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK = "onNewLocationAvailable";
-    private static final String EXTRA_NEW_ERROR_AVAILABLE_CALLBACK = "onNewErrorAvailable";
 
     // Values for the LocationRequest's setInterval for normal and high accuracy, respectively.
     private static final long UPDATE_INTERVAL_MS = 1000;
@@ -52,8 +47,6 @@ public class LocationProviderGmsCore
     private static LocationProviderGmsCore sProvider;
     private final GoogleApiClient mGoogleApiClient;
     private FusedLocationProviderApi mLocationProviderApi = LocationServices.FusedLocationApi;
-
-    private TrustedWebActivityCallbackRemote mCallback;
 
     private boolean mEnablehighAccuracy;
     private LocationRequest mLocationRequest;
@@ -69,13 +62,6 @@ public class LocationProviderGmsCore
     public static boolean isGooglePlayServicesAvailable(Context context) {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
                 == ConnectionResult.SUCCESS;
-    }
-
-    public static LocationProviderGmsCore getInstance(Context context) {
-        if (sProvider == null) {
-            sProvider = new LocationProviderGmsCore(context);
-        }
-        return sProvider;
     }
 
     // ConnectionCallbacks implementation
@@ -121,6 +107,8 @@ public class LocationProviderGmsCore
         notifyLocationErrorWithMessage("Failed to connect to Google Play Services: " + result.toString());
     }
 
+    // LocationProvider implementations
+    @Override
     public void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mCallback = callback;
@@ -129,6 +117,7 @@ public class LocationProviderGmsCore
         mGoogleApiClient.connect(); // Should return via onConnected().
     }
 
+    @Override
     public void stop() {
         if (!mGoogleApiClient.isConnected()) return;
 
@@ -138,6 +127,7 @@ public class LocationProviderGmsCore
         mCallback = null;
     }
 
+    @Override
     public boolean isRunning() {
         if (mGoogleApiClient == null) return false;
         return mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected();
@@ -148,43 +138,6 @@ public class LocationProviderGmsCore
     public void onLocationChanged(Location location) {
         if (isRunning()) {
             onNewLocationAvailable(location);
-        }
-    }
-
-    private void onNewLocationAvailable(Location location) {
-        Bundle locationResult = new Bundle();
-        locationResult.putDouble("latitude", location.getLatitude());
-        locationResult.putDouble("longitude", location.getLongitude());
-        locationResult.putLong("timeStamp", location.getTime());
-        if (location.hasAltitude()) {
-            locationResult.putDouble("altitude", location.getAltitude());
-        }
-        if (location.hasAccuracy()) {
-            locationResult.putDouble("accuracy", location.getAccuracy());
-        }
-        if (location.hasBearing()) {
-            locationResult.putDouble("bearing", location.getBearing());
-        }
-        if (location.hasSpeed()) {
-            locationResult.putDouble("speed", location.getSpeed());
-        }
-
-        try {
-            mCallback.runExtraCallback(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG,"Caught RemoteException sending location update callback." );
-            stop();
-        }
-    }
-
-    private void notifyLocationErrorWithMessage(String message) {
-        try {
-            Bundle locationResult = new Bundle();
-            locationResult.putString("message", message);
-            mCallback.runExtraCallback(EXTRA_NEW_ERROR_AVAILABLE_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG,"Caught RemoteException sending location error callback." );
-            stop();
         }
     }
 }

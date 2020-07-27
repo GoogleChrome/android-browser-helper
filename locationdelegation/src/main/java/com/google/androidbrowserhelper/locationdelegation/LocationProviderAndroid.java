@@ -21,7 +21,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.List;
@@ -29,41 +28,35 @@ import java.util.List;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 /**
- * This is a LocationProvider using Android APIs [1]. It is a separate class for clarity
- * so that it can manage all processing completely on the UI thread. The container class
- * ensures that the start/stop calls into this class are done on the UI thread.
- * <p>
+ * This is a LocationProvider using Android APIs [1]. It is a separate class for clarity so that it
+ * can manage all processing completely on the UI thread. The container class ensures that the
+ * start/stop calls into this class are done on the UI thread.
  * [1] https://developer.android.com/reference/android/location/package-summary.html
  */
-public class LocationProviderAndroid implements LocationListener {
-    private static final String TAG = "TWA_LocationProvider";
-
-    private static final String EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK = "onNewLocationAvailable";
-    private static final String EXTRA_NEW_LOCATION_ERROR_CALLBACK= "onNewLocationError";
+public class LocationProviderAndroid extends LocationProvider implements LocationListener {
+    private static final String TAG = "TWA_LocationAndroid";
 
     private LocationManager mLocationManager;
     private boolean mIsRunning;
-    private TrustedWebActivityCallbackRemote mCallback;
-    private static LocationProviderAndroid sProvider;
+    private Context mContext;
 
-    public static LocationProviderAndroid getInstance() {
-        if (sProvider == null) {
-            sProvider = new LocationProviderAndroid();
-        }
-        return sProvider;
+    LocationProviderAndroid(Context context) {
+        mContext = context;
     }
 
-    public void start(
-            Context context, TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
+    @Override
+    public void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
         unregisterFromLocationUpdates();
         mCallback = callback;
-        registerForLocationUpdates(context, enableHighAccuracy);
+        registerForLocationUpdates(enableHighAccuracy);
     }
 
+    @Override
     public void stop() {
         unregisterFromLocationUpdates();
     }
 
+    @Override
     public boolean isRunning() {
         return mIsRunning;
     }
@@ -90,9 +83,9 @@ public class LocationProviderAndroid implements LocationListener {
     public void onProviderDisabled(String provider) {
     }
 
-    private void createLocationManagerIfNeeded(Context context) {
+    private void createLocationManagerIfNeeded() {
         if (mLocationManager != null) return;
-        mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
         if (mLocationManager == null) {
             Log.e(TAG, "Could not get location manager.");
         }
@@ -101,8 +94,8 @@ public class LocationProviderAndroid implements LocationListener {
     /**
      * Registers this object with the location service.
      */
-    private void registerForLocationUpdates(Context context, boolean enableHighAccuracy) {
-        createLocationManagerIfNeeded(context);
+    private void registerForLocationUpdates(boolean enableHighAccuracy) {
+        createLocationManagerIfNeeded();
         if (usePassiveOneShotLocation()) return;
 
         assert !mIsRunning;
@@ -163,41 +156,5 @@ public class LocationProviderAndroid implements LocationListener {
         final List<String> providers = mLocationManager.getProviders(true);
         return providers != null && providers.size() == 1
                 && providers.get(0).equals(LocationManager.PASSIVE_PROVIDER);
-    }
-
-    private void onNewLocationAvailable(Location location) {
-        Bundle locationResult = new Bundle();
-        locationResult.putDouble("latitude", location.getLatitude());
-        locationResult.putDouble("longitude", location.getLongitude());
-        locationResult.putLong("timeStamp", location.getTime());
-        if (location.hasAltitude()) {
-            locationResult.putDouble("altitude", location.getAltitude());
-        }
-        if (location.hasAccuracy()) {
-            locationResult.putDouble("accuracy", location.getAccuracy());
-        }
-        if (location.hasBearing()) {
-            locationResult.putDouble("bearing", location.getBearing());
-        }
-        if (location.hasSpeed()) {
-            locationResult.putDouble("speed", location.getSpeed());
-        }
-        try {
-            mCallback.runExtraCallback(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG,"Caught RemoteException sending location update callback." );
-            stop();
-        }
-    }
-
-    private void notifyLocationErrorWithMessage(String message) {
-        try {
-            Bundle locationResult = new Bundle();
-            locationResult.putString("message", message);
-            mCallback.runExtraCallback(EXTRA_NEW_LOCATION_ERROR_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG,"Caught RemoteException sending location error callback." );
-            stop();
-        }
     }
 }

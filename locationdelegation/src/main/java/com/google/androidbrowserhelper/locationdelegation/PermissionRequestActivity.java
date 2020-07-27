@@ -42,12 +42,12 @@ public class PermissionRequestActivity extends AppCompatActivity {
     private static final String EXTRA_PERMISSIONS = "EXTRA_PERMISSIONS";
     private static final String EXTRA_GRANT_RESULTS = "EXTRA_GRANTED_RESULT";
 
-    private static final String mLocationPermission = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
     private Messenger mMessenger;
 
     /**
-     * Launches the {@link PermissionRequestActivity} to request location permission, and then send
+     * Launches the {@link PermissionRequestActivity} to request location permission, and then sends
      * the granted result back to browser via {@link TrustedWebActivityCallbackRemote}.
      */
     public static void requestLocationPermission(
@@ -61,7 +61,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
 
         final Messenger messenger = new Messenger(handler);
         Intent intent = new Intent(context, PermissionRequestActivity.class);
-        intent.putExtra(EXTRA_PERMISSIONS, new String[]{mLocationPermission});
+        intent.putExtra(EXTRA_PERMISSIONS, new String[]{LOCATION_PERMISSION});
         intent.putExtra(EXTRA_RESULT_RECEIVER, messenger);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -71,14 +71,15 @@ public class PermissionRequestActivity extends AppCompatActivity {
             TrustedWebActivityCallbackRemote callback, String[] permissions, int[] grantedResult) {
         Bundle result = new Bundle();
         for (int i = 0; i < permissions.length; i++) {
-            if (TextUtils.equals(permissions[i], mLocationPermission)) {
+            if (TextUtils.equals(permissions[i], LOCATION_PERMISSION)) {
                 result.putBoolean(LOCATION_PERMISSION_RESULT,
                         grantedResult[i] == PackageManager.PERMISSION_GRANTED);
             }
         }
         try {
             callback.runExtraCallback(
-                    LocationDelegationExtraCommandHandler.CHECK_LOCATION_PERMISSION_COMMAND_NAME, result);
+                    LocationDelegationExtraCommandHandler.CHECK_LOCATION_PERMISSION_COMMAND_NAME,
+                    result);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -94,8 +95,8 @@ public class PermissionRequestActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            int[] grantResults) {
         Message message = new Message();
         Bundle data = new Bundle();
         data.putStringArray(EXTRA_PERMISSIONS, permissions);

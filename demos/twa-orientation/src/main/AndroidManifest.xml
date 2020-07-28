@@ -72,7 +72,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                    android:host="twa-tests.firebaseapp.com"/>
+                    android:host="tulip-forest-limpet.glitch.me"/>
             </intent-filter>
 
         </activity>
@@ -90,12 +90,8 @@
         </provider>
 
         <service
-            android:name=".NotificationDelegationService"
-            android:enabled="true"
+            android:name="com.google.androidbrowserhelper.trusted.DelegationService"
             android:exported="true">
-
-            <meta-data android:name="android.support.customtabs.trusted.SMALL_ICON"
-                android:resource="@drawable/ic_notification_icon" />
 
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>

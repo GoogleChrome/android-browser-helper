@@ -45,19 +45,19 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
     }
 
     @Override
-    public void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
+    void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
         unregisterFromLocationUpdates();
         mCallback = callback;
         registerForLocationUpdates(enableHighAccuracy);
     }
 
     @Override
-    public void stop() {
+    void stop() {
         unregisterFromLocationUpdates();
     }
 
     @Override
-    public boolean isRunning() {
+    boolean isRunning() {
         return mIsRunning;
     }
 

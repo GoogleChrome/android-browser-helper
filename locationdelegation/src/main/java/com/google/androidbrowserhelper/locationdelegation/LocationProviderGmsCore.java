@@ -48,7 +48,7 @@ public class LocationProviderGmsCore extends LocationProvider
     private final GoogleApiClient mGoogleApiClient;
     private FusedLocationProviderApi mLocationProviderApi = LocationServices.FusedLocationApi;
 
-    private boolean mEnablehighAccuracy;
+    private boolean mEnableHighAccuracy;
     private LocationRequest mLocationRequest;
 
     LocationProviderGmsCore(Context context) {
@@ -68,7 +68,7 @@ public class LocationProviderGmsCore extends LocationProvider
     @Override
     public void onConnected(Bundle connectionHint) {
         mLocationRequest = LocationRequest.create();
-        if (mEnablehighAccuracy) {
+        if (mEnableHighAccuracy) {
             // With enableHighAccuracy, request a faster update interval and configure the provider
             // for high accuracy mode.
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -107,16 +107,16 @@ public class LocationProviderGmsCore extends LocationProvider
 
     // LocationProvider implementations
     @Override
-    public void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
+    void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mCallback = callback;
 
-        mEnablehighAccuracy = enableHighAccuracy;
+        mEnableHighAccuracy = enableHighAccuracy;
         mGoogleApiClient.connect(); // Should return via onConnected().
     }
 
     @Override
-    public void stop() {
+    void stop() {
         if (!mGoogleApiClient.isConnected()) return;
 
         mLocationProviderApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -126,7 +126,7 @@ public class LocationProviderGmsCore extends LocationProvider
     }
 
     @Override
-    public boolean isRunning() {
+    boolean isRunning() {
         if (mGoogleApiClient == null) return false;
         return mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected();
     }

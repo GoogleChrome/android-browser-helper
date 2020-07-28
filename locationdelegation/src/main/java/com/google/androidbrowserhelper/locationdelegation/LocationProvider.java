@@ -54,8 +54,7 @@ public abstract class LocationProvider {
     abstract void stop();
 
     /**
-     * Returns true if we are currently listening for location updates, false if not. For testing
-     * purpose.
+     * Returns true if we are currently listening for location updates, false if not.
      */
     abstract boolean isRunning();
 

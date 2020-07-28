@@ -84,13 +84,11 @@ public class LocationProviderGmsCore extends LocationProvider
         }
 
         try {
-            // Request updates on UI Thread replicating LocationProviderAndroid's behaviour.
             mLocationProviderApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this, Looper.getMainLooper());
         } catch (IllegalStateException | SecurityException e) {
             // IllegalStateException is thrown "If this method is executed in a thread that has not
-            // called Looper.prepare()". SecurityException is thrown if there is no permission, see
-            // https://crbug.com/731271.
+            // called Looper.prepare()". SecurityException is thrown if there is no permission.
             Log.e(TAG, " mLocationProviderApi.requestLocationUpdates() " + e);
             notifyLocationErrorWithMessage(
                     "Failed to request location updates: " + e.toString());

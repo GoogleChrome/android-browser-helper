@@ -63,9 +63,8 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
 
     @Override
     public void onLocationChanged(Location location) {
-        // Callbacks from the system location service are queued to this thread, so it's
-        // possible that we receive callbacks after unregistering. At this point, the
-        // native object will no longer exist.
+        // Callbacks from the system location service are queued to this thread, so it's possible
+        // that we receive callbacks after unregistering.
         if (mIsRunning) {
             onNewLocationAvailable(location);
         }
@@ -101,12 +100,11 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
         assert !mIsRunning;
         mIsRunning = true;
 
-        // We're running on the main thread. The C++ side is responsible to
-        // bounce notifications to the Geolocation thread as they arrive in the mainLooper.
         try {
             Criteria criteria = new Criteria();
             if (enableHighAccuracy) criteria.setAccuracy(Criteria.ACCURACY_FINE);
-            mLocationManager.requestLocationUpdates(0, 0, criteria, this, Looper.getMainLooper());
+            mLocationManager.requestLocationUpdates(0, 0, criteria,
+                    this, Looper.getMainLooper());
         } catch (SecurityException e) {
             Log.e(TAG,
                     "Caught security exception while registering for location updates "
@@ -136,9 +134,8 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
             return false;
         }
 
-        // Do not request a location update if the only available location provider is
-        // the passive one. Make use of the last known location and call
-        // onNewLocationAvailable directly.
+        // Do not request a location update if the only available location provider is the passive
+        // one. Make use of the last known location and call onNewLocationAvailable directly.
         final Location location =
                 mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         if (location != null) {
@@ -149,8 +146,7 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
     }
 
     /*
-     * Checks if the passive location provider is the only provider available
-     * in the system.
+     * Checks if the passive location provider is the only provider available in the system.
      */
     private boolean isOnlyPassiveLocationProviderEnabled() {
         final List<String> providers = mLocationManager.getProviders(true);

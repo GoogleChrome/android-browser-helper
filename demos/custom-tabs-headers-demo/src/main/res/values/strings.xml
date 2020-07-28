@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">Custom Tab Headers Demo</string>
-    <string name="standard_headers">STANDARD HEADERS</string>
-    <string name="extra_headers">EXTRA HEADERS</string>
-</resources>

@@ -78,12 +78,12 @@ public class LocationProviderGmsCore extends LocationProvider
                     .setInterval(UPDATE_INTERVAL_MS);
         }
 
-        final Location location = mLocationProviderApi.getLastLocation(mGoogleApiClient);
-        if (location != null) {
-            onNewLocationAvailable(location);
-        }
-
         try {
+            final Location location = mLocationProviderApi.getLastLocation(mGoogleApiClient);
+            if (location != null) {
+                onNewLocationAvailable(location);
+            }
+
             mLocationProviderApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this, Looper.getMainLooper());
         } catch (IllegalStateException | SecurityException e) {
@@ -110,8 +110,8 @@ public class LocationProviderGmsCore extends LocationProvider
     void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         mCallback = callback;
-
         mEnableHighAccuracy = enableHighAccuracy;
+
         mGoogleApiClient.connect(); // Should return via onConnected().
     }
 

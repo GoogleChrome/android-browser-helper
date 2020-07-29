@@ -35,6 +35,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
  * Utilities used by helper classes that are setting up and launching Trusted Web Activities.
  */
 public class Utils {
+    private static final String ARC_FEATURE = "org.chromium.arc";
 
     /** Sets status bar color. Makes the icons dark if necessary. */
     public static void setStatusBarColor(Activity activity, @ColorInt int color) {
@@ -109,34 +110,38 @@ public class Utils {
      * Important: The content the meta-tag and the JSON fire are not validated.
      */
     public static boolean hasChromeOsSupport(Context context) {
-        // We first check if /app/res/web_app_manifest.json is available
+        PackageManager packageManager = context.getPackageManager();
+
+        // Check if the application is running on a Chrome OS device.
+        if (!packageManager.hasSystemFeature(ARC_FEATURE)) {
+            return false;
+        }
+
+        // We first check if /app/res/web_app_manifest.json is available.
         int id = context.getResources().getIdentifier(
                 "web_app_manifest.json", "raw", context.getPackageName());
         // If an attribute with that name doesn't exist the result is 0 (which is an invalid ID for
-        // attributes)
+        // attributes).
         if (id == 0) {
-            Log.e("ChromeOS-Support", "Could not find '/res/raw/web_app_manifest.json'");
+            Log.w("ChromeOS-Support", "Could not find '/res/raw/web_app_manifest.json'.");
             return false;
         }
 
         // Then, we check if the 'web_manifest_url' meta-tag has been defined.
         try {
-            ApplicationInfo applicationInfo = context.getPackageManager()
+            ApplicationInfo applicationInfo = packageManager
                     .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            String webManifestUrl = applicationInfo.metaData.getString("web_manifest_url");
-            if (webManifestUrl == null) {
-                Log.e("ChromeOS-Support",
-                        "Could not the 'web_manifest_url' meta-tag in 'AndroidManifest.xml'.'");
+            if (!applicationInfo.metaData.containsKey("web_manifest_url")) {
+                Log.w("ChromeOS-Support",
+                        "Could not the 'web_manifest_url' meta-tag in 'AndroidManifest.xml'.");
+                return false;
             }
-            context.getPackageManager().getResourcesForApplication(context.getPackageName());
-            return false;
+            return true;
         } catch (PackageManager.NameNotFoundException ex) {
             // This should never happen, as we're retrieving info for the app itself, but we log
             // and allow returning true nevertheless.
-            Log.e("ChromeOS-Support", "Error retrieving application meta-data");
+            Log.w("ChromeOS-Support", "Error retrieving application meta-data.");
+            return false;
         }
-
-        // If both have been defined, we can have Chrome OS support.
-        return true;
     }
 }

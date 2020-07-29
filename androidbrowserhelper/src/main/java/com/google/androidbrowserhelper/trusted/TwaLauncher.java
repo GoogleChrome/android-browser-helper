@@ -43,8 +43,6 @@ public class TwaLauncher {
 
     private static final int DEFAULT_SESSION_ID = 96375;
 
-    private static final String ARC_FEATURE = "org.chromium.arc";
-
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
@@ -54,8 +52,7 @@ public class TwaLauncher {
             intent.intent.setPackage(providerPackage);
         }
         // Add the TWA flag to the intent if the app is running on ARC++ on Chrome OS.
-        if (context.getPackageManager().hasSystemFeature(ARC_FEATURE) &&
-                Utils.hasChromeOsSupport(context)) {
+        if (Utils.hasChromeOsSupport(context)) {
             intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
         intent.launchUrl(context, twaBuilder.getUri());

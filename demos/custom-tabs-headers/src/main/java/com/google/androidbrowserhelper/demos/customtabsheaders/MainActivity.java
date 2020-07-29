@@ -31,6 +31,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
+import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,21 +40,17 @@ public class MainActivity extends AppCompatActivity {
     private CustomTabsSession mSession;
     private CustomTabsServiceConnection mConnection;
 
-    private boolean connectionValidated = false;
-
     @Override
     protected void onStart() {
         super.onStart();
 
-        // Set up a callback that launches the cross origin intent after session validated.
+        // Set up a callback that launches the intent after session was validated.
         CustomTabsCallback callback = new CustomTabsCallback() {
             @Override
-            public void onRelationshipValidationResult(int relation,
-                                                       @NonNull Uri requestedOrigin,
-                                                       boolean result,
-                                                       @Nullable Bundle extras) {
+            public void onRelationshipValidationResult(int relation, @NonNull Uri requestedOrigin,
+                    boolean result, @Nullable Bundle extras) {
                 // Can launch custom tabs intent after session was validated as the same origin.
-                connectionValidated = true;
+                findViewById(R.id.btn_extra).setEnabled(true);
             }
         };
 
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         mConnection = new CustomTabsServiceConnection() {
             @Override
             public void onCustomTabsServiceConnected(@NonNull ComponentName name,
-                                                     @NonNull CustomTabsClient client) {
+                    @NonNull CustomTabsClient client) {
                 // Create session after service connected.
                 mSession = client.newSession(callback);
                 client.warmup(0);
@@ -91,11 +88,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.btn_extra).setOnClickListener(view -> {
-            if (connectionValidated) {
-                CustomTabsIntent intent = constructExtraHeadersIntent(mSession);
-                intent.launchUrl(MainActivity.this, URL);
-            }
+        Button btnExtra = findViewById(R.id.btn_extra);
+        btnExtra.setEnabled(false);
+        btnExtra.setOnClickListener(view -> {
+            CustomTabsIntent intent = constructExtraHeadersIntent(mSession);
+            intent.launchUrl(MainActivity.this, URL);
         });
     }
 
@@ -103,9 +100,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (mConnection == null) return;
-        this.unbindService(mConnection);
+        unbindService(mConnection);
         mConnection = null;
-        connectionValidated = false;
+        findViewById(R.id.btn_extra).setEnabled(false);
     }
 
     private CustomTabsIntent constructExtraHeadersIntent(CustomTabsSession session) {

@@ -136,8 +136,14 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
 
         // Do not request a location update if the only available location provider is the passive
         // one. Make use of the last known location and call onNewLocationAvailable directly.
-        final Location location =
-                mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        Location location = null;
+        try {
+            location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+        } catch (SecurityException | IllegalArgumentException e) {
+            notifyLocationErrorWithMessage(
+                    "Failed to request location updates: " + e.toString());
+        }
+
         if (location != null) {
             // should called on main thread!!!
             onNewLocationAvailable(location);

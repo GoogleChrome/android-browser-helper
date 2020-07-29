@@ -52,7 +52,7 @@ public class TwaLauncher {
             intent.intent.setPackage(providerPackage);
         }
         // Add the TWA flag to the intent if the app is running on ARC++ on Chrome OS.
-        if (Utils.hasChromeOsSupport(context)) {
+        if (Utils.shouldAddExtraForChromeOs(context)) {
             intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
         intent.launchUrl(context, twaBuilder.getUri());

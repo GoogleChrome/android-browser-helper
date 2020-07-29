@@ -105,11 +105,13 @@ public class Utils {
     }
 
     /**
-     * Verifies if the application has the required meta-tag, `web_manifest_url`, and the
-     * `web_app_manifest.json` file, required to enable the Trusted Web Activity on Chrome OS.
+     * Verifies if the application is running on Chrome OS by checking the the system feature
+     * `org.chromium.arc`. If the application is indeed running on Chrome OS, checks if it has the
+     * required meta-tag, `web_manifest_url`, and the `web_app_manifest.json` file, which are
+     * required to enable the Trusted Web Activity on Chrome OS.
      * Important: The content the meta-tag and the JSON fire are not validated.
      */
-    public static boolean hasChromeOsSupport(Context context) {
+    public static boolean shouldAddExtraForChromeOs(Context context) {
         PackageManager packageManager = context.getPackageManager();
 
         // Check if the application is running on a Chrome OS device.

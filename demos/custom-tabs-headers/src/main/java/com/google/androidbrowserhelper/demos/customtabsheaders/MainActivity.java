@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private CustomTabsSession mSession;
     private CustomTabsServiceConnection mConnection;
 
+    private Button mExtraButton;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -88,9 +90,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnExtra = findViewById(R.id.btn_extra);
-        btnExtra.setEnabled(false);
-        btnExtra.setOnClickListener(view -> {
+        mExtraButton = findViewById(R.id.btn_extra);
+        mExtraButton.setOnClickListener(view -> {
             CustomTabsIntent intent = constructExtraHeadersIntent(mSession);
             intent.launchUrl(MainActivity.this, URL);
         });

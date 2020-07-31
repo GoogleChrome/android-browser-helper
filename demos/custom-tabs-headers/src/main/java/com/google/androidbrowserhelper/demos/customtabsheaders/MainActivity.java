@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             public void onRelationshipValidationResult(int relation, @NonNull Uri requestedOrigin,
                     boolean result, @Nullable Bundle extras) {
                 // Can launch custom tabs intent after session was validated as the same origin.
-                findViewById(R.id.btn_extra).setEnabled(true);
+                mExtraButton.setEnabled(true);
             }
         };
 
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         if (mConnection == null) return;
         unbindService(mConnection);
         mConnection = null;
-        findViewById(R.id.btn_extra).setEnabled(false);
+        mExtraButton.setEnabled(false);
     }
 
     private CustomTabsIntent constructExtraHeadersIntent(CustomTabsSession session) {

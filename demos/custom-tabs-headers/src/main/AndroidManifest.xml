@@ -14,6 +14,11 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.androidbrowserhelper.demos.customtabsheaders">
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -25,11 +30,9 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
 

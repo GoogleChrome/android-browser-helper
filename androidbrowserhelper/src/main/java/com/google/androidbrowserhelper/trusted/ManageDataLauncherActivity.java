@@ -20,7 +20,6 @@ import static androidx.browser.customtabs.CustomTabsService.RELATION_HANDLE_ALL_
 import static androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY_CATEGORY;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -76,6 +74,9 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
     // TODO: move to AndroidX.
     public static final String ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA =
             "android.support.customtabs.action.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA";
+
+    public static final String CATEGORY_LAUNCH_SITE_SETTINGS =
+            "androidx.browser.trusted.category.LaunchSiteSettings";
 
     @Nullable
     private String mProviderPackage;
@@ -294,4 +295,21 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName componentName) {}
     }
+
+    public static boolean packageSupportsSiteSettings(String packageName, PackageManager packageManager) {
+        if (packageName != null) {
+            if (ChromeLegacyUtils.supportsTrustedWebActivities(packageManager, packageName)) {
+                // Chrome 72-74 support site settings but don't yet have the category
+                return true;
+            } else {
+                Intent customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+                customTabsIntent.addCategory(CATEGORY_LAUNCH_SITE_SETTINGS);
+                customTabsIntent.setPackage(packageName);
+                List<ResolveInfo> services = packageManager.queryIntentServices(customTabsIntent, PackageManager.GET_RESOLVED_FILTER);
+                return services.size() > 0;
+            }
+        }
+        return false;
+    }
 }
+

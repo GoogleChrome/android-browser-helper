@@ -15,6 +15,10 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
@@ -34,7 +38,8 @@ import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -113,6 +118,8 @@ public class LauncherActivity extends AppCompatActivity {
     @Nullable
     private TwaLauncher mTwaLauncher;
 
+    private PackageManager mPackageManager;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,6 +179,30 @@ public class LauncherActivity extends AppCompatActivity {
 
         new TwaSharedPreferencesManager(this)
                 .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+
+        mPackageManager = getPackageManager();
+        // Check whether ManageDataLauncherActivity is present in manifest.
+        Intent siteSettingsIntent = new Intent(this, ManageDataLauncherActivity.class);
+        siteSettingsIntent.setAction(ManageDataLauncherActivity.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
+        List<ResolveInfo> activities = mPackageManager.queryIntentActivities(siteSettingsIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        boolean siteSettingsAvailable = activities.size() > 0;
+
+        // Check whether TWA provider package supports site settings.
+        String packageName = mTwaLauncher.getProviderPackage();
+        boolean supportsTWASiteSettings = ManageDataLauncherActivity.packageSupportsSiteSettings(packageName, mPackageManager);
+
+        if(siteSettingsAvailable && supportsTWASiteSettings) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+                ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "siteSettings")
+                        .setShortLabel("Site Settings")
+                        .setLongLabel("Manage website notifications, permissions, etc.")
+                        .setIntent(siteSettingsIntent)
+                        .build();
+                shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
+            }
+        }
     }
 
     private boolean splashScreenNeeded() {

@@ -22,12 +22,16 @@ import static androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -73,6 +77,9 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
 
     // TODO: move to AndroidX.
     public static final String ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA =
+            "android.support.customtabs.action.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA";
+
+    public static final String SITE_SETTINGS_SHORTCUT_ID =
             "android.support.customtabs.action.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA";
 
     public static final String CATEGORY_LAUNCH_SITE_SETTINGS =
@@ -296,20 +303,55 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
         public void onServiceDisconnected(ComponentName componentName) {}
     }
 
-    public static boolean packageSupportsSiteSettings(String packageName, PackageManager packageManager) {
-        if (packageName != null) {
-            if (ChromeLegacyUtils.supportsTrustedWebActivities(packageManager, packageName)) {
-                // Chrome 72-74 support site settings but don't yet have the category
-                return true;
-            } else {
-                Intent customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
-                customTabsIntent.addCategory(CATEGORY_LAUNCH_SITE_SETTINGS);
-                customTabsIntent.setPackage(packageName);
-                List<ResolveInfo> services = packageManager.queryIntentServices(customTabsIntent, PackageManager.GET_RESOLVED_FILTER);
-                return services.size() > 0;
+    /**
+     * Checks whether the provided package name supports site settings. Returns true when
+     * the package name belongs to a twa provider supporting the site settings category or
+     * it is a legacy version of chrome that supports site settings but does not define
+     * the site settings category yet.
+     */
+    public static boolean packageSupportsSiteSettings(String packageName,
+            PackageManager packageManager) {
+        if (packageName == null) return false;
+        if (ChromeLegacyUtils.supportsSiteSettings(packageManager, packageName)) {
+            // Legacy Chrome supports site settings but does not have the site settings category.
+            return true;
+        } else {
+            Intent customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+            customTabsIntent.addCategory(CATEGORY_LAUNCH_SITE_SETTINGS);
+            customTabsIntent.setPackage(packageName);
+            List<ResolveInfo> services = packageManager.queryIntentServices(customTabsIntent,
+                    PackageManager.GET_RESOLVED_FILTER);
+            return services.size() > 0;
+        }
+    }
+
+    /**
+     * Returns the {@link ShortcutInfo} for a dynamic shortcut into site settings,
+     * provided that {@link ManageDataLauncherActivity} is present in the manifest
+     * and an Intent for managing site settings is available.
+     *
+     * Otherwise returns null if {@link ManageDataLauncherActivity} is not launchable
+     * or if shortcuts are not supported by the Android SDK version.
+     */
+    public static ShortcutInfo getSiteSettingsShortcutOrNull(Context context, PackageManager packageManager) {
+        Intent siteSettingsIntent = new Intent(context, ManageDataLauncherActivity.class);
+        siteSettingsIntent.setAction(ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(siteSettingsIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        // Intent for managing settings available
+        if(activities.size() > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                return new ShortcutInfo.Builder(context, ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA)
+                        .setShortLabel("Site Settings")
+                        .setLongLabel("Manage website notifications, permissions, etc.")
+                        .setIcon(Icon.createWithResource(context,
+                                android.R.drawable.ic_menu_preferences))
+                        .setIntent(siteSettingsIntent)
+                        .build();
             }
         }
-        return false;
+        return null;
     }
+
 }
 

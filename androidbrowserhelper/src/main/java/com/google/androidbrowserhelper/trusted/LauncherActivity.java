@@ -16,7 +16,6 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.Matrix;
@@ -118,8 +117,6 @@ public class LauncherActivity extends AppCompatActivity {
     @Nullable
     private TwaLauncher mTwaLauncher;
 
-    private PackageManager mPackageManager;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -180,29 +177,36 @@ public class LauncherActivity extends AppCompatActivity {
         new TwaSharedPreferencesManager(this)
                 .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
 
-        mPackageManager = getPackageManager();
-        // Check whether ManageDataLauncherActivity is present in manifest.
-        Intent siteSettingsIntent = new Intent(this, ManageDataLauncherActivity.class);
-        siteSettingsIntent.setAction(ManageDataLauncherActivity.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
-        List<ResolveInfo> activities = mPackageManager.queryIntentActivities(siteSettingsIntent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-        boolean siteSettingsAvailable = activities.size() > 0;
+        addSiteSettingsShortcut();
+    }
 
-        // Check whether TWA provider package supports site settings.
-        String packageName = mTwaLauncher.getProviderPackage();
-        boolean supportsTWASiteSettings = ManageDataLauncherActivity.packageSupportsSiteSettings(packageName, mPackageManager);
+    /**
+     * Adds dynamic shortcut to site settings if the twa provider and android version supports it.
+     */
+    private void addSiteSettingsShortcut() {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return;
 
-        if(siteSettingsAvailable && supportsTWASiteSettings) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-                ShortcutInfo shortcut = new ShortcutInfo.Builder(this, "siteSettings")
-                        .setShortLabel("Site Settings")
-                        .setLongLabel("Manage website notifications, permissions, etc.")
-                        .setIntent(siteSettingsIntent)
-                        .build();
-                shortcutManager.setDynamicShortcuts(Collections.singletonList(shortcut));
-            }
+        PackageManager packageManager = getPackageManager();
+        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+
+        // Remove potentially existing shortcut if package does not support shortcuts.
+        if (!ManageDataLauncherActivity
+                .packageSupportsSiteSettings(mTwaLauncher.getProviderPackage(), packageManager)) {
+            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
+                    .SITE_SETTINGS_SHORTCUT_ID));
+            return;
         }
+
+        ShortcutInfo shortcut = ManageDataLauncherActivity.getSiteSettingsShortcutOrNull(
+                this, packageManager);
+
+        // Remove potentially existing shortcut if shortcut can not be retrieved.
+        if(shortcut == null) {
+            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
+                    .SITE_SETTINGS_SHORTCUT_ID));
+            return;
+        };
+        shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcut));
     }
 
     private boolean splashScreenNeeded() {

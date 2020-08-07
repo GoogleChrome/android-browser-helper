@@ -182,6 +182,9 @@ public class LauncherActivity extends AppCompatActivity {
 
     /**
      * Adds dynamic shortcut to site settings if the twa provider and android version supports it.
+     *
+     * Removes previously added site settings shortcut if it is no longer supported, e.g. the user
+     * changed their default browser.
      */
     private void addSiteSettingsShortcut() {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return;

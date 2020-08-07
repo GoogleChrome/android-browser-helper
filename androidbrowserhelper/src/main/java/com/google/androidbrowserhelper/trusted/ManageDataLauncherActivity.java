@@ -338,7 +338,6 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
         siteSettingsIntent.setAction(ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
         List<ResolveInfo> activities = packageManager.queryIntentActivities(siteSettingsIntent,
                 PackageManager.MATCH_DEFAULT_ONLY);
-        // Intent for managing settings available
         if(activities.size() > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 return new ShortcutInfo.Builder(context, ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA)

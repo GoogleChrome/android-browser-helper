@@ -16,7 +16,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.support.customtabs">
     <uses-sdk android:minSdkVersion="16"/>
-    <application>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
+
+    <application
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+
+        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="https://www.test.com/default_url/" />
+            <intent-filter>
+                <action android:name="android.support.customtabs.action.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestActivity"
                   android:enabled="false">
             <!-- A browsable intent filter is required for the DelegationService. -->
@@ -47,6 +71,7 @@
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivitySplashScreensV1" />
+                <category android:name="androidx.browser.trusted.category.LaunchSiteSettings" />
             </intent-filter>
         </service>
 

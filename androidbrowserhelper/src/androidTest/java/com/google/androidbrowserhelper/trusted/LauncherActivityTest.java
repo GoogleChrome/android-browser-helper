@@ -14,19 +14,16 @@
 
 package com.google.androidbrowserhelper.trusted;
 
-import static com.google.androidbrowserhelper.trusted.testutils.TestUtil.getBrowserActivityWhenLaunched;
+import static com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity.SITE_SETTINGS_SHORTCUT_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import static androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY;
-
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ShortcutManager;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.test.R;
-import com.google.androidbrowserhelper.trusted.testcomponents.TestActivity;
 import com.google.androidbrowserhelper.trusted.testutils.EnableComponentsTestRule;
 import com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser;
 import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService;
@@ -38,10 +35,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
@@ -119,14 +114,10 @@ public class LauncherActivityTest {
     public void addsSiteSettingsShortcut() {
         TestBrowser browser = launch();
         ShortcutManager shortcutManager = mContext.getSystemService(ShortcutManager.class);
-        shortcutManager.getDynamicShortcuts();
-        Uri url = Uri.parse("https://padr31.github.io/");
-
-        TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(url);
-        Runnable launchRunnable = () -> new TwaLauncher(mActivityTestRule.getActivity()).launch(builder, null, null);
-        Intent intent = getBrowserActivityWhenLaunched(launchRunnable).getIntent();
-        //browser.get
+        assertEquals(1, shortcutManager.getDynamicShortcuts().size());
+        assertEquals(SITE_SETTINGS_SHORTCUT_ID, shortcutManager.getDynamicShortcuts().get(0).getId());
     }
+
 
     private void checkColor(TestBrowser browser) {
         int requestedColor = browser.getIntent()

@@ -340,9 +340,10 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
                 PackageManager.MATCH_DEFAULT_ONLY);
         if(activities.size() > 0) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                return new ShortcutInfo.Builder(context, ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA)
+                return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
                         .setShortLabel("Site Settings")
                         .setLongLabel("Manage website notifications, permissions, etc.")
+                        .setActivity(new ComponentName(context, ManageDataLauncherActivity.class))
                         .setIcon(Icon.createWithResource(context,
                                 android.R.drawable.ic_menu_preferences))
                         .setIntent(siteSettingsIntent)

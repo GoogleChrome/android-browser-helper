@@ -76,7 +76,8 @@ public class ManageDataLauncherActivityTest {
         installChrome(CHROME_72_VERSION);
         TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
 
-        assertTrue(ManageDataLauncherActivity.packageSupportsSiteSettings(action.provider, mPackageManager));
+        assertTrue(ManageDataLauncherActivity
+                .packageSupportsSiteSettings(action.provider, mPackageManager));
     }
 
     @Test
@@ -84,7 +85,8 @@ public class ManageDataLauncherActivityTest {
         installChrome(CHROME_71_VERSION);
         TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
 
-        assertFalse(ManageDataLauncherActivity.packageSupportsSiteSettings(action.provider, mPackageManager));
+        assertFalse(ManageDataLauncherActivity
+                .packageSupportsSiteSettings(action.provider,mPackageManager));
     }
 
     @Test
@@ -93,16 +95,18 @@ public class ManageDataLauncherActivityTest {
 
         TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
 
-        assertTrue(ManageDataLauncherActivity.packageSupportsSiteSettings(action.provider, mPackageManager));
+        assertTrue(ManageDataLauncherActivity
+                .packageSupportsSiteSettings(action.provider, mPackageManager));
     }
 
     @Test
-    public void browserWithoutCategorySupportsSiteSettings() {
+    public void browserWithoutCategoryDoesNotSupportSiteSettings() {
         installTrustedWebActivityProvider(TWA_PROVIDER_PACKAGE);
 
         TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
 
-        assertFalse(ManageDataLauncherActivity.packageSupportsSiteSettings(action.provider, mPackageManager));
+        assertFalse(ManageDataLauncherActivity
+                .packageSupportsSiteSettings(action.provider, mPackageManager));
     }
 
     @Test
@@ -110,21 +114,23 @@ public class ManageDataLauncherActivityTest {
     public void returnsSiteSettingsShortcut() {
         installTrustedWebActivityProviderWithManageDataAction(TWA_PROVIDER_PACKAGE);
 
-        assertNotNull(ManageDataLauncherActivity.getSiteSettingsShortcutOrNull(mContext, mPackageManager));
+        assertNotNull(ManageDataLauncherActivity
+                .getSiteSettingsShortcutOrNull(mContext, mPackageManager));
     }
 
     @Test
     @Config(sdk = Build.VERSION_CODES.N)
     public void returnsNullSiteSettingsShortcutWithLowSDK() {
         installTrustedWebActivityProviderWithManageDataAction(TWA_PROVIDER_PACKAGE);
-
-        assertNull(ManageDataLauncherActivity.getSiteSettingsShortcutOrNull(mContext, mPackageManager));
+        assertNull(ManageDataLauncherActivity
+                .getSiteSettingsShortcutOrNull(mContext, mPackageManager));
     }
 
     @Test
     @Config(sdk = Build.VERSION_CODES.N_MR1)
     public void returnsNullSiteSettingsShortcutWhenMissingManageDataLauncherActivity() {
-        assertNull(ManageDataLauncherActivity.getSiteSettingsShortcutOrNull(mContext, mPackageManager));
+        assertNull(ManageDataLauncherActivity
+                .getSiteSettingsShortcutOrNull(mContext, mPackageManager));
     }
 
     private void installBrowser(String packageName) {

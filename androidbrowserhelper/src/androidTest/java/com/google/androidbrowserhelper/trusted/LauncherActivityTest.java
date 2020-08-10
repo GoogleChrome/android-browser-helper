@@ -118,7 +118,6 @@ public class LauncherActivityTest {
         assertEquals(SITE_SETTINGS_SHORTCUT_ID, shortcutManager.getDynamicShortcuts().get(0).getId());
     }
 
-
     private void checkColor(TestBrowser browser) {
         int requestedColor = browser.getIntent()
                 .getIntExtra(CustomTabsIntent.EXTRA_TOOLBAR_COLOR, 0);

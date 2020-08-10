@@ -15,12 +15,8 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
 import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -36,9 +32,6 @@ import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -177,39 +170,8 @@ public class LauncherActivity extends AppCompatActivity {
         new TwaSharedPreferencesManager(this)
                 .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
 
-        addSiteSettingsShortcut();
-    }
-
-    /**
-     * Adds dynamic shortcut to site settings if the twa provider and android version supports it.
-     *
-     * Removes previously added site settings shortcut if it is no longer supported, e.g. the user
-     * changed their default browser.
-     */
-    private void addSiteSettingsShortcut() {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return;
-
-        PackageManager packageManager = getPackageManager();
-        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-
-        // Remove potentially existing shortcut if package does not support shortcuts.
-        if (!ManageDataLauncherActivity
-                .packageSupportsSiteSettings(mTwaLauncher.getProviderPackage(), packageManager)) {
-            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
-                    .SITE_SETTINGS_SHORTCUT_ID));
-            return;
-        }
-
-        ShortcutInfo shortcut = ManageDataLauncherActivity.getSiteSettingsShortcutOrNull(
-                this, packageManager);
-
-        // Remove potentially existing shortcut if shortcut can not be retrieved.
-        if(shortcut == null) {
-            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
-                    .SITE_SETTINGS_SHORTCUT_ID));
-            return;
-        };
-        shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcut));
+        ManageDataLauncherActivity.addSiteSettingsShortcut(this,
+                mTwaLauncher.getProviderPackage());
     }
 
     private boolean splashScreenNeeded() {

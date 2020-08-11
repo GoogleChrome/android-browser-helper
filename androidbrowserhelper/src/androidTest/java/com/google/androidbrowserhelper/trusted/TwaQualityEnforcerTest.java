@@ -39,6 +39,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import static com.google.androidbrowserhelper.trusted.testutils.TestUtil.getBrowserActivityWhenLaunched;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -67,9 +68,6 @@ public class TwaQualityEnforcerTest {
     @Rule
     public final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, false, true);
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     private TestActivity mActivity;
 
@@ -117,5 +115,19 @@ public class TwaQualityEnforcerTest {
                 callback.extraCallbackWithResult(QualityEnforcer.CRASH, args);
         assertTrue(result.getBoolean(QualityEnforcer.KEY_SUCCESS));
         assertTrue(mCrashed);
+    }
+
+    @Test
+    public void triggerQualityEnforcement_NoCrashReason() {
+        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
+        CustomTabsSessionToken token =
+                CustomTabsSessionToken.getSessionTokenFromIntent(
+                        getBrowserActivityWhenLaunched(launchRunnable).getIntent());
+        CustomTabsCallback callback = token.getCallback();
+
+        Bundle args = Bundle.EMPTY;
+        Bundle result =
+                callback.extraCallbackWithResult(QualityEnforcer.NOTIFY, args);
+        assertFalse(result.getBoolean(QualityEnforcer.KEY_SUCCESS));
     }
 }

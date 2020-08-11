@@ -17,8 +17,7 @@
           package="android.support.customtabs">
     <uses-sdk android:minSdkVersion="16"/>
 
-    <application
-        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+    <application>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
             <meta-data

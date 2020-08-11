@@ -340,8 +340,10 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
      * MAIN action and LAUNCHER category in order to attach the shortcut.
      */
     @Nullable
-    public static ShortcutInfo getSiteSettingsShortcutOrNull(Context context,
+    static ShortcutInfo getSiteSettingsShortcutOrNull(Context context,
             PackageManager packageManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return null;
+
         Intent siteSettingsIntent = new Intent(context, ManageDataLauncherActivity.class);
         siteSettingsIntent.setAction(ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
         List<ResolveInfo> activities = packageManager.queryIntentActivities(siteSettingsIntent,
@@ -349,17 +351,13 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
 
         if(activities.size() == 0) return null;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
-                    .setShortLabel("Site Settings")
-                    .setLongLabel("Manage website notifications, permissions, etc.")
-                    .setIcon(Icon.createWithResource(context,
-                            android.R.drawable.ic_menu_preferences))
-                    .setIntent(siteSettingsIntent)
-                    .build();
-        }
-
-        return null;
+        return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
+                .setShortLabel("Site Settings")
+                .setLongLabel("Manage website notifications, permissions, etc.")
+                .setIcon(Icon.createWithResource(context,
+                        android.R.drawable.ic_menu_preferences))
+                .setIntent(siteSettingsIntent)
+                .build();
     }
 
     /**

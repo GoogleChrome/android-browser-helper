@@ -377,7 +377,7 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
 
         // Remove potentially existing shortcut if package does not support shortcuts.
         if (!packageSupportsSiteSettings(packageName, packageManager)) {
-            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
+            shortcutManager.removeDynamicShortcuts(Collections.singletonList(ManageDataLauncherActivity
                     .SITE_SETTINGS_SHORTCUT_ID));
             return;
         }
@@ -387,7 +387,7 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
 
         // Remove potentially existing shortcut if shortcut can not be retrieved.
         if(shortcut == null) {
-            shortcutManager.removeDynamicShortcuts(List.of(ManageDataLauncherActivity
+            shortcutManager.removeDynamicShortcuts(Collections.singletonList(ManageDataLauncherActivity
                     .SITE_SETTINGS_SHORTCUT_ID));
             return;
         }

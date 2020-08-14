@@ -1,9 +1,12 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -20,6 +23,7 @@ public class MockBillingWrapper implements BillingWrapper {
     private List<String> mQueriedSkuDetails;
     private List<SkuDetails> mSkuDetailsList;
     private boolean mPaymentFlowSuccessful;
+    private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(1);
@@ -31,18 +35,14 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus) {
+    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
         mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
+        mPendingQuerySkuDetailsCallback = callback;
     }
 
     @Override
-    public List<SkuDetails> getSkuDetailsList() {
-        return mSkuDetailsList;
-    }
-
-    @Override
-    public boolean launchPaymentFlow(SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }
@@ -56,7 +56,10 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotSkuDetails() {
-        mListener.onGotSkuDetails();
+        BillingResult result = BillingResult.newBuilder()
+                .setResponseCode(BillingClient.BillingResponseCode.OK)
+                .build();
+        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, mSkuDetailsList);
     }
 
     public void triggerOnPurchasesUpdated() {

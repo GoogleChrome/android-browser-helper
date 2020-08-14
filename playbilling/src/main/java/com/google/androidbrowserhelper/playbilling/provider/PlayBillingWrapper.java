@@ -1,6 +1,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
+import android.content.Context;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -10,6 +11,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
 
@@ -19,12 +21,8 @@ import androidx.annotation.Nullable;
  * A {@link BillingWrapper} that communicates with the Play Billing libraries.
  */
 public class PlayBillingWrapper implements BillingWrapper {
-    private final Activity mActivity;
     private final Listener mListener;
     private final BillingClient mClient;
-
-    @Nullable
-    private List<SkuDetails> mSkuDetailsList;
 
     private final PurchasesUpdatedListener mPurchaseUpdateListener =
             new PurchasesUpdatedListener() {
@@ -34,11 +32,10 @@ public class PlayBillingWrapper implements BillingWrapper {
         }
     };
 
-    public PlayBillingWrapper(Activity activity, Listener listener) {
-        mActivity = activity;
+    public PlayBillingWrapper(Context context, Listener listener) {
         mListener = listener;
         mClient = BillingClient
-                .newBuilder(activity)
+                .newBuilder(context)
                 .setListener(mPurchaseUpdateListener)
                 .enablePendingPurchases()
                 .build();
@@ -60,33 +57,24 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus) {
+    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
         SkuDetailsParams params = SkuDetailsParams
                 .newBuilder()
                 .setSkusList(skus)
                 .setType(BillingClient.SkuType.INAPP)
                 .build();
 
-        mClient.querySkuDetailsAsync(params, (billingResult, list) -> {
-            // TODO: Check result
-            mSkuDetailsList = list;
-            mListener.onGotSkuDetails();
-        });
+        mClient.querySkuDetailsAsync(params, callback);
     }
 
     @Override
-    public List<SkuDetails> getSkuDetailsList() {
-        return mSkuDetailsList;
-    }
-
-    @Override
-    public boolean launchPaymentFlow(SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
         BillingFlowParams params = BillingFlowParams
                 .newBuilder()
                 .setSkuDetails(sku)
                 .build();
 
-        BillingResult result = mClient.launchBillingFlow(mActivity, params);
+        BillingResult result = mClient.launchBillingFlow(activity, params);
 
         return result.getResponseCode() == BillingClient.BillingResponseCode.OK;
     }

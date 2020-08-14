@@ -355,7 +355,7 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
                 .setShortLabel("Site Settings")
                 .setLongLabel("Manage website notifications, permissions, etc.")
                 .setIcon(Icon.createWithResource(context,
-                        android.R.drawable.ic_menu_preferences))
+                        R.drawable.ic_site_settings))
                 .setIntent(siteSettingsIntent)
                 .build();
     }

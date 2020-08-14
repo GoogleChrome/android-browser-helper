@@ -1,4 +1,4 @@
-package com.google.androidbrowserhelper.demos.playbilling;
+package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 

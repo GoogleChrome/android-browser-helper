@@ -1,5 +1,6 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
@@ -42,7 +43,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public boolean launchPaymentFlow(SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }

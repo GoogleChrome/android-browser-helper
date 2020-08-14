@@ -1,10 +1,8 @@
-package com.google.androidbrowserhelper.demos.playbilling;
+package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
-import android.os.RemoteException;
 
 import androidx.annotation.Nullable;
-import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 public class AcknowledgeCall {
     public static final String COMMAND_NAME = "acknowledge";
@@ -17,10 +15,10 @@ public class AcknowledgeCall {
 
     public final String purchaseToken;
     public final boolean makeAvailableAgain;
-    private final TrustedWebActivityCallbackRemote mCallback;
+    private final DigitalGoodsRequestHandler.Callback mCallback;
 
     private AcknowledgeCall(String purchaseToken, boolean makeAvailableAgain,
-            TrustedWebActivityCallbackRemote mCallback) {
+            DigitalGoodsRequestHandler.Callback mCallback) {
         this.purchaseToken = purchaseToken;
         this.makeAvailableAgain = makeAvailableAgain;
         this.mCallback = mCallback;
@@ -28,7 +26,7 @@ public class AcknowledgeCall {
 
     @Nullable
     public static AcknowledgeCall create(@Nullable Bundle args,
-            @Nullable TrustedWebActivityCallbackRemote callback) {
+            @Nullable DigitalGoodsRequestHandler.Callback callback) {
         if (args == null || callback == null) return null;
 
         if (!args.containsKey(PARAM_ACKNOWLEDGE_PURCHASE_TOKEN) ||
@@ -43,13 +41,8 @@ public class AcknowledgeCall {
     }
 
     public void respond(int responseCode) {
-        try {
-            Bundle args = new Bundle();
-            args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, responseCode);
-            mCallback.runExtraCallback(RESPONSE_ACKNOWLEDGE, args);
-        } catch (RemoteException e) {
-            // TODO: Something...
-            throw new RuntimeException(e);
-        }
+        Bundle args = new Bundle();
+        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, responseCode);
+        mCallback.run(RESPONSE_ACKNOWLEDGE, args);
     }
 }

@@ -1,5 +1,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
+
 import com.android.billingclient.api.SkuDetails;
 
 import java.util.List;
@@ -9,8 +11,10 @@ import androidx.annotation.Nullable;
 /**
  * Wraps communication with Play Billing to provide a simpler interface and allowing mocking in
  * tests.
+ *
+ * TODO(peconn): Move BillingWrapper and related classes into a different package.
  */
-interface BillingWrapper {
+public interface BillingWrapper {
     /**
      * Callbacks for various async calls.
      */
@@ -47,5 +51,5 @@ interface BillingWrapper {
      * Launches the Payment Flow. If it returns {@code true},
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
-    boolean launchPaymentFlow(SkuDetails sku);
+    boolean launchPaymentFlow(Activity activity, SkuDetails sku);
 }

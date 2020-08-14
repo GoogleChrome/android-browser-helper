@@ -66,7 +66,7 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
             return;
         }
 
-        if (mWrapper.launchPaymentFlow(mWrapper.getSkuDetailsList().get(0))) return;
+        if (mWrapper.launchPaymentFlow(this, mWrapper.getSkuDetailsList().get(0))) return;
 
         fail("Payment attempt failed (have you already bought the item?).");
     }

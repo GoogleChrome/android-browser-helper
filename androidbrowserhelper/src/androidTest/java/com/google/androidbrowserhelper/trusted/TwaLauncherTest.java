@@ -183,13 +183,15 @@ public class TwaLauncherTest {
         int sessionId1 = 1;
         int sessionId2 = 2;
 
-        TwaLauncher launcher1 = new TwaLauncher(mActivity, null, sessionId1);
+        TwaLauncher launcher1 = new TwaLauncher(mActivity, null, sessionId1,
+                new SharedPreferencesTokenStore(mActivity));
         CustomTabsSessionToken token1 =
                 getSessionTokenFromLaunchedBrowser(() -> launcher1.launch(URL));
         launcher1.destroy();
 
         // New activity is created (e.g. by an external VIEW intent).
-        TwaLauncher launcher2 = new TwaLauncher(mActivity, null, sessionId2);
+        TwaLauncher launcher2 = new TwaLauncher(mActivity, null, sessionId2,
+                new SharedPreferencesTokenStore(mActivity));
         CustomTabsSessionToken token2 =
                 getSessionTokenFromLaunchedBrowser(() -> launcher2.launch(URL));
         launcher2.destroy();

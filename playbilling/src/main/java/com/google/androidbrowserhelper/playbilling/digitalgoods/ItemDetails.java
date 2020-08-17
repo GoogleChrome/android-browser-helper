@@ -2,10 +2,9 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 
-public class ItemDetails {
-    public static ItemDetails APPLE =
-            new ItemDetails("apple", "Apple", "A tasty apple", "GBP", "0.30");
+import com.android.billingclient.api.SkuDetails;
 
+public class ItemDetails {
     private static final String ITEM_DETAILS_ID = "itemDetails.id";
     private static final String ITEM_DETAILS_TITLE = "itemDetails.title";
     private static final String ITEM_DETAILS_DESC = "itemDetails.description";
@@ -18,12 +17,27 @@ public class ItemDetails {
     public final String currency;
     public final String value;
 
-    public ItemDetails(String id, String title, String description, String currency, String value) {
+    private ItemDetails(String id, String title, String description, String currency, String value) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.currency = currency;
         this.value = value;
+    }
+
+    public static ItemDetails create(SkuDetails skuDetails) {
+        return new ItemDetails(skuDetails.getSku(), skuDetails.getTitle(),
+                skuDetails.getDescription(), skuDetails.getPriceCurrencyCode(),
+                skuDetails.getPrice());
+    }
+
+    public static ItemDetails create(Bundle bundle) {
+        String id = bundle.getString(ITEM_DETAILS_ID);
+        String title = bundle.getString(ITEM_DETAILS_TITLE);
+        String description = bundle.getString(ITEM_DETAILS_DESC);
+        String currency = bundle.getString(ITEM_DETAILS_CURRENCY);
+        String value = bundle.getString(ITEM_DETAILS_VALUE);
+        return new ItemDetails(id, title, description, currency, value);
     }
 
     public Bundle toBundle() {

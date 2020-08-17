@@ -8,10 +8,10 @@ import androidx.annotation.Nullable;
 public class GetDetailsCall {
     public static final String COMMAND_NAME = "getDetails";
 
-    private static final String PARAM_GET_DETAILS_ITEM_IDS = "getDetails.itemIds";
-    private static final String RESPONSE_GET_DETAILS = "getDetails.response";
-    private static final String RESPONSE_GET_DETAILS_RESPONSE_CODE = "getDetails.responseCode";
-    private static final String RESPONSE_GET_DETAILS_DETAILS_LIST = "getDetails.detailsList";
+    static final String PARAM_GET_DETAILS_ITEM_IDS = "getDetails.itemIds";
+    static final String RESPONSE_GET_DETAILS = "getDetails.response";
+    static final String RESPONSE_GET_DETAILS_RESPONSE_CODE = "getDetails.responseCode";
+    static final String RESPONSE_GET_DETAILS_DETAILS_LIST = "getDetails.detailsList";
 
     public final String[] itemIds;
     private final DigitalGoodsRequestHandler.Callback mCallback;

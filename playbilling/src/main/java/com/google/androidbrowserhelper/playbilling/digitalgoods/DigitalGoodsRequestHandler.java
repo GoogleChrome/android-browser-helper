@@ -3,6 +3,7 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 
@@ -22,7 +23,7 @@ public class DigitalGoodsRequestHandler {
 
         @Override
         public void onDisconnected() {
-            // Respond failure
+            // TODO: Respond failure
         }
 
         @Override
@@ -45,7 +46,15 @@ public class DigitalGoodsRequestHandler {
                 if (getDetailsCall == null) break;
 
                 mWrapper.querySkuDetails(Arrays.asList(getDetailsCall.itemIds), (code, details) -> {
-                    getDetailsCall.respond(code.getResponseCode(), ItemDetails.APPLE);
+                    int responseCode = code.getResponseCode();
+                    ItemDetails[] itemDetails = new ItemDetails[details.size()];
+
+                    int index = 0;
+                    for (SkuDetails skuDetails : details) {
+                        itemDetails[index++] = ItemDetails.create(skuDetails);
+                    }
+
+                    getDetailsCall.respond(responseCode, itemDetails);
                 });
 
                 return true;
@@ -53,7 +62,7 @@ public class DigitalGoodsRequestHandler {
                 AcknowledgeCall ackCall = AcknowledgeCall.create(args, callback);
                 if (ackCall == null) break;
 
-                ackCall.respond(0);
+                // TODO(peconn): Implement
                 return true;
         }
         return false;

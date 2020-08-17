@@ -21,7 +21,6 @@ public class MockBillingWrapper implements BillingWrapper {
     private Listener mListener;
 
     private List<String> mQueriedSkuDetails;
-    private List<SkuDetails> mSkuDetailsList;
     private boolean mPaymentFlowSuccessful;
     private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
 
@@ -55,11 +54,13 @@ public class MockBillingWrapper implements BillingWrapper {
         mListener.onDisconnected();
     }
 
-    public void triggerOnGotSkuDetails() {
-        BillingResult result = BillingResult.newBuilder()
-                .setResponseCode(BillingClient.BillingResponseCode.OK)
-                .build();
-        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, mSkuDetailsList);
+    public void triggerOnGotSkuDetails(List<SkuDetails> skuDetails) {
+        triggerOnGotSkuDetails(BillingClient.BillingResponseCode.OK, skuDetails);
+    }
+
+    public void triggerOnGotSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
+        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
+        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, skuDetails);
     }
 
     public void triggerOnPurchasesUpdated() {
@@ -80,10 +81,6 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public void setListener(Listener listener) {
         mListener = listener;
-    }
-
-    public void setSkuDetailsList(List<SkuDetails> skuDetailsList) {
-        mSkuDetailsList = skuDetailsList;
     }
 
     public void setPaymentFlowWillBeSuccessful(boolean successful) {

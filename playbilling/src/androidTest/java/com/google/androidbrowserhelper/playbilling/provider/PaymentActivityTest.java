@@ -69,8 +69,7 @@ public class PaymentActivityTest {
         mWrapper.triggerConnected();
 
         assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.setSkuDetailsList(getSkuDetailsList());
-        mWrapper.triggerOnGotSkuDetails();
+        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
 
         assertTrue(mWrapper.waitForLaunchPaymentFlow());
         mWrapper.triggerOnPurchasesUpdated();
@@ -88,8 +87,7 @@ public class PaymentActivityTest {
         mWrapper.triggerConnected();
 
         assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.setSkuDetailsList(getSkuDetailsList());
-        mWrapper.triggerOnGotSkuDetails();
+        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
 
         assertTrue(mWrapper.waitForLaunchPaymentFlow());
 
@@ -133,8 +131,7 @@ public class PaymentActivityTest {
         mWrapper.triggerConnected();
 
         assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.setSkuDetailsList(Collections.emptyList());
-        mWrapper.triggerOnGotSkuDetails();
+        mWrapper.triggerOnGotSkuDetails(Collections.emptyList());
 
         assertActivityResult(Activity.RESULT_CANCELED);
     }

@@ -1,7 +1,6 @@
 include ':androidbrowserhelper'
-include ':playbilling'
-
 include ':demos:custom-tabs-example-app'
+include ':demos:custom-tabs-headers'
 include ':demos:payment-provider'
 include ':demos:twa-basic'
 include ':demos:twa-custom-launcher'
@@ -9,3 +8,4 @@ include ':demos:twa-multi-domain'
 include ':demos:twa-notification-delegation'
 include ':demos:twa-play-billing'
 include ':demos:twa-webview-fallback'
+include ':playbilling'

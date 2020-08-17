@@ -11,6 +11,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
 
@@ -20,12 +21,8 @@ import androidx.annotation.Nullable;
  * A {@link BillingWrapper} that communicates with the Play Billing libraries.
  */
 public class PlayBillingWrapper implements BillingWrapper {
-    private final Context mContext;
     private final Listener mListener;
     private final BillingClient mClient;
-
-    @Nullable
-    private List<SkuDetails> mSkuDetailsList;
 
     private final PurchasesUpdatedListener mPurchaseUpdateListener =
             new PurchasesUpdatedListener() {
@@ -36,10 +33,9 @@ public class PlayBillingWrapper implements BillingWrapper {
     };
 
     public PlayBillingWrapper(Context context, Listener listener) {
-        mContext = context;
         mListener = listener;
         mClient = BillingClient
-                .newBuilder(mContext)
+                .newBuilder(context)
                 .setListener(mPurchaseUpdateListener)
                 .enablePendingPurchases()
                 .build();
@@ -61,25 +57,14 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus) {
+    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
         SkuDetailsParams params = SkuDetailsParams
                 .newBuilder()
                 .setSkusList(skus)
                 .setType(BillingClient.SkuType.INAPP)
                 .build();
 
-        mClient.querySkuDetailsAsync(params, (billingResult, list) -> {
-            // TODO: Check result
-            mSkuDetailsList = list;
-            mListener.onGotSkuDetails();
-        });
-    }
-
-
-
-    @Override
-    public List<SkuDetails> getSkuDetailsList() {
-        return mSkuDetailsList;
+        mClient.querySkuDetailsAsync(params, callback);
     }
 
     @Override

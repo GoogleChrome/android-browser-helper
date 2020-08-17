@@ -14,12 +14,13 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import static com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity.SITE_SETTINGS_SHORTCUT_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import static androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY;
-
 import android.content.Context;
+import android.content.pm.ShortcutManager;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.test.R;
@@ -107,6 +108,14 @@ public class LauncherActivityTest {
         TestBrowser browser = launch();
 
         checkColor(browser);
+    }
+
+    @Test
+    public void addsSiteSettingsShortcut() {
+        TestBrowser browser = launch();
+        ShortcutManager shortcutManager = mContext.getSystemService(ShortcutManager.class);
+        assertEquals(1, shortcutManager.getDynamicShortcuts().size());
+        assertEquals(SITE_SETTINGS_SHORTCUT_ID, shortcutManager.getDynamicShortcuts().get(0).getId());
     }
 
     private void checkColor(TestBrowser browser) {

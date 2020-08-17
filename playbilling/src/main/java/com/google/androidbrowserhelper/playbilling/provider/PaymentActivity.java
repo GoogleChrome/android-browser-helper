@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 
 import java.util.Collections;
@@ -54,21 +55,17 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
 
     @Override
     public void onConnected() {
-        mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku));
-    }
+        mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku),
+                (BillingResult result, List<SkuDetails> details) -> {
+            if (details == null || details.isEmpty()) {
+                fail("Play Billing returned did not find SKUs.");
+                return;
+            }
 
-    @Override
-    public void onGotSkuDetails() {
-        List<SkuDetails> details = mWrapper.getSkuDetailsList();
+            if (mWrapper.launchPaymentFlow(this, details.get(0))) return;
 
-        if (details == null || details.isEmpty()) {
-            fail("Play Billing returned did not find SKUs.");
-            return;
-        }
-
-        if (mWrapper.launchPaymentFlow(this, mWrapper.getSkuDetailsList().get(0))) return;
-
-        fail("Payment attempt failed (have you already bought the item?).");
+            fail("Payment attempt failed (have you already bought the item?).");
+        });
     }
 
     @Override

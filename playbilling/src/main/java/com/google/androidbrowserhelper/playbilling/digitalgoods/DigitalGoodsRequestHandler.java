@@ -26,11 +26,6 @@ public class DigitalGoodsRequestHandler {
         }
 
         @Override
-        public void onGotSkuDetails() {
-
-        }
-
-        @Override
         public void onPurchaseFlowComplete(int result) { }
     };
 
@@ -50,7 +45,7 @@ public class DigitalGoodsRequestHandler {
                 if (getDetailsCall == null) break;
 
                 mWrapper.querySkuDetails(Arrays.asList(getDetailsCall.itemIds), (code, details) -> {
-                    getDetailsCall.respond(code, ItemDetails.APPLE);
+                    getDetailsCall.respond(code.getResponseCode(), ItemDetails.APPLE);
                 });
 
                 return true;

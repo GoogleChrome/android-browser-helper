@@ -1,12 +1,12 @@
 package com.google.androidbrowserhelper.trusted;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * The purpose of this Activity is to allow this app's Task to be brought to the foreground.
@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
  * then finishes itself, revealing the other Activities in the app's Task. Hopefully the topmost
  * Activity will be the web browsing Activity.
  */
-public class FocusActivity extends AppCompatActivity {
+public class FocusActivity extends Activity {
     // This value should be moved into androidx.browser.
     private static final String EXTRA_FOCUS_INTENT =
             "androidx.browser.customtabs.extra.FOCUS_INTENT";

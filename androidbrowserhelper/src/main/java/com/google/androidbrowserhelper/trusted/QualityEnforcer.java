@@ -36,7 +36,6 @@ import androidx.browser.customtabs.CustomTabsCallback;
 public class QualityEnforcer extends CustomTabsCallback {
     private static final  String TAG = "TwaQualityEnforcement";
     static final String CRASH = "quality_enforcement.crash";
-    static final String NOTIFY = "quality_enforcement.notify";
     static final String KEY_CRASH_REASON = "crash_reason";
     static final String KEY_SUCCESS = "success";
 
@@ -72,10 +71,7 @@ public class QualityEnforcer extends CustomTabsCallback {
         if (message == null) return Bundle.EMPTY;
 
         Bundle result = new Bundle();
-        if (callbackName.equals(NOTIFY)) {
-            Log.e(TAG, message);
-            result.putBoolean(KEY_SUCCESS, true);
-        } else if (callbackName.equals(CRASH)) {
+        if (callbackName.equals(CRASH)) {
             result.putBoolean(KEY_SUCCESS, true);
             mDelegate.crash(message);
         }

@@ -83,24 +83,7 @@ public class TwaQualityEnforcerTest {
     }
 
     @Test
-    public void triggerQualityEnforcement_GotNotify() {
-        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
-        CustomTabsSessionToken token =
-                CustomTabsSessionToken.getSessionTokenFromIntent(
-                        getBrowserActivityWhenLaunched(launchRunnable).getIntent());
-        CustomTabsCallback callback = token.getCallback();
-
-        Bundle args = new Bundle();
-        String message = "TestMessage";
-        args.putString(QualityEnforcer.KEY_CRASH_REASON, message);
-        Bundle result =
-                callback.extraCallbackWithResult(QualityEnforcer.NOTIFY, args);
-        assertTrue(result.getBoolean(QualityEnforcer.KEY_SUCCESS));
-    }
-
-
-    @Test
-    public void triggerQualityEnforcement_GotCrash() {
+    public void triggerQualityEnforcement_Crash() {
         Runnable launchRunnable = () -> mTwaLauncher.launch(
                 new TrustedWebActivityIntentBuilder(URL), mCustomTabsCallback, null, null);
         CustomTabsSessionToken token =
@@ -119,7 +102,8 @@ public class TwaQualityEnforcerTest {
 
     @Test
     public void triggerQualityEnforcement_NoCrashReason() {
-        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
+        Runnable launchRunnable = () -> mTwaLauncher.launch(
+                new TrustedWebActivityIntentBuilder(URL), mCustomTabsCallback, null, null);
         CustomTabsSessionToken token =
                 CustomTabsSessionToken.getSessionTokenFromIntent(
                         getBrowserActivityWhenLaunched(launchRunnable).getIntent());
@@ -127,7 +111,7 @@ public class TwaQualityEnforcerTest {
 
         Bundle args = Bundle.EMPTY;
         Bundle result =
-                callback.extraCallbackWithResult(QualityEnforcer.NOTIFY, args);
+                callback.extraCallbackWithResult(QualityEnforcer.CRASH, args);
         assertFalse(result.getBoolean(QualityEnforcer.KEY_SUCCESS));
     }
 }

@@ -108,6 +108,14 @@ public class ChromeLegacyUtils {
     }
 
     /**
+     * Whether the browser supports site settings. Note that in legacy Chrome this coincides
+     * with supporting Trusted Web Activities.
+     */
+    public static boolean supportsSiteSettings(PackageManager packageManager, String packageName) {
+        return supportsTrustedWebActivities(packageManager, packageName);
+    }
+
+    /**
      * Returns whether {@link CustomTabsClient#warmup} needs to be called prior to launching a
      * Trusted Web Activity. Starting from version 73 Chrome does not require warmup, which allows
      * to launch Trusted Web Activities faster.

@@ -140,7 +140,7 @@ public class LauncherActivityMetadata {
             "android.support.customtabs.trusted.SCREEN_ORIENTATION";
 
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
-    private final static int DEFAULT_DIVIDER_COLOR_ID = 0x00000000;
+    private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
     @Nullable public final String defaultUrl;
     public final int statusBarColorId;

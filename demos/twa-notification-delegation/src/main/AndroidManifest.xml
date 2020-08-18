@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LauncherActivity">
+        android:theme="@android:style/Theme.Translucent.NoTitleBar">
         <meta-data
             android:name="asset_statements"
             android:resource="@string/asset_statements" />

@@ -1,9 +1,12 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -18,8 +21,8 @@ public class MockBillingWrapper implements BillingWrapper {
     private Listener mListener;
 
     private List<String> mQueriedSkuDetails;
-    private List<SkuDetails> mSkuDetailsList;
     private boolean mPaymentFlowSuccessful;
+    private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(1);
@@ -31,18 +34,14 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus) {
+    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
         mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
+        mPendingQuerySkuDetailsCallback = callback;
     }
 
     @Override
-    public List<SkuDetails> getSkuDetailsList() {
-        return mSkuDetailsList;
-    }
-
-    @Override
-    public boolean launchPaymentFlow(SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }
@@ -55,8 +54,13 @@ public class MockBillingWrapper implements BillingWrapper {
         mListener.onDisconnected();
     }
 
-    public void triggerOnGotSkuDetails() {
-        mListener.onGotSkuDetails();
+    public void triggerOnGotSkuDetails(List<SkuDetails> skuDetails) {
+        triggerOnGotSkuDetails(BillingClient.BillingResponseCode.OK, skuDetails);
+    }
+
+    public void triggerOnGotSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
+        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
+        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, skuDetails);
     }
 
     public void triggerOnPurchasesUpdated() {
@@ -77,10 +81,6 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public void setListener(Listener listener) {
         mListener = listener;
-    }
-
-    public void setSkuDetailsList(List<SkuDetails> skuDetailsList) {
-        mSkuDetailsList = skuDetailsList;
     }
 
     public void setPaymentFlowWillBeSuccessful(boolean successful) {

@@ -14,7 +14,6 @@
 
 package com.google.androidbrowserhelper.trusted;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -23,6 +22,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.trusted.ScreenOrientation;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 
 import java.util.Arrays;
@@ -34,6 +34,8 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
  * Parses and holds on to metadata parameters associated with {@link LauncherActivity}.
  */
 public class LauncherActivityMetadata {
+
+    private static final String TAG = "LauncherActivityMetadata";
 
     /**
      * Url to launch in a Trusted Web Activity, unless other url provided in a VIEW intent.
@@ -114,6 +116,15 @@ public class LauncherActivityMetadata {
     private static final String METADATA_DISPLAY_MODE =
             "android.support.customtabs.trusted.DISPLAY_MODE";
 
+    /**
+     * The screen orientation to use when launching the Trusted Web Activity. Possible values are
+     * "any", "natural", "landscape", "landscape-primary", "landscape-secondary",
+     * "portrait", "portrait-primary", "portrait-secondary".
+     * Taken from https://www.w3.org/TR/screen-orientation/#screenorientation-interface
+     */
+    private static final String METADATA_SCREEN_ORIENTATION =
+            "android.support.customtabs.trusted.SCREEN_ORIENTATION";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
 
     @Nullable public final String defaultUrl;
@@ -128,6 +139,7 @@ public class LauncherActivityMetadata {
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
+    @ScreenOrientation.LockType public final int screenOrientation;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -152,6 +164,34 @@ public class LauncherActivityMetadata {
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
         displayMode = getDisplayMode(metaData);
+        screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
+    }
+
+    private @ScreenOrientation.LockType int getOrientation(String orientation) {
+        if (orientation == null) {
+            return ScreenOrientation.DEFAULT;
+        }
+
+        switch (orientation) {
+            case "any":
+                return ScreenOrientation.ANY;
+            case "natural":
+                return ScreenOrientation.NATURAL;
+            case "landscape":
+                return ScreenOrientation.LANDSCAPE;
+            case "portrait":
+                return ScreenOrientation.PORTRAIT;
+            case "portrait-primary":
+                return ScreenOrientation.PORTRAIT_PRIMARY;
+            case "portrait-secondary":
+                return ScreenOrientation.PORTRAIT_SECONDARY;
+            case "landscape-primary":
+                return ScreenOrientation.LANDSCAPE_PRIMARY;
+            case "landscape-secondary":
+                return ScreenOrientation.LANDSCAPE_SECONDARY;
+            default:
+                return ScreenOrientation.DEFAULT;
+        }
     }
 
     private static TrustedWebActivityDisplayMode getDisplayMode(@NonNull Bundle metaData) {

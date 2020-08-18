@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -71,7 +70,7 @@ import androidx.browser.customtabs.CustomTabsSession;
  *
  * [1] https://developer.android.com/guide/topics/manifest/application-element#space
  */
-public class ManageDataLauncherActivity extends AppCompatActivity {
+public class ManageDataLauncherActivity extends Activity {
     private static final String TAG = "ManageDataLauncher";
 
     private static final String METADATA_MANAGE_SPACE_DEFAULT_URL =

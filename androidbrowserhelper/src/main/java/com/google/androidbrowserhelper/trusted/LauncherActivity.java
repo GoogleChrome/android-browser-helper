@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -23,7 +24,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
@@ -89,7 +89,7 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
  * [2] https://www.chromium.org/developers/how-tos/run-chromium-with-flags#TOC-Setting-Flags-for-Chrome-on-Android
  * [3] https://developer.android.com/reference/android/support/v4/content/FileProvider
  */
-public class LauncherActivity extends AppCompatActivity {
+public class LauncherActivity extends Activity {
     private static final String TAG = "TWALauncherActivity";
 
     private static final String BROWSER_WAS_LAUNCHED_KEY =

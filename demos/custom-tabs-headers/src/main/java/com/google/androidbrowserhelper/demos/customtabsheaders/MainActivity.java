@@ -18,7 +18,6 @@ package com.google.androidbrowserhelper.demos.customtabsheaders;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -26,6 +25,7 @@ import androidx.browser.customtabs.CustomTabsService;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.net.Uri;
@@ -34,7 +34,7 @@ import android.provider.Browser;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private static final Uri URL = Uri.parse("https://padr31.github.io/");
 
     private CustomTabsSession mSession;

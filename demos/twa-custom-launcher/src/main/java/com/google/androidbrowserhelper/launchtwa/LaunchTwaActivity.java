@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.launchtwa;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Color;
@@ -30,13 +31,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
-public class LaunchTwaActivity extends AppCompatActivity {
+public class LaunchTwaActivity extends Activity {
     private static final Uri LAUNCH_URI =
             Uri.parse("https://github.com/GoogleChrome/android-browser-helper");
 

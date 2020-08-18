@@ -1,10 +1,11 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
+
 import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
-
-import androidx.annotation.Nullable;
 
 /**
  * Wraps communication with Play Billing to provide a simpler interface and allowing mocking in
@@ -12,7 +13,7 @@ import androidx.annotation.Nullable;
  */
 interface BillingWrapper {
     /**
-     * Callbacks for various async calls.
+     * Callbacks for connection state and for purchase flow completion.
      */
     interface Listener {
         /** Will be called when connected to the Play Billing client. */
@@ -20,9 +21,6 @@ interface BillingWrapper {
 
         /** Will be called when the Play Billing client disconnects. */
         void onDisconnected();
-
-        /** Will be called after a successful call to {@link #querySkuDetails}. */
-        void onGotSkuDetails();
 
         /** Will be called after a call to {@link #launchPaymentFlow} that returns {@code true}. */
         void onPurchaseFlowComplete(int result);
@@ -33,19 +31,12 @@ interface BillingWrapper {
 
     /**
      * Get {@link SkuDetails} objects for the provided SKUs.
-     * Can be accessed through {@link #getSkuDetailsList}.
      */
-    void querySkuDetails(List<String> skus);
-
-    /**
-     * Returns the list of {@SkuDetails} fetched by a call to {@link #querySkuDetails}, may be null.
-     */
-    @Nullable
-    List<SkuDetails> getSkuDetailsList();
+    void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback);
 
     /**
      * Launches the Payment Flow. If it returns {@code true},
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
-    boolean launchPaymentFlow(SkuDetails sku);
+    boolean launchPaymentFlow(Activity activity, SkuDetails sku);
 }

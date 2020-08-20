@@ -70,6 +70,20 @@ public class LauncherActivityMetadata {
             "android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK";
 
     /**
+     * Navigation bar divider color to use for Trusted Web Activity (note: in Chrome this is supported
+     * from version 86).
+     */
+    private static final String METADATA_NAVIGATION_BAR_DIVIDER_COLOR_ID =
+            "androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR";
+
+    /**
+     * Navigation bar divider color to use for Trusted Web Activity (note: in Chrome this is supported
+     * from version 86).
+     */
+    private static final String METADATA_NAVIGATION_BAR_DIVIDER_COLOR_DARK_ID =
+            "androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK";
+
+    /**
      * Id of the Drawable to use as a splash screen.
      */
     private static final String METADATA_SPLASH_IMAGE_DRAWABLE_ID =
@@ -126,12 +140,15 @@ public class LauncherActivityMetadata {
             "android.support.customtabs.trusted.SCREEN_ORIENTATION";
 
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
+    private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
     @Nullable public final String defaultUrl;
     public final int statusBarColorId;
     public final int statusBarColorDarkId;
     public final int navigationBarColorId;
     public final int navigationBarColorDarkId;
+    public final int navigationBarDividerColorId;
+    public final int navigationBarDividerColorDarkId;
     public final int splashImageDrawableId;
     public final int splashScreenBackgroundColorId;
     @Nullable public final String fileProviderAuthority;
@@ -148,6 +165,10 @@ public class LauncherActivityMetadata {
         navigationBarColorId = metaData.getInt(METADATA_NAVIGATION_BAR_COLOR_ID, DEFAULT_COLOR_ID);
         navigationBarColorDarkId =
                 metaData.getInt(METADATA_NAVIGATION_BAR_COLOR_DARK_ID, navigationBarColorId);
+        navigationBarDividerColorId =
+                metaData.getInt(METADATA_NAVIGATION_BAR_DIVIDER_COLOR_ID, DEFAULT_DIVIDER_COLOR_ID);
+        navigationBarDividerColorDarkId =
+                metaData.getInt(METADATA_NAVIGATION_BAR_DIVIDER_COLOR_DARK_ID, navigationBarColorId);
         splashImageDrawableId = metaData.getInt(METADATA_SPLASH_IMAGE_DRAWABLE_ID, 0);
         splashScreenBackgroundColorId = metaData.getInt(METADATA_SPLASH_SCREEN_BACKGROUND_COLOR,
                 DEFAULT_COLOR_ID);

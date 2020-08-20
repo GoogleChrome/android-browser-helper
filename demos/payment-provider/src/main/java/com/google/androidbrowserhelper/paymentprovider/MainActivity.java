@@ -1,15 +1,15 @@
 package com.google.androidbrowserhelper.paymentprovider;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private static final Uri WEB_STORE = Uri.parse("https://beer.conn.dev");
 
     @Override

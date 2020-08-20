@@ -19,7 +19,7 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LauncherActivity"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
         tools:ignore="GoogleAppIndexingWarning">
 
         <meta-data

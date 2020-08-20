@@ -25,7 +25,7 @@ import java.util.List;
  * Wraps communication with Play Billing to provide a simpler interface and allowing mocking in
  * tests.
  */
-interface BillingWrapper {
+public interface BillingWrapper {
     /**
      * Callbacks for connection state and for purchase flow completion.
      */

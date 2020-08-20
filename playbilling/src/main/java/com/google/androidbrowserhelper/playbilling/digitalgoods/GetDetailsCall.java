@@ -17,6 +17,12 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import android.os.Bundle;
 import android.os.Parcelable;
 
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.SkuDetails;
+
+import java.util.Arrays;
+import java.util.List;
+
 import androidx.annotation.Nullable;
 
 /**
@@ -31,11 +37,11 @@ public class GetDetailsCall {
     static final String RESPONSE_GET_DETAILS_RESPONSE_CODE = "getDetails.responseCode";
     static final String RESPONSE_GET_DETAILS_DETAILS_LIST = "getDetails.detailsList";
 
-    public final String[] itemIds;
+    public final List<String> itemIds;
     private final DigitalGoodsCallback mCallback;
 
     private GetDetailsCall(String[] itemIds, DigitalGoodsCallback callback) {
-        this.itemIds = itemIds;
+        this.itemIds = Arrays.asList(itemIds);
         this.mCallback = callback;
     }
 
@@ -52,12 +58,24 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    public void respond(int responseCode, ItemDetails... itemDetails) {
+    private void respond(int responseCode, ItemDetails... details) {
         Bundle args = new Bundle();
         args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, responseCode);
-        args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST,
-                toParcelableArray(itemDetails));
+        args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, toParcelableArray(details));
         mCallback.run(RESPONSE_GET_DETAILS, args);
+    }
+
+    /** Calls the callback provided in the constructor with serialized forms of the parameters. */
+    public void respond(BillingResult code, List<SkuDetails> details) {
+        int responseCode = code.getResponseCode();
+        ItemDetails[] itemDetails = new ItemDetails[details.size()];
+
+        int index = 0;
+        for (SkuDetails skuDetails : details) {
+            itemDetails[index++] = ItemDetails.create(skuDetails);
+        }
+
+        respond(responseCode, itemDetails);
     }
 
     private static Parcelable[] toParcelableArray(ItemDetails... itemDetails) {
@@ -68,5 +86,12 @@ public class GetDetailsCall {
         }
 
         return out;
+    }
+
+    /** Creates a Bundle that can be used with {@link #create}. For testing. */
+    public static Bundle createBundleForTesting(String... itemIds) {
+        Bundle bundle = new Bundle();
+        bundle.putStringArray(PARAM_GET_DETAILS_ITEM_IDS, itemIds);
+        return bundle;
     }
 }

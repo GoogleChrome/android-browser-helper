@@ -17,14 +17,16 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
+def VERSION = "1.3.2";
+
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
-        versionName "1.3.1-alpha01"
+        versionName VERSION
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,7 +50,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core:1.0.2'
 
     testImplementation 'junit:junit:4.12'
@@ -81,7 +82,7 @@ publishing {
 
             groupId 'com.google.androidbrowserhelper'
             artifactId 'androidbrowserhelper'
-            version '1.3.1-alpha01'
+            version VERSION
 
             // This ensures that the generated POM file contains the correct Android dependencies.
             // The section used the BinTray example as a base:

@@ -20,14 +20,17 @@ import static androidx.browser.customtabs.CustomTabsService.RELATION_HANDLE_ALL_
 import static androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY_CATEGORY;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,10 +43,10 @@ import android.widget.Toast;
 
 import com.google.androidbrowserhelper.R;
 
+import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -67,7 +70,7 @@ import androidx.browser.customtabs.CustomTabsSession;
  *
  * [1] https://developer.android.com/guide/topics/manifest/application-element#space
  */
-public class ManageDataLauncherActivity extends AppCompatActivity {
+public class ManageDataLauncherActivity extends Activity {
     private static final String TAG = "ManageDataLauncher";
 
     private static final String METADATA_MANAGE_SPACE_DEFAULT_URL =
@@ -76,6 +79,12 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
     // TODO: move to AndroidX.
     public static final String ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA =
             "android.support.customtabs.action.ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA";
+
+    public static final String SITE_SETTINGS_SHORTCUT_ID =
+            "android.support.customtabs.action.SITE_SETTINGS_SHORTCUT";
+
+    public static final String CATEGORY_LAUNCH_SITE_SETTINGS =
+            "androidx.browser.trusted.category.LaunchSiteSettings";
 
     @Nullable
     private String mProviderPackage;
@@ -293,5 +302,94 @@ public class ManageDataLauncherActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {}
+    }
+
+    /**
+     * Checks whether the provided package name supports site settings. Returns true when
+     * the package name belongs to a twa provider supporting the site settings category or
+     * it is a legacy version of chrome that supports site settings but does not define
+     * the site settings category yet.
+     */
+    public static boolean packageSupportsSiteSettings(String packageName,
+            PackageManager packageManager) {
+        if (packageName == null) return false;
+        if (ChromeLegacyUtils.supportsSiteSettings(packageManager, packageName)) {
+            // Legacy Chrome supports site settings but does not have the site settings category.
+            return true;
+        } else {
+            Intent customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+            customTabsIntent.addCategory(CATEGORY_LAUNCH_SITE_SETTINGS);
+            customTabsIntent.setPackage(packageName);
+            List<ResolveInfo> services = packageManager.queryIntentServices(customTabsIntent,
+                    PackageManager.GET_RESOLVED_FILTER);
+            return services.size() > 0;
+        }
+    }
+
+    /**
+     * Returns the {@link ShortcutInfo} for a dynamic shortcut into site settings,
+     * provided that {@link ManageDataLauncherActivity} is present in the manifest
+     * and an Intent for managing site settings is available.
+     *
+     * Otherwise returns null if {@link ManageDataLauncherActivity} is not launchable
+     * or if shortcuts are not supported by the Android SDK version.
+     *
+     * The shortcut returned does not specify an activity. Thus when the shortcut is added,
+     * the app's main activity will be used by default. This activity needs to define the
+     * MAIN action and LAUNCHER category in order to attach the shortcut.
+     */
+    @Nullable
+    static ShortcutInfo getSiteSettingsShortcutOrNull(Context context,
+            PackageManager packageManager) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return null;
+
+        Intent siteSettingsIntent = new Intent(context, ManageDataLauncherActivity.class);
+        siteSettingsIntent.setAction(ACTION_MANAGE_TRUSTED_WEB_ACTIVITY_DATA);
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(siteSettingsIntent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+
+        if(activities.size() == 0) return null;
+
+        return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
+                .setShortLabel("Site Settings")
+                .setLongLabel("Manage website notifications, permissions, etc.")
+                .setIcon(Icon.createWithResource(context,
+                        android.R.drawable.ic_menu_preferences))
+                .setIntent(siteSettingsIntent)
+                .build();
+    }
+
+    /**
+     * Adds dynamic shortcut to site settings if the twa provider and android version supports it.
+     *
+     * Removes previously added site settings shortcut if it is no longer supported, e.g. the user
+     * changed their default browser.
+     *
+     * In order for addDynamicShortcuts() to work the android manifest must declare
+     * an activity with the action MAIN and category LAUNCHER.
+     */
+    public static void addSiteSettingsShortcut(Context context, String packageName) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return;
+
+        PackageManager packageManager = context.getPackageManager();
+        ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
+
+        // Remove potentially existing shortcut if package does not support shortcuts.
+        if (!packageSupportsSiteSettings(packageName, packageManager)) {
+            shortcutManager.removeDynamicShortcuts(Collections.singletonList(ManageDataLauncherActivity
+                    .SITE_SETTINGS_SHORTCUT_ID));
+            return;
+        }
+
+        ShortcutInfo shortcut = getSiteSettingsShortcutOrNull(
+                context, packageManager);
+
+        // Remove potentially existing shortcut if shortcut can not be retrieved.
+        if(shortcut == null) {
+            shortcutManager.removeDynamicShortcuts(Collections.singletonList(ManageDataLauncherActivity
+                    .SITE_SETTINGS_SHORTCUT_ID));
+            return;
+        }
+        shortcutManager.addDynamicShortcuts(Collections.singletonList(shortcut));
     }
 }

@@ -15,6 +15,7 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -34,14 +35,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebViewFallbackActivity extends AppCompatActivity {
+public class WebViewFallbackActivity extends Activity {
     private static final String TAG = WebViewFallbackActivity.class.getSimpleName();
     private static final String KEY_PREFIX =
             "com.google.browser.examples.twawebviewfallback.WebViewFallbackActivity.";

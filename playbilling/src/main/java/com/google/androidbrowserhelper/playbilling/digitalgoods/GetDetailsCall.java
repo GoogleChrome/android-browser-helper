@@ -19,6 +19,7 @@ import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
+import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,8 +67,15 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    public void respond(BillingResult code, List<SkuDetails> details) {
+    private void respond(BillingResult code, List<SkuDetails> details) {
         int responseCode = code.getResponseCode();
+
+        if (details == null) {
+            // In some error cases the SkuDetails list will be empty.
+            respond(responseCode);
+            return;
+        }
+
         ItemDetails[] itemDetails = new ItemDetails[details.size()];
 
         int index = 0;
@@ -76,6 +84,11 @@ public class GetDetailsCall {
         }
 
         respond(responseCode, itemDetails);
+    }
+
+    /** Calls the appropriate PlayBilling method. */
+    public void call(BillingWrapper billing) {
+        billing.querySkuDetails(itemIds, this::respond);
     }
 
     private static Parcelable[] toParcelableArray(ItemDetails... itemDetails) {

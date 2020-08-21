@@ -17,10 +17,14 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.app.Activity;
 import android.content.Context;
 
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
@@ -79,6 +83,26 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .build();
 
         mClient.querySkuDetailsAsync(params, callback);
+    }
+
+    @Override
+    public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
+        AcknowledgePurchaseParams params = AcknowledgePurchaseParams
+                .newBuilder()
+                .setPurchaseToken(token)
+                .build();
+
+        mClient.acknowledgePurchase(params, callback);
+    }
+
+    @Override
+    public void consume(String token, ConsumeResponseListener callback) {
+        ConsumeParams params = ConsumeParams
+                .newBuilder()
+                .setPurchaseToken(token)
+                .build();
+
+        mClient.consumeAsync(params, callback);
     }
 
     @Override

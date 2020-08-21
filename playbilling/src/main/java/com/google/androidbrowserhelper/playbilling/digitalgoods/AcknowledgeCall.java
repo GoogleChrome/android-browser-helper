@@ -15,6 +15,10 @@
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
+import android.util.Log;
+
+import com.android.billingclient.api.BillingResult;
+import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import androidx.annotation.Nullable;
 
@@ -59,8 +63,26 @@ public class AcknowledgeCall {
         return new AcknowledgeCall(token, makeAvailableAgain, callback);
     }
 
+    public void call(BillingWrapper billing) {
+        if (makeAvailableAgain) {
+            billing.acknowledge(purchaseToken, this::respond);
+        } else {
+            billing.consume(purchaseToken, this::respond);
+        }
+    }
+
+    private void respond(BillingResult result, String token) {
+        respond(result);
+    }
+
+    private void respond(BillingResult result) {
+        // TODO: Log if result not OK.
+
+        respond(result.getResponseCode());
+    }
+
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    public void respond(int responseCode) {
+    private void respond(int responseCode) {
         Bundle args = new Bundle();
         args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, responseCode);
         mCallback.run(RESPONSE_ACKNOWLEDGE, args);

@@ -14,9 +14,11 @@
 
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
@@ -26,9 +28,8 @@ import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class PaymentActivity extends AppCompatActivity implements BillingWrapper.Listener {
+public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
 
     private static final String METHOD_NAME = "https://beer.conn.dev";
@@ -91,6 +92,7 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
     }
 
     private void fail(String reason) {
+        Log.d("Peter", "Fail: " + reason);
         setResultAndFinish(PaymentResult.failure(reason));
     }
 

@@ -3,6 +3,7 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
@@ -20,12 +21,13 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
     private final BillingWrapper.Listener mListener = new BillingWrapper.Listener() {
         @Override
         public void onConnected() {
-
+            Log.d("Peter", "connected");
         }
 
         @Override
         public void onDisconnected() {
             // TODO: Respond failure
+            Log.d("Peter", "disconnected");
         }
 
         @Override
@@ -34,6 +36,7 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
 
     public DigitalGoodsRequestHandler(Context context) {
         mWrapper = BillingWrapperFactory.get(context, mListener);
+        mWrapper.connect();
     }
 
     @NonNull
@@ -62,14 +65,14 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 GetDetailsCall getDetailsCall = GetDetailsCall.create(args, callback);
                 if (getDetailsCall == null) break;
 
-                mWrapper.querySkuDetails(getDetailsCall.itemIds, getDetailsCall::respond);
+                getDetailsCall.call(mWrapper);
 
                 return true;
             case AcknowledgeCall.COMMAND_NAME:
                 AcknowledgeCall ackCall = AcknowledgeCall.create(args, callback);
                 if (ackCall == null) break;
 
-                // TODO(peconn): Implement
+                ackCall.call(mWrapper);
                 return true;
         }
         return false;

@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 
 import androidx.annotation.NonNull;
@@ -31,9 +32,6 @@ public class PaymentVerifier {
     // TODO: Should this be an instance class (eg PaymentStrategy)?
     // It would allow developers to override verification behaviour more easily.
 
-    private static final String ARC_FEATURE = "org.chromium.arc";
-    private static final String ARC_PAYMENT_APP = "org.chromium.arc.payment_app";
-
     /**
      * Determines whether the given package name should be allowed to trigger Payment Requests.
      * A package can only trigger payment requests if it is the verified provider for the Trusted
@@ -44,7 +42,8 @@ public class PaymentVerifier {
         // TODO: Should I also check whether the TWA is currently running? If so, how?
         if (packageName == null) return false;
 
-        if (context.getPackageManager().hasSystemFeature(ARC_FEATURE) && packageName.equals(ARC_PAYMENT_APP)) {
+        if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())
+                && packageName.equals(ChromeOsSupport.ARC_PAYMENT_APP)) {
             return true;
         }
 

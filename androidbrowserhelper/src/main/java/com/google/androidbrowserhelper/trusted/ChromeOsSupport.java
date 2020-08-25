@@ -29,7 +29,7 @@ public class ChromeOsSupport {
      * @param pm A {@link PackageManager}.
      * @return True if running on ARC++.
      */
-    public static boolean isRunningOnArc (PackageManager pm) {
+    public static boolean isRunningOnArc(PackageManager pm) {
         return pm.hasSystemFeature(ARC_FEATURE);
     }
 }

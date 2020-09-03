@@ -15,6 +15,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
+import android.content.Context;
 
 import androidx.annotation.Nullable;
 
@@ -29,13 +30,13 @@ public class BillingWrapperFactory {
      * Returns the appropriate {@link BillingWrapper} - this will be {@link PlayBillingWrapper} in
      * production code and {@link MockBillingWrapper} in tests.
      */
-    public static BillingWrapper get(Activity activity, BillingWrapper.Listener listener) {
+    public static BillingWrapper get(Context context, BillingWrapper.Listener listener) {
         if (sTestingBillingWrapper != null) {
             sTestingBillingWrapper.setListener(listener);
             return sTestingBillingWrapper;
         }
 
-        return new PlayBillingWrapper(activity, listener);
+        return new PlayBillingWrapper(context, listener);
     }
 
     /**

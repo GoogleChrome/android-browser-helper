@@ -15,6 +15,11 @@
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
+import android.util.Log;
+
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
+import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import androidx.annotation.Nullable;
 
@@ -23,13 +28,15 @@ import androidx.annotation.Nullable;
  * suitable for calling the Play Biling library.
  */
 public class AcknowledgeCall {
+    private static final String TAG = "TwaBilling";
+
     public static final String COMMAND_NAME = "acknowledge";
 
     private static final String PARAM_ACKNOWLEDGE_PURCHASE_TOKEN = "acknowledge.purchaseToken";
     private static final String PARAM_ACKNOWLEDGE_MAKE_AVAILABLE_AGAIN =
             "acknowledge.makeAvailableAgain";
-    private static final String RESPONSE_ACKNOWLEDGE = "acknowledge.response";
-    private static final String RESPONSE_ACKNOWLEDGE_RESPONSE_CODE = "acknowledge.responseCode";
+    static final String RESPONSE_ACKNOWLEDGE = "acknowledge.response";
+    static final String RESPONSE_ACKNOWLEDGE_RESPONSE_CODE = "acknowledge.responseCode";
 
     public final String purchaseToken;
     public final boolean makeAvailableAgain;
@@ -60,9 +67,32 @@ public class AcknowledgeCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    public void respond(int responseCode) {
+    private void respond(BillingResult result) {
+        int responseCode = result.getResponseCode();
+        if (responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "Billing returned non-OK response code: " + responseCode + ", "
+                    + result.getDebugMessage());
+        }
+
         Bundle args = new Bundle();
         args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, responseCode);
         mCallback.run(RESPONSE_ACKNOWLEDGE, args);
+    }
+
+    /** Calls the appropriate method on {@link BillingWrapper}. */
+    public void call(BillingWrapper billing) {
+        if (makeAvailableAgain) {
+            billing.acknowledge(purchaseToken, this::respond);
+        } else {
+            billing.consume(purchaseToken, (result, token) -> respond(result));
+        }
+    }
+
+    /** Creates a bundle that can be used with {@link #create}. For testing. */
+    static Bundle createBundleForTesting(String token, boolean makeAvailableAgain) {
+        Bundle bundle = new Bundle();
+        bundle.putString(PARAM_ACKNOWLEDGE_PURCHASE_TOKEN, token);
+        bundle.putBoolean(PARAM_ACKNOWLEDGE_MAKE_AVAILABLE_AGAIN, makeAvailableAgain);
+        return bundle;
     }
 }

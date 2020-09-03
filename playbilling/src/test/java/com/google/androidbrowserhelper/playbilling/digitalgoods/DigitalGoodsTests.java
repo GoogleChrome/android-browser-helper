@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.AcknowledgeCall.RESPONSE_ACKNOWLEDGE;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_DETAILS_LIST;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_RESPONSE_CODE;
@@ -124,5 +125,26 @@ public class DigitalGoodsTests {
         mBillingWrapper.triggerOnGotSkuDetails(Collections.singletonList(new SkuDetails(skuJson)));
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void acknowledgeCall_callsAcknowledge() {
+        boolean makeAvailableAgain = true;
+        Bundle args = AcknowledgeCall.createBundleForTesting("id1", makeAvailableAgain);
+        CountDownLatch callbackTriggered = new CountDownLatch(1);
+
+        DigitalGoodsCallback callback = (name, bundle) -> {
+            assertEquals(RESPONSE_ACKNOWLEDGE, name);
+            callbackTriggered.countDown();
+        };
+
+        assertTrue(mHandler.handle(AcknowledgeCall.COMMAND_NAME, args, callback));
+
+        // TODO check things work...
+    }
+
+    @Test
+    public void acknowledgeCall_callsConsume() {
+
     }
 }

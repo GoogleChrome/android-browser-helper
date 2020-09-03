@@ -16,6 +16,8 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
 
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
+import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
@@ -47,6 +49,16 @@ public interface BillingWrapper {
      * Get {@link SkuDetails} objects for the provided SKUs.
      */
     void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback);
+
+    /**
+     * Acknowledges that a purchase has occured.
+     */
+    void acknowledge(String token, AcknowledgePurchaseResponseListener callback);
+
+    /**
+     * Consumes a repeatable purchase.
+     */
+    void consume(String token, ConsumeResponseListener callback);
 
     /**
      * Launches the Payment Flow. If it returns {@code true},

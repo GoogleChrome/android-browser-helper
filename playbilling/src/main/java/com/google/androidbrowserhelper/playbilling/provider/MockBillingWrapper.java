@@ -16,8 +16,10 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
 
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
@@ -49,6 +51,16 @@ public class MockBillingWrapper implements BillingWrapper {
         mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
         mPendingQuerySkuDetailsCallback = callback;
+    }
+
+    @Override
+    public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
+
+    }
+
+    @Override
+    public void consume(String token, ConsumeResponseListener callback) {
+
     }
 
     @Override

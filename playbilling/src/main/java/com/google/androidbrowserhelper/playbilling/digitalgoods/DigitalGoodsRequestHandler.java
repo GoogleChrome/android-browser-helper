@@ -77,6 +77,11 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 if (getDetailsCall == null) break;
                 getDetailsCall.call(mWrapper);
                 return true;
+            case AcknowledgeCall.COMMAND_NAME:
+                AcknowledgeCall acknowledgeCall = AcknowledgeCall.create(args, callback);
+                if (acknowledgeCall == null) break;
+                acknowledgeCall.call(mWrapper);
+                return true;
         }
         return false;
     }

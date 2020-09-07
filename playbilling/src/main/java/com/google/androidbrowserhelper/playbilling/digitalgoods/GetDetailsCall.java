@@ -16,8 +16,10 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
@@ -32,6 +34,8 @@ import androidx.annotation.Nullable;
  * suitable for calling the Play Biling library.
  */
 public class GetDetailsCall {
+    private static final String TAG = "TwaBilling";
+
     public static final String COMMAND_NAME = "getDetails";
 
     static final String PARAM_GET_DETAILS_ITEM_IDS = "getDetails.itemIds";
@@ -60,7 +64,13 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    private void respond(BillingResult code, List<SkuDetails> detailsList) {
+    private void respond(BillingResult result, List<SkuDetails> detailsList) {
+        int responseCode = result.getResponseCode();
+        if (responseCode != BillingClient.BillingResponseCode.OK) {
+            Log.w(TAG, "Billing returned non-OK response code: " + responseCode + ", "
+                    + result.getDebugMessage());
+        }
+
         Parcelable[] parcelables = new Parcelable[detailsList.size()];
 
         int index = 0;
@@ -69,7 +79,7 @@ public class GetDetailsCall {
         }
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, code.getResponseCode());
+        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, responseCode);
         args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, parcelables);
         mCallback.run(RESPONSE_GET_DETAILS, args);
     }

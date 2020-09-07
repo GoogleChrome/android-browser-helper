@@ -128,8 +128,16 @@ public class DigitalGoodsTests {
     }
 
     @Test
-    public void acknowledgeCall_callsAcknowledge() {
-        boolean makeAvailableAgain = true;
+    public void acknowledgeCall_callsAcknowledge() throws InterruptedException {
+        callAcknowledge(true);
+    }
+
+    @Test
+    public void acknowledgeCall_callsConsume() throws InterruptedException {
+        callAcknowledge(false);
+    }
+
+    private void callAcknowledge(boolean makeAvailableAgain) throws InterruptedException {
         Bundle args = AcknowledgeCall.createBundleForTesting("id1", makeAvailableAgain);
         CountDownLatch callbackTriggered = new CountDownLatch(1);
 
@@ -140,11 +148,14 @@ public class DigitalGoodsTests {
 
         assertTrue(mHandler.handle(AcknowledgeCall.COMMAND_NAME, args, callback));
 
-        // TODO check things work...
-    }
+        if (makeAvailableAgain) {
+            assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
+            mBillingWrapper.triggerAcknowledge(0);
+        } else {
+            assertEquals("id1", mBillingWrapper.getConsumeToken());
+            mBillingWrapper.triggerConsume(0, "?");
+        }
 
-    @Test
-    public void acknowledgeCall_callsConsume() {
-
+        assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }
 }

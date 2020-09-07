@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
 
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
- * suitable for calling the Play Biling library.
+ * suitable for calling the Play Billing library.
  */
 public class AcknowledgeCall {
     private static final String TAG = "TwaBilling";

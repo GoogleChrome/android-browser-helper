@@ -16,8 +16,10 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
 
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
@@ -34,6 +36,10 @@ public class MockBillingWrapper implements BillingWrapper {
     private List<String> mQueriedSkuDetails;
     private boolean mPaymentFlowSuccessful;
     private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
+    private String mAcknowledgeToken;
+    private AcknowledgePurchaseResponseListener mPendingAcknowledgeCallback;
+    private String mConsumeToken;
+    private ConsumeResponseListener mPendingConsumeCallback;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(1);
@@ -49,6 +55,18 @@ public class MockBillingWrapper implements BillingWrapper {
         mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
         mPendingQuerySkuDetailsCallback = callback;
+    }
+
+    @Override
+    public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
+        mAcknowledgeToken = token;
+        mPendingAcknowledgeCallback = callback;
+    }
+
+    @Override
+    public void consume(String token, ConsumeResponseListener callback) {
+        mConsumeToken = token;
+        mPendingConsumeCallback = callback;
     }
 
     @Override
@@ -72,6 +90,16 @@ public class MockBillingWrapper implements BillingWrapper {
     public void triggerOnGotSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
         BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
         mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, skuDetails);
+    }
+
+    public void triggerAcknowledge(int responseCode) {
+        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
+        mPendingAcknowledgeCallback.onAcknowledgePurchaseResponse(result);
+    }
+
+    public void triggerConsume(int responseCode, String token) {
+        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
+        mPendingConsumeCallback.onConsumeResponse(result, token);
     }
 
     public void triggerOnPurchasesUpdated() {
@@ -100,6 +128,14 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public List<String> getQueriedSkuDetails() {
         return mQueriedSkuDetails;
+    }
+
+    public String getConsumeToken() {
+        return mConsumeToken;
+    }
+
+    public String getAcknowledgeToken() {
+        return mAcknowledgeToken;
     }
 
     private static boolean wait(CountDownLatch latch) throws InterruptedException {

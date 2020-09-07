@@ -15,6 +15,7 @@
 package com.google.androidbrowserhelper.locationdelegation;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,7 +27,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 import androidx.core.app.ActivityCompat;
 
@@ -35,7 +35,7 @@ import androidx.core.app.ActivityCompat;
  * or disapprove, this will send the result via the {@link Messenger} provided with the intent, and
  * then finish.
  */
-public class PermissionRequestActivity extends AppCompatActivity {
+public class PermissionRequestActivity extends Activity {
     private static final String LOCATION_PERMISSION_RESULT = "locationPermissionResult";
 
     private static final String EXTRA_RESULT_RECEIVER = "EXTRA_RESULT_RECEIVER";

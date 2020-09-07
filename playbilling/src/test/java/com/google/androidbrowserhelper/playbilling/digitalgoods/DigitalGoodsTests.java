@@ -83,6 +83,7 @@ public class DigitalGoodsTests {
         DigitalGoodsCallback callback = (name, bundle) -> callbackTriggered.countDown();
 
         assertTrue(mHandler.handle( GetDetailsCall.COMMAND_NAME, args, callback));
+        mBillingWrapper.triggerConnected();
 
         assertTrue(mBillingWrapper.waitForQuerySkuDetails());
         mBillingWrapper.triggerOnGotSkuDetails(Collections.emptyList());
@@ -121,6 +122,7 @@ public class DigitalGoodsTests {
         };
 
         assertTrue(mHandler.handle(GetDetailsCall.COMMAND_NAME, args, callback));
+        mBillingWrapper.triggerConnected();
 
         assertTrue(mBillingWrapper.waitForQuerySkuDetails());
         mBillingWrapper.triggerOnGotSkuDetails(Collections.singletonList(new SkuDetails(skuJson)));
@@ -150,6 +152,7 @@ public class DigitalGoodsTests {
         };
 
         assertTrue(mHandler.handle(AcknowledgeCall.COMMAND_NAME, args, callback));
+        mBillingWrapper.triggerConnected();
 
         if (makeAvailableAgain) {
             assertEquals("id1", mBillingWrapper.getAcknowledgeToken());

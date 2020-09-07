@@ -31,19 +31,8 @@ import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
     private final BillingWrapper mWrapper;
-    private final BillingWrapper.Listener mListener = new BillingWrapper.Listener() {
-        @Override
-        public void onConnected() {
-            // TODO: Sort out connection lifecycle.
-        }
-
-        @Override
-        public void onDisconnected() {
-            // TODO: Sort out connection lifecycle.
-        }
-
-        @Override
-        public void onPurchaseFlowComplete(int result) { }
+    private final BillingWrapper.Listener mListener = result -> {
+        throw new IllegalStateException("DigitalGoods does not support Payment Flows.");
     };
 
     public DigitalGoodsRequestHandler(Context context) {

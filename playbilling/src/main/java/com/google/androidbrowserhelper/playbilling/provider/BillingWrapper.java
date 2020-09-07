@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.app.Activity;
 
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
+import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -32,18 +33,12 @@ public interface BillingWrapper {
      * Callbacks for connection state and for purchase flow completion.
      */
     interface Listener {
-        /** Will be called when connected to the Play Billing client. */
-        void onConnected();
-
-        /** Will be called when the Play Billing client disconnects. */
-        void onDisconnected();
-
         /** Will be called after a call to {@link #launchPaymentFlow} that returns {@code true}. */
         void onPurchaseFlowComplete(int result);
     }
 
     /** Connect to the Play Billing client. */
-    void connect();
+    void connect(BillingClientStateListener callback);
 
     /**
      * Get {@link SkuDetails} objects for the provided SKUs.

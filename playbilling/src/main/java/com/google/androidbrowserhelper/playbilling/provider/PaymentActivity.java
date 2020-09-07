@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 
@@ -58,15 +59,23 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
         }
 
         mWrapper = BillingWrapperFactory.get(this, this);
-        mWrapper.connect();
+        mWrapper.connect(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                onConnected();
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                onDisconnected();
+            }
+        });
     }
 
-    @Override
     public void onDisconnected() {
         fail("BillingClient disconnected.");
     }
 
-    @Override
     public void onConnected() {
         mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku),
                 (BillingResult result, List<SkuDetails> details) -> {

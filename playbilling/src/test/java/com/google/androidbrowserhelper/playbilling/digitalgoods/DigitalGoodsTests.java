@@ -35,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.AcknowledgeCall.RESPONSE_ACKNOWLEDGE;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.AcknowledgeCall.RESPONSE_ACKNOWLEDGE_RESPONSE_CODE;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_DETAILS_LIST;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_RESPONSE_CODE;
@@ -140,9 +141,11 @@ public class DigitalGoodsTests {
     private void callAcknowledge(boolean makeAvailableAgain) throws InterruptedException {
         Bundle args = AcknowledgeCall.createBundleForTesting("id1", makeAvailableAgain);
         CountDownLatch callbackTriggered = new CountDownLatch(1);
+        int expectedResponseCode = 23;
 
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(RESPONSE_ACKNOWLEDGE, name);
+            assertEquals(expectedResponseCode, bundle.getInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE));
             callbackTriggered.countDown();
         };
 
@@ -150,10 +153,10 @@ public class DigitalGoodsTests {
 
         if (makeAvailableAgain) {
             assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
-            mBillingWrapper.triggerAcknowledge(0);
+            mBillingWrapper.triggerAcknowledge(expectedResponseCode);
         } else {
             assertEquals("id1", mBillingWrapper.getConsumeToken());
-            mBillingWrapper.triggerConsume(0, "?");
+            mBillingWrapper.triggerConsume(expectedResponseCode, "?");
         }
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));

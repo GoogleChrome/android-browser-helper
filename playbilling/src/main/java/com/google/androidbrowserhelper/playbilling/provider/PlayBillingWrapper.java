@@ -60,18 +60,8 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void connect() {
-        mClient.startConnection(new BillingClientStateListener() {
-            @Override
-            public void onBillingSetupFinished(BillingResult billingResult) {
-                mListener.onConnected();
-            }
-
-            @Override
-            public void onBillingServiceDisconnected() {
-                mListener.onDisconnected();
-            }
-        });
+    public void connect(BillingClientStateListener callback) {
+        mClient.startConnection(callback);
     }
 
     @Override

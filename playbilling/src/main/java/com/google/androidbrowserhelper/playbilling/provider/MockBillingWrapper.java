@@ -18,6 +18,7 @@ import android.app.Activity;
 
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
@@ -33,11 +34,15 @@ import java.util.concurrent.TimeUnit;
 public class MockBillingWrapper implements BillingWrapper {
     private Listener mListener;
 
+    private BillingClientStateListener mConnectionStateListener;
+
     private List<String> mQueriedSkuDetails;
     private boolean mPaymentFlowSuccessful;
     private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
+
     private String mAcknowledgeToken;
     private AcknowledgePurchaseResponseListener mPendingAcknowledgeCallback;
+
     private String mConsumeToken;
     private ConsumeResponseListener mPendingConsumeCallback;
 
@@ -46,7 +51,8 @@ public class MockBillingWrapper implements BillingWrapper {
     private final CountDownLatch mLaunchPaymentFlowLatch = new CountDownLatch(1);
 
     @Override
-    public void connect() {
+    public void connect(BillingClientStateListener callback) {
+        mConnectionStateListener = callback;
         mConnectLatch.countDown();
     }
 
@@ -76,11 +82,12 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerConnected() {
-        mListener.onConnected();
+        mConnectionStateListener.onBillingSetupFinished(
+                toResult(BillingClient.BillingResponseCode.OK));
     }
 
     public void triggerDisconnected() {
-        mListener.onDisconnected();
+        mConnectionStateListener.onBillingServiceDisconnected();
     }
 
     public void triggerOnGotSkuDetails(List<SkuDetails> skuDetails) {
@@ -88,18 +95,15 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
-        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
-        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(result, skuDetails);
+        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
     }
 
     public void triggerAcknowledge(int responseCode) {
-        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
-        mPendingAcknowledgeCallback.onAcknowledgePurchaseResponse(result);
+        mPendingAcknowledgeCallback.onAcknowledgePurchaseResponse(toResult(responseCode));
     }
 
     public void triggerConsume(int responseCode, String token) {
-        BillingResult result = BillingResult.newBuilder().setResponseCode(responseCode).build();
-        mPendingConsumeCallback.onConsumeResponse(result, token);
+        mPendingConsumeCallback.onConsumeResponse(toResult(responseCode), token);
     }
 
     public void triggerOnPurchasesUpdated() {
@@ -140,5 +144,9 @@ public class MockBillingWrapper implements BillingWrapper {
 
     private static boolean wait(CountDownLatch latch) throws InterruptedException {
         return latch.await(5, TimeUnit.SECONDS);
+    }
+
+    private static BillingResult toResult(int responseCode) {
+         return BillingResult.newBuilder().setResponseCode(responseCode).build();
     }
 }

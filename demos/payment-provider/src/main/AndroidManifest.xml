@@ -22,7 +22,7 @@
         <activity
             android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentActivity"
             android:exported="true"
-            android:theme="@style/Theme.Transparent">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
             <intent-filter>
                 <action android:name="org.chromium.intent.action.PAY" />

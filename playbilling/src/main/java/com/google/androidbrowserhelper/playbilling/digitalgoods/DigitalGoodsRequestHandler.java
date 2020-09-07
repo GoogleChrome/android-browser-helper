@@ -36,7 +36,7 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
     };
 
     public DigitalGoodsRequestHandler(Context context) {
-        mWrapper = BillingWrapperFactory.get(context, mListener);
+        mWrapper = new ConnectedBillingWrapper(BillingWrapperFactory.get(context, mListener));
     }
 
     @NonNull

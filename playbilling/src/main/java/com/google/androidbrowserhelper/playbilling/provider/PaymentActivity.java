@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,9 +28,8 @@ import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class PaymentActivity extends AppCompatActivity implements BillingWrapper.Listener {
+public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
 
     private static final String METHOD_NAME = "https://beer.conn.dev";

@@ -71,11 +71,14 @@ public class GetDetailsCall {
                     + result.getDebugMessage());
         }
 
-        Parcelable[] parcelables = new Parcelable[detailsList.size()];
+        Parcelable[] parcelables = new Parcelable[0];
+        if (detailsList != null) {
+            parcelables = new Parcelable[detailsList.size()];
 
-        int index = 0;
-        for (SkuDetails details : detailsList) {
-            parcelables[index] = ItemDetails.create(details).toBundle();
+            int index = 0;
+            for (SkuDetails details : detailsList) {
+                parcelables[index++] = ItemDetails.create(details).toBundle();
+            }
         }
 
         Bundle args = new Bundle();

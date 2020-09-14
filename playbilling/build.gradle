@@ -1,6 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven-publish'
 
 android {
@@ -34,7 +32,6 @@ dependencies {
     api 'androidx.browser:browser:1.2.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'com.android.billingclient:billing:2.1.0'
 

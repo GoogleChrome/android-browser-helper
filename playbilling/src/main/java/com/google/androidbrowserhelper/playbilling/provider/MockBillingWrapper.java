@@ -15,6 +15,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.app.Activity;
+import android.content.Intent;
 
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
@@ -45,6 +46,8 @@ public class MockBillingWrapper implements BillingWrapper {
 
     private String mConsumeToken;
     private ConsumeResponseListener mPendingConsumeCallback;
+
+    private Intent mPlayBillingFlowLaunchIntent;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(1);
@@ -77,6 +80,7 @@ public class MockBillingWrapper implements BillingWrapper {
 
     @Override
     public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
+        mPlayBillingFlowLaunchIntent = activity.getIntent();
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }
@@ -140,6 +144,10 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public String getAcknowledgeToken() {
         return mAcknowledgeToken;
+    }
+
+    public Intent getPlayBillingFlowLaunchIntent() {
+        return mPlayBillingFlowLaunchIntent;
     }
 
     private static boolean wait(CountDownLatch latch) throws InterruptedException {

@@ -34,12 +34,11 @@ import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.browser.trusted.TokenStore;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import static com.google.androidbrowserhelper.playbilling.provider.PaymentActivity.PROXY_PACKAGE_KEY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -89,6 +88,27 @@ public class PaymentActivityTest {
         mWrapper.triggerOnPurchasesUpdated();
 
         assertActivityResult(Activity.RESULT_OK);
+    }
+
+    @Test
+    public void setsProxy() throws InterruptedException, JSONException {
+        mWrapper.setPaymentFlowWillBeSuccessful(true);
+
+        launchActivity();
+
+        assertTrue(mWrapper.waitForConnect());
+        mWrapper.triggerConnected();
+
+        assertTrue(mWrapper.waitForQuerySkuDetails());
+        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
+
+        assertTrue(mWrapper.waitForLaunchPaymentFlow());
+        mWrapper.triggerOnPurchasesUpdated();
+
+        assertActivityResult(Activity.RESULT_OK);
+
+        String proxy = mWrapper.getPlayBillingFlowLaunchIntent().getStringExtra(PROXY_PACKAGE_KEY);
+        assertEquals(proxy, mContext.getPackageName());
     }
 
     @Test

@@ -32,7 +32,9 @@ import androidx.annotation.Nullable;
 public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
 
-    private static final String METHOD_NAME = "https://beer.conn.dev";
+    private static final String METHOD_NAME = "https://play.google.com/billing";
+
+    static final String PROXY_PACKAGE_KEY = "PROXY_PACKAGE";
 
     private BillingWrapper mWrapper;
     private MethodData mMethodData;
@@ -51,6 +53,8 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
             fail("Launching app is not verified.");
             return;
         }
+
+        getIntent().putExtra(PROXY_PACKAGE_KEY, component.getPackageName());
 
         mMethodData = MethodData.fromIntent(getIntent());
         if (mMethodData == null) {

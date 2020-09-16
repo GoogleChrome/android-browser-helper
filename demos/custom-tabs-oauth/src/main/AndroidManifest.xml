@@ -13,7 +13,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.browser.examples.custom_tabs_oauth">
+    package="com.google.androidbrowserhelper.demos.customtabsoauth">
 
     <application
         android:allowBackup="true"

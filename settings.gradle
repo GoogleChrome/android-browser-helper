@@ -1,3 +1,4 @@
+include ':demos:custom-tabs-oauth'
 include ':demos:custom-tabs-headers'
 include ':demos:twa-custom-launcher', ':androidbrowserhelper', ':demos:twa-multi-domain', ':playbilling'
 include ':demos:twa-basic', ':demos:twa-webview-fallback'

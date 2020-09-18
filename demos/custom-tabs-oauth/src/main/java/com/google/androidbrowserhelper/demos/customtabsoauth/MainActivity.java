@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
     private Button mLoginButton;
     private TextView mUserText;
     private ProgressBar mProgressBar;
-    private boolean loggedIn = false;
+    private boolean mLoggedIn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +54,9 @@ public class MainActivity extends Activity {
             Uri data = intent.getData();
             if (data != null && data.getPath() != null
                     && data.getPath().startsWith("/oauth/auth-callback.html")) {
-                this.mProgressBar.setVisibility(View.VISIBLE);
-                this.mLoginButton.setEnabled(false);
-                this.handleAuthCallback(data);
+                mProgressBar.setVisibility(View.VISIBLE);
+                mLoginButton.setEnabled(false);
+                handleAuthCallback(data);
             }
         }
     }
@@ -65,19 +65,19 @@ public class MainActivity extends Activity {
         OAUTH_MANAGER.handleAuthCallback(this, uri, (accessToken, scope, tokenType) -> {
             GithubApi.requestGithubUsername(accessToken, (username -> {
                 mLoginButton.setText(R.string.logout);
-                this.mLoginButton.setEnabled(true);
-                this.mProgressBar.setVisibility(View.INVISIBLE);
+                mLoginButton.setEnabled(true);
+                mProgressBar.setVisibility(View.INVISIBLE);
                 mUserText.setText(getString(R.string.logged_in, username));
-                loggedIn = true;
+                mLoggedIn = true;
             }));
         });
     }
 
     public void login(View v) {
-        if (loggedIn) {
+        if (mLoggedIn) {
             mLoginButton.setText(R.string.login);
             mUserText.setText(R.string.logged_out);
-            loggedIn = false;
+            mLoggedIn = false;
         } else {
             OAUTH_MANAGER.authorize(this, "user");
         }

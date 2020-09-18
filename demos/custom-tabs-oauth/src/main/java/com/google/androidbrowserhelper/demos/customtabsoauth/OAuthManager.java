@@ -16,7 +16,7 @@ import java.util.UUID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
- * This class helps managing an OAuth flow. It was created wit the goal of demonstrating how to
+ * This class helps managing an OAuth flow. It was created with the goal of demonstrating how to
  * use Custom Tabs to handle the authorization flow and is not meant as a complete implementation
  * of the OAuth protocol. We recommend checking out https://github.com/openid/AppAuth-Android for
  * a comprehensive implementation of the OAuth protocol.
@@ -65,7 +65,6 @@ public class OAuthManager {
         // Open the Authorization URI in a Custom Tab.
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
         customTabsIntent.intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-//        customTabsIntent.intent.setPackage("com.android.chrome");
         customTabsIntent.launchUrl(context, uri);
     }
 

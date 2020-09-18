@@ -35,10 +35,10 @@ public class OAuthManager {
 
     public OAuthManager(String clientId, String clientSecret, String authorizationEndpoint,
                         String redirectUri) {
-        this.mClientId = clientId;
-        this.mClientSecret = clientSecret;
-        this.mAuthorizationEndpoint = authorizationEndpoint;
-        this.mRedirectUri = redirectUri;
+        mClientId = clientId;
+        mClientSecret = clientSecret;
+        mAuthorizationEndpoint = authorizationEndpoint;
+        mRedirectUri = redirectUri;
     }
 
     public void authorize(Context context, String scope) {

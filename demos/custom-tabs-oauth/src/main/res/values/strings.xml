@@ -13,4 +13,8 @@
 
 <resources>
     <string name="app_name">Custom Tabs OAuth</string>
+    <string name="logged_out">You are not logged in.</string>
+    <string name="logged_in">Hello, %s.</string>
+    <string name="login">login</string>
+    <string name="logout">logout</string>
 </resources>

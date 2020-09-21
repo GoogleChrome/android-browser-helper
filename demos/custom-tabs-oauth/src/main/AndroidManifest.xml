@@ -15,6 +15,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.androidbrowserhelper.demos.customtabsoauth">
 
+    <!-- This permission is required to query the GitHub API via an HttpUrlConnection. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -26,6 +29,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- An intent-filter for the OAuth Redirect -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="oauth-custom-tabs.glitch.me"
+                    android:pathPattern="/oauth/auth-callback.html"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
     </application>

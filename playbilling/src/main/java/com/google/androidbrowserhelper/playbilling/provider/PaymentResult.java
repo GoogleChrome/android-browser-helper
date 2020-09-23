@@ -20,6 +20,8 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.annotation.Nullable;
+
 /**
  * Takes care of packing the information we send back to the website into JSON.
  */

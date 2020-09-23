@@ -18,6 +18,7 @@ import android.app.Activity;
 
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -34,7 +35,7 @@ public interface BillingWrapper {
      */
     interface Listener {
         /** Will be called after a call to {@link #launchPaymentFlow} that returns {@code true}. */
-        void onPurchaseFlowComplete(int result);
+        void onPurchaseFlowComplete(BillingResult result);
     }
 
     /** Connect to the Play Billing client. */

@@ -111,7 +111,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnPurchasesUpdated() {
-        mListener.onPurchaseFlowComplete(BillingClient.BillingResponseCode.OK);
+        mListener.onPurchaseFlowComplete(toResult(BillingClient.BillingResponseCode.OK));
     }
 
     public boolean waitForConnect() throws InterruptedException {

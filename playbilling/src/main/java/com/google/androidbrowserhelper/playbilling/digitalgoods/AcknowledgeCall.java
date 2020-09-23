@@ -28,8 +28,6 @@ import androidx.annotation.Nullable;
  * suitable for calling the Play Billing library.
  */
 public class AcknowledgeCall {
-    private static final String TAG = "TwaBilling";
-
     public static final String COMMAND_NAME = "acknowledge";
 
     private static final String PARAM_ACKNOWLEDGE_PURCHASE_TOKEN = "acknowledge.purchaseToken";
@@ -68,19 +66,17 @@ public class AcknowledgeCall {
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
     private void respond(BillingResult result) {
-        int responseCode = result.getResponseCode();
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.w(TAG, "Billing returned non-OK response code: " + responseCode + ", "
-                    + result.getDebugMessage());
-        }
+        Logging.logAckResponse(result, makeAvailableAgain);
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, responseCode);
+        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, result.getResponseCode());
         mCallback.run(RESPONSE_ACKNOWLEDGE, args);
     }
 
     /** Calls the appropriate method on {@link BillingWrapper}. */
     public void call(BillingWrapper billing) {
+        Logging.logAckCall(purchaseToken, makeAvailableAgain);
+
         if (makeAvailableAgain) {
             billing.acknowledge(purchaseToken, this::respond);
         } else {

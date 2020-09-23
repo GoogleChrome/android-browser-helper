@@ -34,8 +34,6 @@ import androidx.annotation.Nullable;
  * suitable for calling the Play Biling library.
  */
 public class GetDetailsCall {
-    private static final String TAG = "TwaBilling";
-
     public static final String COMMAND_NAME = "getDetails";
 
     static final String PARAM_GET_DETAILS_ITEM_IDS = "getDetails.itemIds";
@@ -65,11 +63,7 @@ public class GetDetailsCall {
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
     private void respond(BillingResult result, List<SkuDetails> detailsList) {
-        int responseCode = result.getResponseCode();
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.w(TAG, "Billing returned non-OK response code: " + responseCode + ", "
-                    + result.getDebugMessage());
-        }
+        Logging.logGetDetailsResponse(result);
 
         Parcelable[] parcelables = new Parcelable[0];
         if (detailsList != null) {
@@ -82,13 +76,15 @@ public class GetDetailsCall {
         }
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, responseCode);
+        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, result.getResponseCode());
         args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, parcelables);
         mCallback.run(RESPONSE_GET_DETAILS, args);
     }
 
     /** Calls the appropriate method on {@link BillingWrapper}. */
     public void call(BillingWrapper billing) {
+        Logging.logGetDetailsCall(mItemIds);
+
         billing.querySkuDetails(mItemIds, this::respond);
     }
 

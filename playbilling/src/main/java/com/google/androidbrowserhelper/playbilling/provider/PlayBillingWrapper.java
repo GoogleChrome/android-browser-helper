@@ -46,7 +46,7 @@ public class PlayBillingWrapper implements BillingWrapper {
             new PurchasesUpdatedListener() {
         @Override
         public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
-            mListener.onPurchaseFlowComplete(billingResult.getResponseCode());
+            mListener.onPurchaseFlowComplete(billingResult);
         }
     };
 
@@ -103,6 +103,8 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .build();
 
         BillingResult result = mClient.launchBillingFlow(activity, params);
+
+        Logging.logLaunchPaymentFlow(result);
 
         return result.getResponseCode() == BillingClient.BillingResponseCode.OK;
     }

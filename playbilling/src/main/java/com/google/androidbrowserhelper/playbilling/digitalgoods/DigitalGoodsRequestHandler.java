@@ -60,6 +60,8 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
 
     public boolean handle(@NonNull String commandName, @NonNull Bundle args,
             @Nullable DigitalGoodsCallback callback) {
+        Logging.logCommand(commandName);
+
         switch (commandName) {
             case GetDetailsCall.COMMAND_NAME:
                 GetDetailsCall getDetailsCall = GetDetailsCall.create(args, callback);

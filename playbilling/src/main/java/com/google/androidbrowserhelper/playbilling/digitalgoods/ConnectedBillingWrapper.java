@@ -59,6 +59,8 @@ public class ConnectedBillingWrapper implements BillingWrapper {
         mInner.connect(new BillingClientStateListener() {
             @Override
             public void onBillingSetupFinished(BillingResult billingResult) {
+                Logging.logConnected();
+
                 mState = CONNECTED;
 
                 for (Runnable callback : mPendingCallbacks) {
@@ -70,6 +72,8 @@ public class ConnectedBillingWrapper implements BillingWrapper {
 
             @Override
             public void onBillingServiceDisconnected() {
+                Logging.logDisconnected();
+
                 mState = NOT_CONNECTED;
             }
         });

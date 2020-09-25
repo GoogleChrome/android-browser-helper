@@ -86,6 +86,9 @@ public class ManageDataLauncherActivity extends Activity {
     public static final String CATEGORY_LAUNCH_SITE_SETTINGS =
             "androidx.browser.trusted.category.LaunchSiteSettings";
 
+    public static final String OVERRIDE_IC_SITE_SETTINGS_ID =
+            "drawable/override_ic_site_settings";
+
     @Nullable
     private String mProviderPackage;
 
@@ -350,11 +353,13 @@ public class ManageDataLauncherActivity extends Activity {
 
         if(activities.size() == 0) return null;
 
+        int shortcutIconId = context.getResources().getIdentifier(
+                OVERRIDE_IC_SITE_SETTINGS_ID, "drawable", context.getPackageName());
         return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
                 .setShortLabel("Site Settings")
                 .setLongLabel("Manage website notifications, permissions, etc.")
                 .setIcon(Icon.createWithResource(context,
-                        R.drawable.ic_site_settings))
+                        shortcutIconId != 0 ? shortcutIconId : R.drawable.ic_site_settings))
                 .setIntent(siteSettingsIntent)
                 .build();
     }

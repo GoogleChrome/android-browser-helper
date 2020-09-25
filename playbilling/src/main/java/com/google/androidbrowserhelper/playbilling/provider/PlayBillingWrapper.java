@@ -46,7 +46,13 @@ public class PlayBillingWrapper implements BillingWrapper {
             new PurchasesUpdatedListener() {
         @Override
         public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
-            mListener.onPurchaseFlowComplete(billingResult);
+            Logging.logPurchasesUpdate(billingResult, list);
+
+            if (list == null || list.size() == 0) {
+                mListener.onPurchaseFlowComplete(billingResult, "");
+            } else {
+                mListener.onPurchaseFlowComplete(billingResult, list.get(0).getPurchaseToken());
+            }
         }
     };
 

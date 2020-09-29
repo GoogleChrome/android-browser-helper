@@ -18,14 +18,14 @@
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
             \"target\": {
                 \"namespace\": \"web\",
-                \"site\": \"https://peconn.github.io/\"}
+                \"site\": \"https://mvano.github.io/\"}
         }
         ]
     </string>
     <string name="provider_authority">com.google.androidbrowserhelper.webshare.fileprovider</string>
     <string name="share_target">
 {
-  \"action\": \"https://peconn.github.io/starters/index.html\",
+  \"action\": \"https://mvano.github.io/share.html\",
   \"method\": \"GET\",
   \"params\": {
     \"title\": \"title\",

@@ -27,8 +27,8 @@ import java.util.List;
 public class Logging {
     private static final String TAG = "TwaBilling.DG";
 
-    static void logCommand(String commandName) {
-        Log.d(TAG, "Got command: " + commandName);
+    static void logUnknownCommand(String commandName) {
+        Log.d(TAG, "Got unknown command: " + commandName);
     }
 
     static void logAckCall(String token, boolean makeAvailableAgain) {
@@ -41,11 +41,7 @@ public class Logging {
 
     static void logAckResponse(BillingResult result, boolean makeAvailableAgain) {
         String command = makeAvailableAgain ? "Acknowledge" : "Consume";
-        int responseCode = result.getResponseCode();
-        Log.d(TAG, command + " returned code " + responseCode);
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.d(TAG, result.getDebugMessage());
-        }
+        logResult(result, command + " returned:");
     }
 
     static void logGetDetailsCall(List<String> ids) {
@@ -63,10 +59,16 @@ public class Logging {
     }
 
     static void logGetDetailsResponse(BillingResult result) {
+        logResult(result, "GetDetails returned:");
+    }
+
+    private static void logResult(BillingResult result, String message) {
         int responseCode = result.getResponseCode();
-        Log.d(TAG, "GetDetails returned code " + responseCode);
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.d(TAG, result.getDebugMessage());
+
+        Log.d(TAG, message + " " + responseCode);
+        String debugMessage = result.getDebugMessage();
+        if (debugMessage != null && !debugMessage.isEmpty()) {
+            Log.d(TAG, debugMessage);
         }
     }
 

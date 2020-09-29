@@ -35,7 +35,7 @@ public interface BillingWrapper {
      */
     interface Listener {
         /** Will be called after a call to {@link #launchPaymentFlow} that returns {@code true}. */
-        void onPurchaseFlowComplete(BillingResult result);
+        void onPurchaseFlowComplete(BillingResult result, String purchaseToken);
     }
 
     /** Connect to the Play Billing client. */

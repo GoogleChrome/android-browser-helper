@@ -95,11 +95,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     @Override
-    public void onPurchaseFlowComplete(BillingResult result) {
-        Logging.logPaymentFlowComplete(result);
-
+    public void onPurchaseFlowComplete(BillingResult result, String purchaseToken) {
         if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-            setResultAndFinish(PaymentResult.success("success"));
+            setResultAndFinish(PaymentResult.success(purchaseToken));
         } else {
             fail("Purchase flow ended with result: " + result);
         }

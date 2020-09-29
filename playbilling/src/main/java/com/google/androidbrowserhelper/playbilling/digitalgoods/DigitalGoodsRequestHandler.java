@@ -18,12 +18,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.RemoteException;
 
-import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 import com.google.androidbrowserhelper.trusted.ExtraCommandHandler;
-
-import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,7 +28,7 @@ import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
     private final BillingWrapper mWrapper;
-    private final BillingWrapper.Listener mListener = result -> { };
+    private final BillingWrapper.Listener mListener = (result, token) -> { };
 
     public DigitalGoodsRequestHandler(Context context) {
         mWrapper = new ConnectedBillingWrapper(BillingWrapperFactory.get(context, mListener));
@@ -58,8 +55,6 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
 
     public boolean handle(@NonNull String commandName, @NonNull Bundle args,
             @Nullable DigitalGoodsCallback callback) {
-        Logging.logCommand(commandName);
-
         switch (commandName) {
             case GetDetailsCall.COMMAND_NAME:
                 GetDetailsCall getDetailsCall = GetDetailsCall.create(args, callback);
@@ -72,6 +67,8 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 acknowledgeCall.call(mWrapper);
                 return true;
         }
+
+        Logging.logUnknownCommand(commandName);
         return false;
     }
 }

@@ -18,6 +18,11 @@ import android.util.Log;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.Purchase;
+
+import java.util.List;
+
+import androidx.annotation.Nullable;
 
 /**
  * Consolidates all the logging for this package in one place.
@@ -26,24 +31,26 @@ public class Logging {
     private static final String TAG = "TwaBilling.P";
 
     static void logLaunchPaymentFlow(BillingResult result) {
-        int responseCode = result.getResponseCode();
+        logResult(result, "Payment flow launch:");
+    }
 
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.d(TAG, "Payment flow failed to launch " + responseCode);
-            Log.d(TAG, result.getDebugMessage());
+    static void logPurchasesUpdate(BillingResult result, @Nullable List<Purchase> list) {
+        logResult(result, "Purchases updated:");
+
+        if (list == null) {
+            Log.d(TAG, "No items updated.");
         } else {
-            Log.d(TAG, "Payment Flow launched " + responseCode);
+            Log.d(TAG, list.size() + " item(s) updated.");
         }
     }
 
-    static void logPaymentFlowComplete(BillingResult result) {
+    private static void logResult(BillingResult result, String message) {
         int responseCode = result.getResponseCode();
 
-        if (responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.d(TAG, "Payment flow failed " + responseCode);
-            Log.d(TAG, result.getDebugMessage());
-        } else {
-            Log.d(TAG, "Payment Flow succeeded " + responseCode);
+        Log.d(TAG, message + " " + responseCode);
+        String debugMessage = result.getDebugMessage();
+        if (debugMessage != null && !debugMessage.isEmpty()) {
+            Log.d(TAG, debugMessage);
         }
     }
 }

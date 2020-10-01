@@ -17,8 +17,8 @@ package com.google.browser.examples.twa_location_delegation;
 import com.google.androidbrowserhelper.trusted.DelegationService;
 import com.google.androidbrowserhelper.locationdelegation.LocationDelegationExtraCommandHandler;
 
-class ExtraFeaturesService extends DelegationService {
-    ExtraFeaturesService() {
+public class ExtraFeaturesService extends DelegationService {
+    public ExtraFeaturesService() {
         registerExtraCommandHandler(new LocationDelegationExtraCommandHandler());
     }
 }

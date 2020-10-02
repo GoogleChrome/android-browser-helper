@@ -22,6 +22,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LauncherActivity">
 
+        <!-- IMPORTANT! The service is needed for location delegation -->
+        <service
+            android:name=".ExtraFeaturesService"
+            android:enabled="true"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
 
         <!-- Following default fields, same as all TWAs. -->
         <meta-data
@@ -87,18 +98,5 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />
         </provider>
-
-
-        <!-- IMPORTANT! The service is needed for location delegation -->
-        <service
-            android:name=".ExtraFeaturesService"
-            android:enabled="true"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </service>
     </application>
 </manifest>

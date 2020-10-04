@@ -140,7 +140,7 @@ public class WebViewFallbackActivity extends Activity {
         // Applications running in a Trusted Web Activity are supposed to have
         // android-app://<package-name> as the referrer.
         Map<String, String> headers = new HashMap<>();
-        headers.put("Referer", "android-app://" + getPackageName());
+        headers.put("Referer", "android-app://" + getPackageName() + "/");
         mWebView.loadUrl(mLaunchUrl.toString(), headers);
     }
 

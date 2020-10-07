@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,11 @@ public class PaymentVerifier {
             @NonNull String logTag) {
         // TODO: Should I also check whether the TWA is currently running? If so, how?
         if (packageName == null) return false;
+
+        if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())
+                && packageName.equals(ChromeOsSupport.ARC_PAYMENT_APP)) {
+            return true;
+        }
 
         TokenStore tokenStore = new SharedPreferencesTokenStore(context);
         Token verifiedPackage = tokenStore.load();

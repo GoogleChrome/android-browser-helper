@@ -23,9 +23,9 @@
         ]
     </string>
     <string name="provider_authority">com.google.androidbrowserhelper.webshare.fileprovider</string>
-    <string name="share_target">
+    <string name="share_target_text">
 {
-  \"action\": \"https://mvano.github.io/share.html\",
+  \"action\": \"https://mvano.github.io/share-text/index.html\",
   \"method\": \"GET\",
   \"params\": {
     \"title\": \"title\",
@@ -34,22 +34,20 @@
   }
 }
     </string>
-    <string name="share_target_2">
-        {
-            \"action\": \"https://mypwa.com/share.html\",
-            \"method\": \"POST\",
-            \"enctype\": \"multipart/form-data\",
-            \"params\": {
-              \"title\": \"received_title\",
-              \"text\": \"received_text\",
-              \"url\": \"received_url\",
-              \"files\": [
-                {
-                  \"name\": \"received_image_files\",
-                  \"accept\": \"image/*\"
-                }
-              ]
-            }
-        }
+    <string name="share_target_files">
+{
+    \"action\": \"https://mvano.github.io/share-files/index.html\",
+    \"method\": \"POST\",
+    \"enctype\": \"multipart/form-data\",
+    \"params\": {
+      \"title\": \"title\",
+      \"text\": \"text\",
+      \"url\": \"url\",
+      \"files\": [{
+          \"name\": \"files\",
+          \"accept\": [\"image/*\"]
+      }]
+    }
+}
     </string>
 </resources>

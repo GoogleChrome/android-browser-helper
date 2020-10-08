@@ -30,6 +30,7 @@ import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
+import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
 
@@ -256,9 +257,9 @@ public class TwaLauncher {
                      // for further details.
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        Intent intent = builder.build(mSession).getIntent();
-        FocusActivity.addToIntent(intent, mContext);
-        ContextCompat.startActivity(mContext, intent, null);
+        TrustedWebActivityIntent intent = builder.build(mSession);
+        FocusActivity.addToIntent(intent.getIntent(), mContext);
+        intent.launchTrustedWebActivity(mContext);
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.

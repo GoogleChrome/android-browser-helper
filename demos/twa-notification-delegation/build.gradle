@@ -5,7 +5,7 @@ android {
     buildToolsVersion "29.0.2"
 
     defaultConfig {
-        applicationId "com.google.browser.examples.twa_notification_delegation"
+        applicationId "com.google.androidbrowserhelper.demos.twa_notification_delegation"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1

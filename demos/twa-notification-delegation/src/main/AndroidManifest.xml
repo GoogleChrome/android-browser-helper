@@ -12,7 +12,7 @@
     limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.browser.examples.twa_notification_delegation">
+    package="com.google.androidbrowserhelper.demos.twa_notification_delegation">
 
     <application
         android:allowBackup="true"

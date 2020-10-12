@@ -101,7 +101,9 @@ public class ItemDetails {
      * option 3.
      *
      * This may produce an ugly looking number, eg turning "£7.50" into "7.500000" but the website
-     * on the other can use Intl.NumberFormat to display the value nicely.
+     * receiving the value can use
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat">
+     * Intl.NumberFormat</a> to display the price nicely.
      */
     static String toPrice(long priceAmountMicros) {
         StringBuilder sb = new StringBuilder(String.valueOf(priceAmountMicros));
@@ -114,7 +116,7 @@ public class ItemDetails {
         // characters long to account for the minus sign.
         int desiredLength = priceAmountMicros >= 0 ? 7 : 8;
 
-        // For positive numbers, we can insert zeros at the start, for negative numbers we must
+        // For positive numbers we can insert zeros at the start, for negative numbers we must
         // insert them after the minus sign.
         int insertionIndex = priceAmountMicros >= 0 ? 0 : 1;
 

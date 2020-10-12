@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
@@ -29,9 +30,11 @@ import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
+import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
 
+import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
 /**
@@ -43,8 +46,6 @@ public class TwaLauncher {
 
     private static final int DEFAULT_SESSION_ID = 96375;
 
-    private static final String ARC_FEATURE = "org.chromium.arc";
-
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
@@ -53,8 +54,8 @@ public class TwaLauncher {
         if (providerPackage != null) {
             intent.intent.setPackage(providerPackage);
         }
-        // Add the TWA flag to the intent if the app is running on ARC++ on Chrome OS.
-        if (context.getPackageManager().hasSystemFeature(ARC_FEATURE)) {
+        if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())) {
+            // Work around as ARC++ does not support native TWAs at the moment.
             intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
         intent.launchUrl(context, twaBuilder.getUri());
@@ -146,7 +147,7 @@ public class TwaLauncher {
      * @param url Url to open.
      */
     public void launch(Uri url) {
-        launch(new TrustedWebActivityIntentBuilder(url), null, null);
+        launch(new TrustedWebActivityIntentBuilder(url), new QualityEnforcer(), null, null, null);
     }
 
 
@@ -155,6 +156,8 @@ public class TwaLauncher {
      *
      * @param twaBuilder {@link TrustedWebActivityIntentBuilder} containing the url to open, along with
      * optional parameters: status bar color, additional trusted origins, etc.
+     * @param customTabsCallback {@link CustomTabsCallback} to get messages from the browser, use
+     * for quality enforcement.
      * @param splashScreenStrategy {@link SplashScreenStrategy} to use for showing splash screens,
      * null if splash screen not needed.
      * @param completionCallback Callback triggered when the url has been opened.
@@ -162,6 +165,7 @@ public class TwaLauncher {
      * the Trusted Web Activity fails.
      */
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
+                       CustomTabsCallback customTabsCallback,
                        @Nullable SplashScreenStrategy splashScreenStrategy,
                        @Nullable Runnable completionCallback,
                        FallbackStrategy fallbackStrategy) {
@@ -170,7 +174,8 @@ public class TwaLauncher {
         }
 
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
-            launchTwa(twaBuilder, splashScreenStrategy, completionCallback, fallbackStrategy);
+            launchTwa(twaBuilder, customTabsCallback, splashScreenStrategy, completionCallback,
+                    fallbackStrategy);
         } else {
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         }
@@ -182,20 +187,25 @@ public class TwaLauncher {
      *
      * @param twaBuilder {@link TrustedWebActivityIntentBuilder} containing the url to open, along with
      * optional parameters: status bar color, additional trusted origins, etc.
+     * @param customTabsCallback {@link CustomTabsCallback} to get messages from the browser, use
+     * for quality enforcement.
      * @param splashScreenStrategy {@link SplashScreenStrategy} to use for showing splash screens,
      * null if splash screen not needed.
      * @param completionCallback Callback triggered when the url has been opened.
      */
     public void launch(TrustedWebActivityIntentBuilder twaBuilder,
+            CustomTabsCallback customTabsCallback,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback) {
-        launch(twaBuilder, splashScreenStrategy, completionCallback, CCT_FALLBACK_STRATEGY);
+        launch(twaBuilder, customTabsCallback, splashScreenStrategy, completionCallback,
+                CCT_FALLBACK_STRATEGY);
     }
 
     private void launchTwa(TrustedWebActivityIntentBuilder twaBuilder,
+            CustomTabsCallback customTabsCallback,
             @Nullable SplashScreenStrategy splashScreenStrategy,
             @Nullable Runnable completionCallback,
-           FallbackStrategy fallbackStrategy) {
+            FallbackStrategy fallbackStrategy) {
         if (splashScreenStrategy != null) {
             splashScreenStrategy.onTwaLaunchInitiated(mProviderPackage, twaBuilder);
         }
@@ -216,7 +226,7 @@ public class TwaLauncher {
         };
 
         if (mServiceConnection == null) {
-            mServiceConnection = new TwaCustomTabsServiceConnection();
+            mServiceConnection = new TwaCustomTabsServiceConnection(customTabsCallback);
         }
 
         mServiceConnection.setSessionCreationRunnables(
@@ -247,9 +257,9 @@ public class TwaLauncher {
                      // for further details.
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        Intent intent = builder.build(mSession).getIntent();
-        FocusActivity.addToIntent(intent, mContext);
-        ContextCompat.startActivity(mContext, intent, null);
+        TrustedWebActivityIntent intent = builder.build(mSession);
+        FocusActivity.addToIntent(intent.getIntent(), mContext);
+        intent.launchTrustedWebActivity(mContext);
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
@@ -284,6 +294,11 @@ public class TwaLauncher {
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {
         private Runnable mOnSessionCreatedRunnable;
         private Runnable mOnSessionCreationFailedRunnable;
+        private CustomTabsCallback mCustomTabsCallback;
+
+        TwaCustomTabsServiceConnection(CustomTabsCallback callback) {
+            mCustomTabsCallback = callback;
+        }
 
         private void setSessionCreationRunnables(@Nullable Runnable onSuccess,
                 @Nullable Runnable onFailure) {
@@ -298,7 +313,7 @@ public class TwaLauncher {
                     .supportsLaunchWithoutWarmup(mContext.getPackageManager(), mProviderPackage)) {
                 client.warmup(0);
             }
-            mSession = client.newSession(null, mSessionId);
+            mSession = client.newSession(mCustomTabsCallback, mSessionId);
 
             if (mSession != null && mOnSessionCreatedRunnable != null) {
                 mOnSessionCreatedRunnable.run();

@@ -67,7 +67,7 @@
         <activity
             android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:configChanges="keyboardHidden|keyboard|orientation|screenLayout|screenSize"
             android:exported="true">
 
             <intent-filter>

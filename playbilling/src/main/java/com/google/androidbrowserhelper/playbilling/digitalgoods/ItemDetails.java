@@ -52,7 +52,7 @@ public class ItemDetails {
     public static ItemDetails create(SkuDetails skuDetails) {
         return new ItemDetails(skuDetails.getSku(), skuDetails.getTitle(),
                 skuDetails.getDescription(), skuDetails.getPriceCurrencyCode(),
-                skuDetails.getPrice());
+                toPrice(skuDetails.getPriceAmountMicros()));
     }
 
     /**
@@ -81,5 +81,58 @@ public class ItemDetails {
         bundle.putString(ITEM_DETAILS_VALUE, value);
 
         return bundle;
+    }
+
+    /**
+     * Takes a price amount in micro units (1,000,000 micro units = 1 unit) and converts it to a
+     * String representing the price amount in units.
+     *
+     * The reason we need this method is because {@link SkuDetails} provides either a price amount
+     * in units *with* the currency symbol, or a price amount in micro units (without the currency
+     * symbol) while we need a price without the currency symbol.
+     *
+     * We have three options:
+     * 1. Manually remove the currency symbol from the price.
+     * 2. Use numeric division to convert the price in micros to a price in units.
+     * 3. Perform string division by converting the price in micros to a string and moving the
+     *    decimal point around.
+     *
+     * Option 1 seems quite error prone and option 2 could lead to rounding errors, so we chose
+     * option 3.
+     *
+     * This may produce an ugly looking number, eg turning "£7.50" into "7.500000" but the website
+     * receiving the value can use
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat">
+     * Intl.NumberFormat</a> to display the price nicely.
+     */
+    static String toPrice(long priceAmountMicros) {
+        StringBuilder sb = new StringBuilder(String.valueOf(priceAmountMicros));
+
+        // We want to perform a "string division" by inserting a decimal point 6 digits from the
+        // end. We may have to pad the string with leading zeros so that there is space to do this.
+
+        // If the number is positive, we need the string to be at least 7 characters long, so that
+        // there will be a digit to the left of the decimal point. Negative numbers need to be 8
+        // characters long to account for the minus sign.
+        int desiredLength = priceAmountMicros >= 0 ? 7 : 8;
+
+        // For positive numbers we can insert zeros at the start, for negative numbers we must
+        // insert them after the minus sign.
+        int insertionIndex = priceAmountMicros >= 0 ? 0 : 1;
+
+        // Add leading zeros until we have the right amount of characters.
+        //      "200" ->  "0000200"
+        //     "-200" -> "-0000200"
+        // "90000000" -> "90000000"
+        while (sb.length() < desiredLength) sb.insert(insertionIndex, "0");
+
+        // Perform a "string division" by 1,000,000 by inserting a decimal point 6 characters from
+        // the end.
+        //  "0000200" ->  "0.000200"
+        // "-0000200" -> "-0.000200"
+        // "90000000" -> "90.000000"
+        sb.insert(sb.length() - 6, ".");
+
+        return sb.toString();
     }
 }

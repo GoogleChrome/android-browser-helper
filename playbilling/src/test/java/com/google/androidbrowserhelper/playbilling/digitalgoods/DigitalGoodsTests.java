@@ -101,6 +101,7 @@ public class DigitalGoodsTests {
                 + "\"title\" = \"My item\","
                 + "\"description\" = \"Some description.\","
                 + "\"price\" = \"123.45\","
+                + "\"price_amount_micros\" = \"123450000\","
                 + "\"price_currency_code\" = \"GBP\""
                 + "}";
 
@@ -115,7 +116,7 @@ public class DigitalGoodsTests {
             assertEquals("id1", details.id);
             assertEquals("My item", details.title);
             assertEquals("Some description.", details.description);
-            assertEquals("123.45", details.value);
+            assertEquals("123.450000", details.value);
             assertEquals("GBP", details.currency);
 
             callbackTriggered.countDown();

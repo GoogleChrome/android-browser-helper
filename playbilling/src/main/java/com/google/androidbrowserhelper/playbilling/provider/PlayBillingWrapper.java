@@ -71,11 +71,12 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
+    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
+            SkuDetailsResponseListener callback) {
         SkuDetailsParams params = SkuDetailsParams
                 .newBuilder()
                 .setSkusList(skus)
-                .setType(BillingClient.SkuType.INAPP)
+                .setType(skuType)
                 .build();
 
         mClient.querySkuDetailsAsync(params, callback);

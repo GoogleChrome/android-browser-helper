@@ -31,6 +31,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +49,14 @@ import static org.junit.Assert.assertTrue;
 @Config(manifest = Config.NONE)
 public class DigitalGoodsTests {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
+    private final static String SKU_DETAILS = "{"
+            + "\"productId\" = \"id1\","
+            + "\"title\" = \"My item\","
+            + "\"description\" = \"Some description.\","
+            + "\"price\" = \"123.45\","
+            + "\"price_amount_micros\" = \"123450000\","
+            + "\"price_currency_code\" = \"GBP\""
+            + "}";
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;
@@ -86,23 +95,30 @@ public class DigitalGoodsTests {
         mBillingWrapper.triggerConnected();
 
         assertTrue(mBillingWrapper.waitForQuerySkuDetails());
-        mBillingWrapper.triggerOnGotSkuDetails(Collections.emptyList());
+        mBillingWrapper.triggerOnGotInAppSkuDetails(Collections.emptyList());
+        mBillingWrapper.triggerOnGotSubsSkuDetails(Collections.emptyList());
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }
 
     @Test
-    public void getDetailsCall_parsesResult() throws InterruptedException, JSONException {
+    public void getDetailsCall_parsesResult_inApp() throws InterruptedException, JSONException {
+        checkParsesResult(
+                Collections.singletonList(new SkuDetails(SKU_DETAILS)),
+                Collections.EMPTY_LIST);
+    }
+
+    @Test
+    public void getDetailsCall_parsesResult_subs() throws InterruptedException, JSONException {
+        checkParsesResult(
+                Collections.EMPTY_LIST,
+                Collections.singletonList(new SkuDetails(SKU_DETAILS)));
+    }
+
+    private void checkParsesResult(List<SkuDetails> inAppSkuDetails,
+            List<SkuDetails> subsSkuDetails) throws InterruptedException {
         Bundle args = GetDetailsCall.createBundleForTesting("id1");
         CountDownLatch callbackTriggered = new CountDownLatch(1);
-
-        String skuJson = "{"
-                + "\"productId\" = \"id1\","
-                + "\"title\" = \"My item\","
-                + "\"description\" = \"Some description.\","
-                + "\"price\" = \"123.45\","
-                + "\"price_currency_code\" = \"GBP\""
-                + "}";
 
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(RESPONSE_GET_DETAILS, name);
@@ -115,7 +131,7 @@ public class DigitalGoodsTests {
             assertEquals("id1", details.id);
             assertEquals("My item", details.title);
             assertEquals("Some description.", details.description);
-            assertEquals("123.45", details.value);
+            assertEquals("123.450000", details.value);
             assertEquals("GBP", details.currency);
 
             callbackTriggered.countDown();
@@ -125,7 +141,8 @@ public class DigitalGoodsTests {
         mBillingWrapper.triggerConnected();
 
         assertTrue(mBillingWrapper.waitForQuerySkuDetails());
-        mBillingWrapper.triggerOnGotSkuDetails(Collections.singletonList(new SkuDetails(skuJson)));
+        mBillingWrapper.triggerOnGotInAppSkuDetails(inAppSkuDetails);
+        mBillingWrapper.triggerOnGotSubsSkuDetails(subsSkuDetails);
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }

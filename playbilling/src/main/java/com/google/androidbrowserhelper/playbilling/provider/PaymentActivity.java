@@ -23,6 +23,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
+import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,7 +82,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     public void onConnected() {
-        mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku),
+        BillingResultMerger merger = new BillingResultMerger(
                 (BillingResult result, List<SkuDetails> details) -> {
             if (details == null || details.isEmpty()) {
                 fail("Play Billing returned did not find SKUs.");
@@ -92,6 +93,10 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
 
             fail("Payment attempt failed (have you already bought the item?).");
         });
+
+        List<String> ids = Collections.singletonList(mMethodData.sku);
+        mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);
+        mWrapper.querySkuDetails(BillingClient.SkuType.SUBS, ids, merger::setSubsResult);
     }
 
     @Override

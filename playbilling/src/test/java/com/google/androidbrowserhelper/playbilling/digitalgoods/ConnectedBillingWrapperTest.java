@@ -38,7 +38,7 @@ public class ConnectedBillingWrapperTest {
 
     @Test
     public void delays_getDetailsCall() {
-        mConnectedWrapper.querySkuDetails(Collections.singletonList("id1"), null);
+        mConnectedWrapper.querySkuDetails("type", Collections.singletonList("id1"), null);
         assertNull(mInnerBillingWrapper.getQueriedSkuDetails());
 
         mInnerBillingWrapper.triggerConnected();
@@ -68,7 +68,7 @@ public class ConnectedBillingWrapperTest {
         mConnectedWrapper.connect(null);
         mInnerBillingWrapper.triggerConnected();
 
-        mConnectedWrapper.querySkuDetails(Collections.singletonList("id1"), null);
+        mConnectedWrapper.querySkuDetails("type", Collections.singletonList("id1"), null);
         assertEquals(mInnerBillingWrapper.getQueriedSkuDetails().get(0), "id1");
     }
 

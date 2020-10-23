@@ -25,6 +25,7 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,8 @@ public class MockBillingWrapper implements BillingWrapper {
 
     private List<String> mQueriedSkuDetails;
     private boolean mPaymentFlowSuccessful;
-    private SkuDetailsResponseListener mPendingQuerySkuDetailsCallback;
+    private SkuDetailsResponseListener mPendingQueryInAppSkuDetailsCallback;
+    private SkuDetailsResponseListener mPendingQuerySubsSkuDetailsCallback;
 
     private String mAcknowledgeToken;
     private AcknowledgePurchaseResponseListener mPendingAcknowledgeCallback;
@@ -50,7 +52,7 @@ public class MockBillingWrapper implements BillingWrapper {
     private Intent mPlayBillingFlowLaunchIntent;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
-    private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(1);
+    private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(2);
     private final CountDownLatch mLaunchPaymentFlowLatch = new CountDownLatch(1);
 
     @Override
@@ -60,10 +62,15 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
+    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
+            SkuDetailsResponseListener callback) {
         mQueriedSkuDetails = skus;
         mQuerySkuDetailsLatch.countDown();
-        mPendingQuerySkuDetailsCallback = callback;
+        if (BillingClient.SkuType.INAPP.equals(skuType)) {
+            mPendingQueryInAppSkuDetailsCallback = callback;
+        } else {
+            mPendingQuerySubsSkuDetailsCallback = callback;
+        }
     }
 
     @Override
@@ -95,11 +102,24 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotSkuDetails(List<SkuDetails> skuDetails) {
-        triggerOnGotSkuDetails(BillingClient.BillingResponseCode.OK, skuDetails);
+        triggerOnGotInAppSkuDetails(skuDetails);
+        triggerOnGotSubsSkuDetails(Collections.emptyList());
     }
 
-    public void triggerOnGotSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
-        mPendingQuerySkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
+    public void triggerOnGotInAppSkuDetails(List<SkuDetails> skuDetails) {
+        triggerOnGotInAppSkuDetails(BillingClient.BillingResponseCode.OK, skuDetails);
+    }
+
+    public void triggerOnGotInAppSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
+        mPendingQueryInAppSkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
+    }
+
+    public void triggerOnGotSubsSkuDetails(List<SkuDetails> skuDetails) {
+        triggerOnGotSubsSkuDetails(BillingClient.BillingResponseCode.OK, skuDetails);
+    }
+
+    public void triggerOnGotSubsSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
+        mPendingQuerySubsSkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
     }
 
     public void triggerAcknowledge(int responseCode) {

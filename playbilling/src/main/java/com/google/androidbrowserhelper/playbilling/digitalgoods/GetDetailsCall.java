@@ -16,9 +16,7 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
@@ -85,7 +83,10 @@ public class GetDetailsCall {
     public void call(BillingWrapper billing) {
         Logging.logGetDetailsCall(mItemIds);
 
-        billing.querySkuDetails(mItemIds, this::respond);
+        BillingResultMerger merger = new BillingResultMerger(this::respond);
+
+        billing.querySkuDetails(BillingClient.SkuType.INAPP, mItemIds, merger::setInAppResult);
+        billing.querySkuDetails(BillingClient.SkuType.SUBS, mItemIds, merger::setSubsResult);
     }
 
     /** Creates a Bundle that can be used with {@link #create}. For testing. */

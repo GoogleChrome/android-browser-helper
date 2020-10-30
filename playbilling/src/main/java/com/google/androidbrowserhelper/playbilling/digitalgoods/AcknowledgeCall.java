@@ -78,9 +78,9 @@ public class AcknowledgeCall {
         Logging.logAckCall(purchaseToken, makeAvailableAgain);
 
         if (makeAvailableAgain) {
-            billing.acknowledge(purchaseToken, this::respond);
-        } else {
             billing.consume(purchaseToken, (result, token) -> respond(result));
+        } else {
+            billing.acknowledge(purchaseToken, this::respond);
         }
     }
 

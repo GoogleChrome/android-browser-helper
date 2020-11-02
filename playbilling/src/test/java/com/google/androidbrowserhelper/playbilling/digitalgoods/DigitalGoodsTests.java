@@ -172,11 +172,11 @@ public class DigitalGoodsTests {
         mBillingWrapper.triggerConnected();
 
         if (makeAvailableAgain) {
-            assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
-            mBillingWrapper.triggerAcknowledge(expectedResponseCode);
-        } else {
             assertEquals("id1", mBillingWrapper.getConsumeToken());
             mBillingWrapper.triggerConsume(expectedResponseCode, "?");
+        } else {
+            assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
+            mBillingWrapper.triggerAcknowledge(expectedResponseCode);
         }
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));

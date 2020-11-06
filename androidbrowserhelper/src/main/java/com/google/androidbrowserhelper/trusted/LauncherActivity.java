@@ -165,7 +165,7 @@ public class LauncherActivity extends Activity {
 
         addShareDataIfPresent(twaBuilder);
 
-        mTwaLauncher = new TwaLauncher(this);
+        mTwaLauncher = createTwaLauncher();
         mTwaLauncher.launch(twaBuilder,
                 mCustomTabsCallback,
                 mSplashScreenStrategy,
@@ -182,6 +182,10 @@ public class LauncherActivity extends Activity {
 
         ManageDataLauncherActivity.addSiteSettingsShortcut(this,
                 mTwaLauncher.getProviderPackage());
+    }
+
+    protected TwaLauncher createTwaLauncher() {
+        return new TwaLauncher(this);
     }
 
     private boolean splashScreenNeeded() {

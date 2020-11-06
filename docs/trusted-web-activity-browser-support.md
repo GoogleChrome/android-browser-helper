@@ -9,7 +9,7 @@ incorrect, please file an [issue][14].
 |:---------------:|:-------------------------:|:-----------:|:---------------------:|
 |[Chrome][2]      |✅ (Since 72)              |✅           |✅                      |
 |[Firefox][3]     |✅ ([Preview Nightly][1])  |❌           |❌                      |
-|[Edge][4]        |✅ (since 45.05)           |❌           |❌                      |
+|[Edge][4]        |✅ (since 45.05)           |✅           |❌                      |
 |[Samsung Internet][5]|❌                     |❌           |❌                      |
 |[Brave][6]       |✅                         |✅           |✅                      |
 |[Vivaldi][7]     |✅                         |✅           |✅                      |

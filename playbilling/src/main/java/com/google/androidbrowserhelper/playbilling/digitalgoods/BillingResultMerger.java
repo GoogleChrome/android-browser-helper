@@ -35,26 +35,30 @@ import androidx.annotation.Nullable;
  * {@link #setInAppResult} and {@link #setSubsResult}) should both take place on the UI thread, so
  * we don't need to worry about any concurrency.
  */
-public class BillingResultMerger {
-    private final SkuDetailsResponseListener mOnCombinedResult;
+public class BillingResultMerger<T> {
+    private final ResultListener<T> mOnCombinedResult;
 
     private @Nullable BillingResult mInAppResult;
-    private @Nullable List<SkuDetails> mInAppDetailsList;
+    private @Nullable List<T> mInAppDetailsList;
     private @Nullable BillingResult mSubsResult;
-    private @Nullable List<SkuDetails> mSubsDetailsList;
+    private @Nullable List<T> mSubsDetailsList;
 
-    public BillingResultMerger(SkuDetailsResponseListener onCombinedResult) {
+    public interface ResultListener<T> {
+        void onResult(BillingResult responseCode, List<T> combinedResult);
+    }
+
+    public BillingResultMerger(ResultListener<T> onCombinedResult) {
         mOnCombinedResult = onCombinedResult;
     }
 
-    public void setInAppResult(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    public void setInAppResult(BillingResult result, @Nullable List<T> detailsList) {
         mInAppResult = result;
         mInAppDetailsList = detailsList;
 
         triggerIfReady();
     }
 
-    public void setSubsResult(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    public void setSubsResult(BillingResult result, @Nullable List<T> detailsList) {
         mSubsResult = result;
         mSubsDetailsList = detailsList;
 
@@ -65,7 +69,7 @@ public class BillingResultMerger {
         if (mSubsResult == null || mInAppResult == null) return;
 
         BillingResult result;
-        @Nullable List<SkuDetails> detailsList;
+        @Nullable List<T> detailsList;
         if (mSubsDetailsList == null || mSubsDetailsList.isEmpty()) {
             // If one of the lists is null or empty, just use the results from the other call.
             result = mInAppResult;
@@ -89,7 +93,7 @@ public class BillingResultMerger {
             detailsList.addAll(mSubsDetailsList);
         }
 
-        mOnCombinedResult.onSkuDetailsResponse(result, detailsList);
+        mOnCombinedResult.onResult(result, detailsList);
     }
 
     private static boolean didSucceed(BillingResult result) {

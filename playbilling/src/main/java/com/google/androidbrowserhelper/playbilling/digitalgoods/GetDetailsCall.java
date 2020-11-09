@@ -83,7 +83,7 @@ public class GetDetailsCall {
     public void call(BillingWrapper billing) {
         Logging.logGetDetailsCall(mItemIds);
 
-        BillingResultMerger merger = new BillingResultMerger(this::respond);
+        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::respond);
 
         billing.querySkuDetails(BillingClient.SkuType.INAPP, mItemIds, merger::setInAppResult);
         billing.querySkuDetails(BillingClient.SkuType.SUBS, mItemIds, merger::setSubsResult);

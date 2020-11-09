@@ -18,6 +18,8 @@ import android.os.Bundle;
 
 import com.android.billingclient.api.SkuDetails;
 
+import androidx.annotation.Nullable;
+
 /**
  * A data class representing an item (or SKU) from the Play Store.
  *
@@ -26,11 +28,17 @@ import com.android.billingclient.api.SkuDetails;
  * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/DigitalGoodsConverter.java;drc=a9e30a32540072b3b33d94435a42bef974b13a95
  */
 public class ItemDetails {
-    private static final String ITEM_DETAILS_ID = "itemDetails.id";
-    private static final String ITEM_DETAILS_TITLE = "itemDetails.title";
-    private static final String ITEM_DETAILS_DESC = "itemDetails.description";
-    private static final String ITEM_DETAILS_CURRENCY = "itemDetails.currency";
-    private static final String ITEM_DETAILS_VALUE = "itemDetails.value";
+    private static final String KEY_DETAILS_ID = "itemDetails.id";
+    private static final String KEY_DETAILS_TITLE = "itemDetails.title";
+    private static final String KEY_DETAILS_DESC = "itemDetails.description";
+    private static final String KEY_DETAILS_CURRENCY = "itemDetails.currency";
+    private static final String KEY_DETAILS_VALUE = "itemDetails.value";
+
+    private static final String KEY_SUBS_PERIOD = "itemDetails.subsPeriod";
+    private static final String KEY_FREE_TRIAL_PERIOD = "itemDetails.freeTrialPeriod";
+    private static final String KEY_INTRO_PERIOD = "itemDetails.introPricePeriod";
+    private static final String KEY_INTRO_CURRENCY = "itemDetails.introPriceCurrency";
+    private static final String KEY_INTRO_VALUE = "itemDetails.introPriceValue";
 
     public final String id;
     public final String title;
@@ -38,33 +46,63 @@ public class ItemDetails {
     public final String currency;
     public final String value;
 
-    private ItemDetails(String id, String title, String description, String currency, String value) {
+    public final String subscriptionPeriod;
+    public final String freeTrialPeriod;
+    public final String introductoryPricePeriod;
+    public final String introductoryPriceCurrency;
+    public final String introductoryPriceValue;
+
+    private ItemDetails(String id, String title, String description, String currency, String value,
+            String subscriptionPeriod, String freeTrialPeriod, String introductoryPricePeriod,
+            String introductoryPriceCurrency, String introductoryPriceValue) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.currency = currency;
         this.value = value;
+        this.subscriptionPeriod = subscriptionPeriod;
+        this.freeTrialPeriod = freeTrialPeriod;
+        this.introductoryPricePeriod = introductoryPricePeriod;
+        this.introductoryPriceCurrency = introductoryPriceCurrency;
+        this.introductoryPriceValue = introductoryPriceValue;
     }
 
     /**
      * Creates this class from a PlayBilling {@link SkuDetails}.
      */
     public static ItemDetails create(SkuDetails skuDetails) {
-        return new ItemDetails(skuDetails.getSku(), skuDetails.getTitle(),
-                skuDetails.getDescription(), skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getPriceAmountMicros()));
+        return new ItemDetails(
+                skuDetails.getSku(),
+                skuDetails.getTitle(),
+                skuDetails.getDescription(),
+                skuDetails.getPriceCurrencyCode(),
+                toPrice(skuDetails.getPriceAmountMicros()),
+                skuDetails.getSubscriptionPeriod(),
+                skuDetails.getFreeTrialPeriod(),
+                skuDetails.getIntroductoryPricePeriod(),
+                skuDetails.getPriceCurrencyCode(),
+                toPrice(skuDetails.getIntroductoryPriceAmountMicros()));
     }
 
     /**
      * Creates this class from a {@link Bundle} previously created by {@link #toBundle};
      */
     public static ItemDetails create(Bundle bundle) {
-        String id = bundle.getString(ITEM_DETAILS_ID);
-        String title = bundle.getString(ITEM_DETAILS_TITLE);
-        String description = bundle.getString(ITEM_DETAILS_DESC);
-        String currency = bundle.getString(ITEM_DETAILS_CURRENCY);
-        String value = bundle.getString(ITEM_DETAILS_VALUE);
-        return new ItemDetails(id, title, description, currency, value);
+        String id = bundle.getString(KEY_DETAILS_ID);
+        String title = bundle.getString(KEY_DETAILS_TITLE);
+        String description = bundle.getString(KEY_DETAILS_DESC);
+        String currency = bundle.getString(KEY_DETAILS_CURRENCY);
+        String value = bundle.getString(KEY_DETAILS_VALUE);
+
+        String subscriptionPeriod = bundle.getString(KEY_SUBS_PERIOD);
+        String freeTrialPeriod = bundle.getString(KEY_FREE_TRIAL_PERIOD);
+        String introductoryPricePeriod = bundle.getString(KEY_INTRO_PERIOD);
+        String introductoryPriceCurrency = bundle.getString(KEY_INTRO_CURRENCY);
+        String introductoryPriceValue = bundle.getString(KEY_INTRO_VALUE);
+
+        return new ItemDetails(id, title, description, currency, value, subscriptionPeriod,
+                freeTrialPeriod, introductoryPricePeriod, introductoryPriceCurrency,
+                introductoryPriceValue);
     }
 
     /**
@@ -74,11 +112,17 @@ public class ItemDetails {
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
 
-        bundle.putString(ITEM_DETAILS_ID, id);
-        bundle.putString(ITEM_DETAILS_TITLE, title);
-        bundle.putString(ITEM_DETAILS_DESC, description);
-        bundle.putString(ITEM_DETAILS_CURRENCY, currency);
-        bundle.putString(ITEM_DETAILS_VALUE, value);
+        bundle.putString(KEY_DETAILS_ID, id);
+        bundle.putString(KEY_DETAILS_TITLE, title);
+        bundle.putString(KEY_DETAILS_DESC, description);
+        bundle.putString(KEY_DETAILS_CURRENCY, currency);
+        bundle.putString(KEY_DETAILS_VALUE, value);
+
+        bundle.putString(KEY_SUBS_PERIOD, subscriptionPeriod);
+        bundle.putString(KEY_FREE_TRIAL_PERIOD, freeTrialPeriod);
+        bundle.putString(KEY_INTRO_PERIOD, introductoryPricePeriod);
+        bundle.putString(KEY_INTRO_CURRENCY, introductoryPriceCurrency);
+        bundle.putString(KEY_INTRO_VALUE, introductoryPriceValue);
 
         return bundle;
     }

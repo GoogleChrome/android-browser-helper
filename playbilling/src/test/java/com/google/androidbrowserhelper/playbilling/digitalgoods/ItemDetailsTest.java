@@ -1,62 +1,138 @@
+// Copyright 2020 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import com.android.billingclient.api.SkuDetails;
+
+import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.annotation.internal.DoNotInstrument;
 
-import java.util.Arrays;
-import java.util.Collection;
+import androidx.annotation.Nullable;
 
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.ItemDetails.toPrice;
 import static org.junit.Assert.assertEquals;
 
+@RunWith(RobolectricTestRunner.class)
+@DoNotInstrument
+@Config(manifest = Config.NONE)
 /**
- * Tests for {@link ItemDetails#toPrice}.
+ * Tests for {@link ItemDetails}.
  */
-@RunWith(Parameterized.class)
 public class ItemDetailsTest {
-    @Parameterized.Parameters(name = "toPrice({0}) = {1}")
-    public static Collection<Object[]> cases() {
-        return Arrays.asList(new Object[][] {
-                // {    input,      expected },
-                // Zero:
-                {           0L,   "0.000000" },
-                // Positive:
-                {           1L,   "0.000001" },
-                {          10L,   "0.000010" },
-                {         100L,   "0.000100" },
-                {       1_000L,   "0.001000" },
-                {      10_000L,   "0.010000" },
-                {     100_000L,   "0.100000" },
-                {   1_000_000L,   "1.000000" },
-                {  10_000_000L,  "10.000000" },
-                { 100_000_000L, "100.000000" },
-                {       1_234L,   "0.001234" },
-                { 123_456_789L, "123.456789" },
-                // Negative:
-                {           -1L,   "-0.000001" },
-                {          -10L,   "-0.000010" },
-                {         -100L,   "-0.000100" },
-                {       -1_000L,   "-0.001000" },
-                {      -10_000L,   "-0.010000" },
-                {     -100_000L,   "-0.100000" },
-                {   -1_000_000L,   "-1.000000" },
-                {  -10_000_000L,  "-10.000000" },
-                { -100_000_000L, "-100.000000" },
-                {       -1_234L,   "-0.001234" },
-                { -123_456_789L, "-123.456789" },
-        });
-    }
-    private final long mInput;
-    private final String mExpected;
 
-    public ItemDetailsTest(long input, String expected) {
-        mInput = input;
-        mExpected = expected;
+    @Test
+    public void create() throws JSONException {
+        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, "month", "week",
+                "day", 45_000_000L);
+
+        ItemDetails item = ItemDetails.create(new SkuDetails(json));
+        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "month", "week", "day",
+                "GBP", "45.000000");
     }
 
     @Test
-    public void test() {
-        assertEquals(mExpected, toPrice(mInput));
+    public void create_optionalOnly() throws JSONException {
+        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, null, null,
+                null, null);
+
+        ItemDetails item = ItemDetails.create(new SkuDetails(json));
+        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "", "", "", "GBP",
+                "0.000000");
     }
+
+    @Test
+    public void bundleConversion() throws JSONException {
+        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, "month", "week",
+                "day", 45_000_000L);
+
+        ItemDetails item =
+                ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
+        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "month", "week", "day",
+                "GBP", "45.000000");
+    }
+
+    @Test
+    public void bundleConversion_optionalOnly() throws JSONException {
+        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, null, null,
+                null, null);
+
+        ItemDetails item =
+                ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
+        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "", "", "", "GBP",
+                "0.000000");
+    }
+
+    private static void assertItemDetails(ItemDetails item, String id, String title,
+            String description, String currency, String value, String subscriptionPeriod,
+            String freeTrialPeriod, String introductoryPricePeriod,
+            String introductoryPriceCurrency, String introductoryPriceValue) {
+        assertEquals(item.id, id);
+        assertEquals(item.title, title);
+        assertEquals(item.description, description);
+        assertEquals(item.currency, currency);
+        assertEquals(item.value, value);
+        assertEquals(item.subscriptionPeriod, subscriptionPeriod);
+        assertEquals(item.freeTrialPeriod, freeTrialPeriod);
+        assertEquals(item.introductoryPricePeriod, introductoryPricePeriod);
+        assertEquals(item.introductoryPriceCurrency, introductoryPriceCurrency);
+        assertEquals(item.introductoryPriceValue, introductoryPriceValue);
+    }
+
+    private static String createSkuDetailsJson(String id, String title, String description,
+            String currency, long value, @Nullable String subscriptionPeriod,
+            @Nullable String freeTrialPeriod, @Nullable String introductoryPricePeriod,
+            @Nullable Long introductoryPriceValue) {
+        StringBuilder b = new StringBuilder();
+
+        b.append("{");
+
+        addFieldWithoutLeadingComma(b, "productId", id);
+        addField(b, "title", title);
+        addField(b, "description", description);
+        addField(b, "price_amount_micros", value);
+        addField(b, "price_currency_code", currency);
+
+        addOptionalField(b, "subscriptionPeriod", subscriptionPeriod);
+        addOptionalField(b, "freeTrialPeriod", freeTrialPeriod);
+        addOptionalField(b, "introductoryPricePeriod", introductoryPricePeriod);
+        addOptionalField(b, "introductoryPriceAmountMicros", introductoryPriceValue);
+
+        b.append("}");
+        return b.toString();
+    }
+
+    private static void addFieldWithoutLeadingComma(StringBuilder b, String name, Object value) {
+        // "name" = "value"
+        b.append('"');
+        b.append(name);
+        b.append("\" = \"");
+        b.append(value.toString());
+        b.append('"');
+    }
+
+    private static void addField(StringBuilder b, String name, Object field) {
+        b.append(',');
+        addFieldWithoutLeadingComma(b, name, field);
+    }
+
+    private static void addOptionalField(StringBuilder b, String name, @Nullable Object field) {
+        if (field == null) return;
+        addField(b, name, field);
+    }
+
 }

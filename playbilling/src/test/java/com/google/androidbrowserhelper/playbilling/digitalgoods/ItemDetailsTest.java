@@ -25,6 +25,9 @@ import org.robolectric.annotation.internal.DoNotInstrument;
 
 import androidx.annotation.Nullable;
 
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addField;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addFieldWithoutLeadingComma;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addOptionalField;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
@@ -115,24 +118,4 @@ public class ItemDetailsTest {
         b.append("}");
         return b.toString();
     }
-
-    private static void addFieldWithoutLeadingComma(StringBuilder b, String name, Object value) {
-        // "name" = "value"
-        b.append('"');
-        b.append(name);
-        b.append("\" = \"");
-        b.append(value.toString());
-        b.append('"');
-    }
-
-    private static void addField(StringBuilder b, String name, Object field) {
-        b.append(',');
-        addFieldWithoutLeadingComma(b, name, field);
-    }
-
-    private static void addOptionalField(StringBuilder b, String name, @Nullable Object field) {
-        if (field == null) return;
-        addField(b, name, field);
-    }
-
 }

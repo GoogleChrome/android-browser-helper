@@ -21,8 +21,10 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.google.androidbrowserhelper.playbilling.digitalgoods.ConnectedBillingWrapper;
 
 import java.util.List;
 
@@ -39,6 +41,14 @@ public interface BillingWrapper {
         void onPurchaseFlowComplete(BillingResult result, String purchaseToken);
     }
 
+    /**
+     * Callback for {@link #queryPurchases} result.
+     */
+    interface QueryPurchasesListener {
+        /** Will be called after a call to {@link #queryPurchases}. */
+        void onQueryPurchasesResponse(Purchase.PurchasesResult result);
+    }
+
     /** Connect to the Play Billing client. */
     void connect(BillingClientStateListener callback);
 
@@ -47,6 +57,16 @@ public interface BillingWrapper {
      */
     void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
             SkuDetailsResponseListener callback);
+
+    /**
+     * Returns details for currently owned items.
+     *
+     * The corresponding method on {@link BillingClient} returns the results synchronously. We
+     * changed this to a callback based method to support the use case of
+     * {@link ConnectedBillingWrapper} which may have to connect to the BillingClient before
+     * returning.
+     */
+    void queryPurchases(@BillingClient.SkuType String skuType, QueryPurchasesListener callback);
 
     /**
      * Acknowledges that a purchase has occured.

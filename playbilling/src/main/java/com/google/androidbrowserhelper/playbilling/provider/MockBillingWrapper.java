@@ -74,6 +74,9 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
+    public void queryPurchases(String skuType, QueryPurchasesListener callback) { }
+
+    @Override
     public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
         mAcknowledgeToken = token;
         mPendingAcknowledgeCallback = callback;

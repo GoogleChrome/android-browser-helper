@@ -82,17 +82,17 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     public void onConnected() {
-        BillingResultMerger merger = new BillingResultMerger(
-                (BillingResult result, List<SkuDetails> details) -> {
-            if (details == null || details.isEmpty()) {
-                fail("Play Billing returned did not find SKUs.");
-                return;
-            }
+        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>((result, details) -> {
+                    if (details == null || details.isEmpty()) {
+                        fail("Play Billing returned did not find SKUs.");
+                        return;
+                    }
 
-            if (mWrapper.launchPaymentFlow(this, details.get(0))) return;
+                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0)))
+                        return;
 
-            fail("Payment attempt failed (have you already bought the item?).");
-        });
+                    fail("Payment attempt failed (have you already bought the item?).");
+                });
 
         List<String> ids = Collections.singletonList(mMethodData.sku);
         mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);

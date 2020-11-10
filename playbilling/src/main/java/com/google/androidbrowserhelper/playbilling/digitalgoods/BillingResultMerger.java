@@ -17,8 +17,6 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.SkuType;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,28 +33,32 @@ import androidx.annotation.Nullable;
  * {@link #setInAppResult} and {@link #setSubsResult}) should both take place on the UI thread, so
  * we don't need to worry about any concurrency.
  */
-public class BillingResultMerger {
-    private final SkuDetailsResponseListener mOnCombinedResult;
+public class BillingResultMerger<T> {
+    private final ResultListener<T> mOnCombinedResult;
 
     private @Nullable BillingResult mInAppResult;
-    private @Nullable List<SkuDetails> mInAppDetailsList;
+    private @Nullable List<T> mInAppResultsList;
     private @Nullable BillingResult mSubsResult;
-    private @Nullable List<SkuDetails> mSubsDetailsList;
+    private @Nullable List<T> mSubsResultsList;
 
-    public BillingResultMerger(SkuDetailsResponseListener onCombinedResult) {
+    public interface ResultListener<T> {
+        void onResult(BillingResult responseCode, List<T> combinedResult);
+    }
+
+    public BillingResultMerger(ResultListener<T> onCombinedResult) {
         mOnCombinedResult = onCombinedResult;
     }
 
-    public void setInAppResult(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    public void setInAppResult(BillingResult result, @Nullable List<T> resultsList) {
         mInAppResult = result;
-        mInAppDetailsList = detailsList;
+        mInAppResultsList = resultsList;
 
         triggerIfReady();
     }
 
-    public void setSubsResult(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    public void setSubsResult(BillingResult result, @Nullable List<T> resultsList) {
         mSubsResult = result;
-        mSubsDetailsList = detailsList;
+        mSubsResultsList = resultsList;
 
         triggerIfReady();
     }
@@ -65,14 +67,14 @@ public class BillingResultMerger {
         if (mSubsResult == null || mInAppResult == null) return;
 
         BillingResult result;
-        @Nullable List<SkuDetails> detailsList;
-        if (mSubsDetailsList == null || mSubsDetailsList.isEmpty()) {
+        @Nullable List<T> detailsList;
+        if (mSubsResultsList == null || mSubsResultsList.isEmpty()) {
             // If one of the lists is null or empty, just use the results from the other call.
             result = mInAppResult;
-            detailsList = mInAppDetailsList;
-        } else if (mInAppDetailsList == null || mInAppDetailsList.isEmpty()) {
+            detailsList = mInAppResultsList;
+        } else if (mInAppResultsList == null || mInAppResultsList.isEmpty()) {
             result = mSubsResult;
-            detailsList = mSubsDetailsList;
+            detailsList = mSubsResultsList;
         } else {
             // To merge the BillingResult:
             // - If one call failed, pick that.
@@ -85,11 +87,11 @@ public class BillingResultMerger {
 
             // To merge the lists, we just combine them.
             // Since we're in this branch, we know the two lists are non-null and non-empty.
-            detailsList = new ArrayList<>(mInAppDetailsList);
-            detailsList.addAll(mSubsDetailsList);
+            detailsList = new ArrayList<>(mInAppResultsList);
+            detailsList.addAll(mSubsResultsList);
         }
 
-        mOnCombinedResult.onSkuDetailsResponse(result, detailsList);
+        mOnCombinedResult.onResult(result, detailsList);
     }
 
     private static boolean didSucceed(BillingResult result) {

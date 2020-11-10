@@ -25,7 +25,7 @@ import androidx.annotation.Nullable;
  *
  * Its main purpose is to serialize {@link SkuDetails} into {@link Bundle}s in such a way that
  * Chromium can read it for the Digital Goods API. See:
- * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/DigitalGoodsConverter.java;drc=a9e30a32540072b3b33d94435a42bef974b13a95
+ * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/GetDetailsConverter.java;drc=a04f522e96fc0eaa0bbcb6eafa96d02aabe5452a
  */
 public class ItemDetails {
     private static final String KEY_DETAILS_ID = "itemDetails.id";
@@ -68,7 +68,7 @@ public class ItemDetails {
     }
 
     /**
-     * Creates this class from a PlayBilling {@link SkuDetails}.
+     * Creates this class from a Play Billing {@link SkuDetails}.
      */
     public static ItemDetails create(SkuDetails skuDetails) {
         return new ItemDetails(

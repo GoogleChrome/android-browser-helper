@@ -66,6 +66,11 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 if (acknowledgeCall == null) break;
                 acknowledgeCall.call(mWrapper);
                 return true;
+            case ListPurchasesCall.COMMAND_NAME:
+                ListPurchasesCall listPurchasesCall = ListPurchasesCall.create(callback);
+                if (listPurchasesCall == null) break;
+                listPurchasesCall.call(mWrapper);
+                return true;
         }
 
         Logging.logUnknownCommand(commandName);

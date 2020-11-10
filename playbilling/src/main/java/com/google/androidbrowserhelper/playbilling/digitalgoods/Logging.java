@@ -62,6 +62,14 @@ public class Logging {
         logResult(result, "GetDetails returned:");
     }
 
+    static void logListPurchasesCall() {
+        Log.d(TAG, "Calling listPurchases");
+    }
+
+    static void logListPurchasesResult(BillingResult result) {
+        logResult(result, "ListPurchases returned:");
+    }
+
     private static void logResult(BillingResult result, String message) {
         int responseCode = result.getResponseCode();
 

@@ -83,6 +83,12 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
+    public void queryPurchases(@BillingClient.SkuType  String skuType,
+            QueryPurchasesListener callback) {
+        callback.onQueryPurchasesResponse(mClient.queryPurchases(skuType));
+    }
+
+    @Override
     public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
         AcknowledgePurchaseParams params = AcknowledgePurchaseParams
                 .newBuilder()

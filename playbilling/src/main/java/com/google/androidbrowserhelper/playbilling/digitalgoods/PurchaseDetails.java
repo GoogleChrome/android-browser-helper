@@ -39,7 +39,7 @@ public class PurchaseDetails {
     static final int CHROMIUM_PURCHASE_STATE_PENDING = 2;
 
     /**
-     * This is the id according to Chromium, which corresponds {@link Purchase#getSku}, not to
+     * This is the id according to Chromium, which corresponds to {@link Purchase#getSku}, not to
      * {@link Purchase#getOrderId}.
      */
     public final String id;

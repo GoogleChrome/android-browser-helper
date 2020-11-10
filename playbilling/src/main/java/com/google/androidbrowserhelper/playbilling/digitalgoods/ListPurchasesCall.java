@@ -43,11 +43,10 @@ public class ListPurchasesCall {
         mCallback = callback;
     }
 
-    /** Creates this class from a {@link Bundle}, returns {@code null} if the Bundle is invalid. */
+    /** Creates this class from a {@link Bundle}. */
     @Nullable
-    public static ListPurchasesCall create(@Nullable Bundle args,
-            @Nullable DigitalGoodsCallback callback) {
-        if (args == null || callback == null) return null;
+    public static ListPurchasesCall create(@Nullable DigitalGoodsCallback callback) {
+        if (callback == null) return null;
 
         return new ListPurchasesCall(callback);
     }
@@ -58,10 +57,10 @@ public class ListPurchasesCall {
 
         BillingResultMerger<Purchase> merger = new BillingResultMerger<>(this::respond);
 
-        billing.queryPurchases(BillingClient.SkuType.INAPP, (result ->
-                merger.setInAppResult(result.getBillingResult(), result.getPurchasesList())));
-        billing.queryPurchases(BillingClient.SkuType.SUBS, (result ->
-                merger.setSubsResult(result.getBillingResult(), result.getPurchasesList())));
+        billing.queryPurchases(BillingClient.SkuType.INAPP, result ->
+                merger.setInAppResult(result.getBillingResult(), result.getPurchasesList()));
+        billing.queryPurchases(BillingClient.SkuType.SUBS, result ->
+                merger.setSubsResult(result.getBillingResult(), result.getPurchasesList()));
     }
 
     private void respond(BillingResult billingResult, @Nullable List<Purchase> purchaseList) {

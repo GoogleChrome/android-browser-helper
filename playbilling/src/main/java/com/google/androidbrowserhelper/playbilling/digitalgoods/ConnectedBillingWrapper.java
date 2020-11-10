@@ -21,6 +21,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
@@ -89,6 +90,11 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
             SkuDetailsResponseListener callback) {
         execute(() -> mInner.querySkuDetails(skuType, skus, callback));
+    }
+
+    @Override
+    public void queryPurchases(String skuType, QueryPurchasesListener callback) {
+        execute(() -> mInner.queryPurchases(skuType, callback));
     }
 
     @Override

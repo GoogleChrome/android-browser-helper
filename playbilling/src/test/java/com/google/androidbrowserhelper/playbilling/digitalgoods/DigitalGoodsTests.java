@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 import com.google.androidbrowserhelper.playbilling.provider.MockBillingWrapper;
@@ -40,6 +41,7 @@ import static com.google.androidbrowserhelper.playbilling.digitalgoods.Acknowled
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_DETAILS_LIST;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_RESPONSE_CODE;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.PurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -49,14 +51,10 @@ import static org.junit.Assert.assertTrue;
 @Config(manifest = Config.NONE)
 public class DigitalGoodsTests {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
-    private final static String SKU_DETAILS = "{"
-            + "\"productId\" = \"id1\","
-            + "\"title\" = \"My item\","
-            + "\"description\" = \"Some description.\","
-            + "\"price\" = \"123.45\","
-            + "\"price_amount_micros\" = \"123450000\","
-            + "\"price_currency_code\" = \"GBP\""
-            + "}";
+    private final static String SKU_DETAILS = ItemDetailsTest.createSkuDetailsJson("id1",
+            "My item", "Some description.", "GBP", 123450000, null, null, null, null);
+    private final static String PURCHASE_DETAILS = PurchaseDetailsTest.createPurchaseJson(
+            "id", "token", true, Purchase.PurchaseState.PENDING, 123_000, true);
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;
@@ -105,13 +103,13 @@ public class DigitalGoodsTests {
     public void getDetailsCall_parsesResult_inApp() throws InterruptedException, JSONException {
         checkParsesResult(
                 Collections.singletonList(new SkuDetails(SKU_DETAILS)),
-                Collections.EMPTY_LIST);
+                Collections.emptyList());
     }
 
     @Test
     public void getDetailsCall_parsesResult_subs() throws InterruptedException, JSONException {
         checkParsesResult(
-                Collections.EMPTY_LIST,
+                Collections.emptyList(),
                 Collections.singletonList(new SkuDetails(SKU_DETAILS)));
     }
 
@@ -133,6 +131,8 @@ public class DigitalGoodsTests {
             assertEquals("Some description.", details.description);
             assertEquals("123.450000", details.value);
             assertEquals("GBP", details.currency);
+            ItemDetailsTest.assertItemDetails(details, "id1", "My item", "Some description.",
+                    "GBP", "123.450000", "", "", "", "GBP", "0.000000");
 
             callbackTriggered.countDown();
         };
@@ -178,6 +178,58 @@ public class DigitalGoodsTests {
             assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
             mBillingWrapper.triggerAcknowledge(expectedResponseCode);
         }
+
+        assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void listPurchasesCall_goodArgs() {
+        assertTrue(mHandler.handle(ListPurchasesCall.COMMAND_NAME, new Bundle(), EMPTY_CALLBACK));
+    }
+
+    @Test
+    public void listPurchasesCall_parsesResult_inApp() throws JSONException, InterruptedException {
+        checkListPurchasesCall(
+                Collections.singletonList(new Purchase(PURCHASE_DETAILS, "")),
+                Collections.emptyList());
+    }
+
+    @Test
+    public void listPurchasesCall_parsesResult_subs() throws JSONException, InterruptedException {
+        checkListPurchasesCall(
+                Collections.emptyList(),
+                Collections.singletonList(new Purchase(PURCHASE_DETAILS, "")));
+    }
+
+    public void checkListPurchasesCall(List<Purchase> inAppPurchaseDetails,
+            List<Purchase> subsPurchaseDetails) throws InterruptedException {
+        CountDownLatch callbackTriggered = new CountDownLatch(1);
+
+        DigitalGoodsCallback callback = (name, bundle) -> {
+            assertEquals(ListPurchasesCall.RESPONSE_COMMAND, name);
+            assertEquals(bundle.getInt(ListPurchasesCall.KEY_RESPONSE_CODE),
+                    BillingClient.BillingResponseCode.OK);
+
+            Parcelable[] array = bundle.getParcelableArray(ListPurchasesCall.KEY_PURCHASES_LIST);
+            PurchaseDetails details = PurchaseDetails.create((Bundle) array[0]);
+
+            PurchaseDetailsTest.assertPurchaseDetails(details,
+                    "id",
+                    "token",
+                    true,
+                    CHROMIUM_PURCHASE_STATE_PENDING,
+                    123_000_000,
+                    true);
+
+            callbackTriggered.countDown();
+        };
+
+        assertTrue(mHandler.handle(ListPurchasesCall.COMMAND_NAME, new Bundle(), callback));
+        mBillingWrapper.triggerConnected();
+
+        assertTrue(mBillingWrapper.waitForQueryPurchases());
+        mBillingWrapper.triggerOnGotInAppPurchaseDetails(inAppPurchaseDetails);
+        mBillingWrapper.triggerOnGotSubsPurchaseDetails(subsPurchaseDetails);
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }

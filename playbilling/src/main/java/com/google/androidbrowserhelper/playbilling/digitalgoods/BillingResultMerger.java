@@ -42,7 +42,7 @@ public class BillingResultMerger<T> {
     private @Nullable List<T> mSubsResultsList;
 
     public interface ResultListener<T> {
-        void onResult(BillingResult responseCode, List<T> combinedResult);
+        void onResult(BillingResult responseCode, @Nullable List<T> combinedResult);
     }
 
     public BillingResultMerger(ResultListener<T> onCombinedResult) {

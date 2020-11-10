@@ -66,7 +66,7 @@ public class PurchaseDetailsTest {
                 true);
     }
 
-    private static void assertPurchaseDetails(PurchaseDetails details, String id, String token,
+    static void assertPurchaseDetails(PurchaseDetails details, String id, String token,
             boolean acknowledged, int state, long purchaseTimeMicrosecondsPastUnixEpoch,
             boolean willAutoRenew) {
         assertEquals(details.id, id);
@@ -78,7 +78,7 @@ public class PurchaseDetailsTest {
         assertEquals(details.willAutoRenew, willAutoRenew);
     }
 
-    private static String createPurchaseJson(String id, String purchaseToken, boolean acknowledged,
+    static String createPurchaseJson(String id, String purchaseToken, boolean acknowledged,
             int purchaseState, long purchaseTime, boolean willAutoRenew) {
         // In the input JSON to a Play Billing Purchase, a PurchaseState of 4 corresponds to
         // PENDING and a PurchaseState of anything else corresponds to PURCHASED.

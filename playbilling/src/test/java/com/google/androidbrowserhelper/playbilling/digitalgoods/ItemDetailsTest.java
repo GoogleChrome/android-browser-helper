@@ -80,7 +80,7 @@ public class ItemDetailsTest {
                 "0.000000");
     }
 
-    private static void assertItemDetails(ItemDetails item, String id, String title,
+    static void assertItemDetails(ItemDetails item, String id, String title,
             String description, String currency, String value, String subscriptionPeriod,
             String freeTrialPeriod, String introductoryPricePeriod,
             String introductoryPriceCurrency, String introductoryPriceValue) {
@@ -96,7 +96,7 @@ public class ItemDetailsTest {
         assertEquals(item.introductoryPriceValue, introductoryPriceValue);
     }
 
-    private static String createSkuDetailsJson(String id, String title, String description,
+    static String createSkuDetailsJson(String id, String title, String description,
             String currency, long value, @Nullable String subscriptionPeriod,
             @Nullable String freeTrialPeriod, @Nullable String introductoryPricePeriod,
             @Nullable Long introductoryPriceValue) {

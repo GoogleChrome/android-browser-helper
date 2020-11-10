@@ -29,7 +29,7 @@ import androidx.annotation.Nullable;
 
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
- * suitable for calling the Play Biling library.
+ * suitable for calling the Play Billing library.
  */
 public class GetDetailsCall {
     public static final String COMMAND_NAME = "getDetails";
@@ -60,7 +60,7 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    private void respond(BillingResult result, List<SkuDetails> detailsList) {
+    private void respond(BillingResult result, @Nullable List<SkuDetails> detailsList) {
         Logging.logGetDetailsResponse(result);
 
         Parcelable[] parcelables = new Parcelable[0];

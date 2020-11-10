@@ -17,8 +17,6 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.SkuType;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +37,9 @@ public class BillingResultMerger<T> {
     private final ResultListener<T> mOnCombinedResult;
 
     private @Nullable BillingResult mInAppResult;
-    private @Nullable List<T> mInAppDetailsList;
+    private @Nullable List<T> mInAppResultsList;
     private @Nullable BillingResult mSubsResult;
-    private @Nullable List<T> mSubsDetailsList;
+    private @Nullable List<T> mSubsResultsList;
 
     public interface ResultListener<T> {
         void onResult(BillingResult responseCode, List<T> combinedResult);
@@ -51,16 +49,16 @@ public class BillingResultMerger<T> {
         mOnCombinedResult = onCombinedResult;
     }
 
-    public void setInAppResult(BillingResult result, @Nullable List<T> detailsList) {
+    public void setInAppResult(BillingResult result, @Nullable List<T> resultsList) {
         mInAppResult = result;
-        mInAppDetailsList = detailsList;
+        mInAppResultsList = resultsList;
 
         triggerIfReady();
     }
 
-    public void setSubsResult(BillingResult result, @Nullable List<T> detailsList) {
+    public void setSubsResult(BillingResult result, @Nullable List<T> resultsList) {
         mSubsResult = result;
-        mSubsDetailsList = detailsList;
+        mSubsResultsList = resultsList;
 
         triggerIfReady();
     }
@@ -70,13 +68,13 @@ public class BillingResultMerger<T> {
 
         BillingResult result;
         @Nullable List<T> detailsList;
-        if (mSubsDetailsList == null || mSubsDetailsList.isEmpty()) {
+        if (mSubsResultsList == null || mSubsResultsList.isEmpty()) {
             // If one of the lists is null or empty, just use the results from the other call.
             result = mInAppResult;
-            detailsList = mInAppDetailsList;
-        } else if (mInAppDetailsList == null || mInAppDetailsList.isEmpty()) {
+            detailsList = mInAppResultsList;
+        } else if (mInAppResultsList == null || mInAppResultsList.isEmpty()) {
             result = mSubsResult;
-            detailsList = mSubsDetailsList;
+            detailsList = mSubsResultsList;
         } else {
             // To merge the BillingResult:
             // - If one call failed, pick that.
@@ -89,8 +87,8 @@ public class BillingResultMerger<T> {
 
             // To merge the lists, we just combine them.
             // Since we're in this branch, we know the two lists are non-null and non-empty.
-            detailsList = new ArrayList<>(mInAppDetailsList);
-            detailsList.addAll(mSubsDetailsList);
+            detailsList = new ArrayList<>(mInAppResultsList);
+            detailsList.addAll(mSubsResultsList);
         }
 
         mOnCombinedResult.onResult(result, detailsList);

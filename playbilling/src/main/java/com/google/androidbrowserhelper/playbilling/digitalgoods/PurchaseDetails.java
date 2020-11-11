@@ -26,13 +26,13 @@ import com.android.billingclient.api.Purchase;
  * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/ListPurchasesConverter.java;drc=a04f522e96fc0eaa0bbcb6eafa96d02aabe5452a
  */
 public class PurchaseDetails {
-    private static final String KEY_ITEM_ID = "listPurchases.itemId";
-    private static final String KEY_PURCHASE_TOKEN = "listPurchases.purchaseToken";
-    private static final String KEY_ACKNOWLEDGED = "listPurchases.acknowledged";
-    private static final String KEY_PURCHASE_STATE = "listPurchases.purchaseState";
+    private static final String KEY_ITEM_ID = "purchaseDetails.itemId";
+    private static final String KEY_PURCHASE_TOKEN = "purchaseDetails.purchaseToken";
+    private static final String KEY_ACKNOWLEDGED = "purchaseDetails.acknowledged";
+    private static final String KEY_PURCHASE_STATE = "purchaseDetails.purchaseState";
     private static final String KEY_PURCHASE_TIME_MICROSECONDS_PAST_UNIX_EPOCH =
-            "listPurchases.purchaseTime";
-    private static final String KEY_WILL_AUTO_RENEW = "listPurchases.willAutoRenew";
+            "purchaseDetails.purchaseTimeMicrosecondsPastUnixEpoch";
+    private static final String KEY_WILL_AUTO_RENEW = "purchaseDetails.willAutoRenew";
 
     static final int CHROMIUM_PURCHASE_STATE_UNKNOWN = 0;
     static final int CHROMIUM_PURCHASE_STATE_PURCHASED = 1;

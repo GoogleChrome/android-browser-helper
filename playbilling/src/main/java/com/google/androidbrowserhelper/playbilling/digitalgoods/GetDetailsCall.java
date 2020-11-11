@@ -27,6 +27,8 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
+
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
  * suitable for calling the Play Billing library.
@@ -74,7 +76,7 @@ public class GetDetailsCall {
         }
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, result.getResponseCode());
+        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
         args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, parcelables);
         mCallback.run(RESPONSE_GET_DETAILS, args);
     }

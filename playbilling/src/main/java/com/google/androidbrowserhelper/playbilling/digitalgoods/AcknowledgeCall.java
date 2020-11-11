@@ -15,13 +15,13 @@
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
-import android.util.Log;
 
-import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import androidx.annotation.Nullable;
+
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
 
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
@@ -69,7 +69,7 @@ public class AcknowledgeCall {
         Logging.logAckResponse(result, makeAvailableAgain);
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, result.getResponseCode());
+        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
         mCallback.run(RESPONSE_ACKNOWLEDGE, args);
     }
 

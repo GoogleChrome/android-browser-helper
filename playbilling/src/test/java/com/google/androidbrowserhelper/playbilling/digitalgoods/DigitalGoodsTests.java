@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.AcknowledgeCall.RESPONSE_ACKNOWLEDGE;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.AcknowledgeCall.RESPONSE_ACKNOWLEDGE_RESPONSE_CODE;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_DETAILS_LIST;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.GetDetailsCall.RESPONSE_GET_DETAILS_RESPONSE_CODE;
@@ -160,7 +161,8 @@ public class DigitalGoodsTests {
     private void callAcknowledge(boolean makeAvailableAgain) throws InterruptedException {
         Bundle args = AcknowledgeCall.createBundleForTesting("id1", makeAvailableAgain);
         CountDownLatch callbackTriggered = new CountDownLatch(1);
-        int expectedResponseCode = 23;
+        int responseCode = BillingClient.BillingResponseCode.ITEM_NOT_OWNED;
+        int expectedResponseCode = toChromiumResponseCode(responseCode);
 
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(RESPONSE_ACKNOWLEDGE, name);
@@ -173,10 +175,10 @@ public class DigitalGoodsTests {
 
         if (makeAvailableAgain) {
             assertEquals("id1", mBillingWrapper.getConsumeToken());
-            mBillingWrapper.triggerConsume(expectedResponseCode, "?");
+            mBillingWrapper.triggerConsume(responseCode, "?");
         } else {
             assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
-            mBillingWrapper.triggerAcknowledge(expectedResponseCode);
+            mBillingWrapper.triggerAcknowledge(responseCode);
         }
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
@@ -208,7 +210,7 @@ public class DigitalGoodsTests {
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(ListPurchasesCall.RESPONSE_COMMAND, name);
             assertEquals(bundle.getInt(ListPurchasesCall.KEY_RESPONSE_CODE),
-                    BillingClient.BillingResponseCode.OK);
+                    toChromiumResponseCode(BillingClient.BillingResponseCode.OK));
 
             Parcelable[] array = bundle.getParcelableArray(ListPurchasesCall.KEY_PURCHASES_LIST);
             PurchaseDetails details = PurchaseDetails.create((Bundle) array[0]);

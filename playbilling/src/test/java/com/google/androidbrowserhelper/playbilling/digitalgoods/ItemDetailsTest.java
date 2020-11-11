@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.SkuDetails;
 
 import org.json.JSONException;
@@ -114,6 +115,10 @@ public class ItemDetailsTest {
         addOptionalField(b, "freeTrialPeriod", freeTrialPeriod);
         addOptionalField(b, "introductoryPricePeriod", introductoryPricePeriod);
         addOptionalField(b, "introductoryPriceAmountMicros", introductoryPriceValue);
+
+        // The Play Billing library requires that all SkuDetails have a type, but we don't use it
+        // in our testing, so just set it to an arbitrary type.
+        addField(b, "type", BillingClient.SkuType.INAPP);
 
         b.append("}");
         return b.toString();

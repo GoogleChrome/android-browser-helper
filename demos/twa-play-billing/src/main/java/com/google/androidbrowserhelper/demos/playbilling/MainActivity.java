@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.demos.playbilling;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
@@ -30,6 +31,10 @@ public class MainActivity extends Activity {
 
     public void launch(View view) {
         Intent intent = new Intent(this, LauncherActivity.class);
+
+        intent.setData(
+                Uri.parse("https://beer.conn.dev?client_version=" + BuildConfig.VERSION_CODE));
+
         startActivity(intent);
     }
 }

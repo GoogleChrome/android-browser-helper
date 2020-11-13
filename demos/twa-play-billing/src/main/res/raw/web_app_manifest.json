@@ -1,0 +1,17 @@
+{
+  "name": "Buy Peter a Drink",
+  "short_name": "Peter's Drink",
+  "icons": [
+    {
+      "src": "assets/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "prefer_related_applications": true,
+  "start_url": "index.html",
+  "display": "standalone",
+  "theme_color": "#cdecff",
+  "background_color": "#00449e"
+}

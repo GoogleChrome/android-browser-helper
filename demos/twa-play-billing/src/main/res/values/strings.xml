@@ -23,4 +23,5 @@
                 \"site\": \"https://beer.conn.dev/\"}
         }]
     </string>
+    <string name="webManifestUrl">https://beer.conn.dev/manifest.json</string>
 </resources>

@@ -42,6 +42,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="https://beer.conn.dev" />
+            <meta-data android:name="web_manifest_url" android:value="@string/webManifestUrl"/>
 
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>

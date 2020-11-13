@@ -87,4 +87,8 @@ public class Logging {
     static void logDisconnected() {
         Log.d(TAG, "Disconnected from Play Billing library.");
     }
+
+    static void logUnknownResultCode(int resultCode) {
+        Log.w(TAG, "Cannot convert result code: " + resultCode);
+    }
 }

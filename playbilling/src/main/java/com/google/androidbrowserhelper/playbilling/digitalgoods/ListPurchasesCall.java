@@ -26,6 +26,8 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
+
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
  * suitable for calling the Play Billing library.
@@ -63,8 +65,8 @@ public class ListPurchasesCall {
                 merger.setSubsResult(result.getBillingResult(), result.getPurchasesList()));
     }
 
-    private void respond(BillingResult billingResult, @Nullable List<Purchase> purchaseList) {
-        Logging.logListPurchasesResult(billingResult);
+    private void respond(BillingResult result, @Nullable List<Purchase> purchaseList) {
+        Logging.logListPurchasesResult(result);
 
         Parcelable[] parcelables = new Parcelable[0];
         if (purchaseList != null) {
@@ -77,7 +79,7 @@ public class ListPurchasesCall {
         }
 
         Bundle args = new Bundle();
-        args.putInt(KEY_RESPONSE_CODE, billingResult.getResponseCode());
+        args.putInt(KEY_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
         args.putParcelableArray(KEY_PURCHASES_LIST, parcelables);
         mCallback.run(RESPONSE_COMMAND, args);
     }

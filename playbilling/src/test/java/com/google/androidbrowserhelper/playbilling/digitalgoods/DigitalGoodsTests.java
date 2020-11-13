@@ -161,12 +161,12 @@ public class DigitalGoodsTests {
     private void callAcknowledge(boolean makeAvailableAgain) throws InterruptedException {
         Bundle args = AcknowledgeCall.createBundleForTesting("id1", makeAvailableAgain);
         CountDownLatch callbackTriggered = new CountDownLatch(1);
-        int responseCode = BillingClient.BillingResponseCode.ITEM_NOT_OWNED;
-        int expectedResponseCode = toChromiumResponseCode(responseCode);
+        int billingResponseCode = BillingClient.BillingResponseCode.ITEM_NOT_OWNED;
+        int chromiumResponseCode = toChromiumResponseCode(billingResponseCode);
 
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(RESPONSE_ACKNOWLEDGE, name);
-            assertEquals(expectedResponseCode, bundle.getInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE));
+            assertEquals(chromiumResponseCode, bundle.getInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE));
             callbackTriggered.countDown();
         };
 
@@ -175,10 +175,10 @@ public class DigitalGoodsTests {
 
         if (makeAvailableAgain) {
             assertEquals("id1", mBillingWrapper.getConsumeToken());
-            mBillingWrapper.triggerConsume(responseCode, "?");
+            mBillingWrapper.triggerConsume(billingResponseCode, "?");
         } else {
             assertEquals("id1", mBillingWrapper.getAcknowledgeToken());
-            mBillingWrapper.triggerAcknowledge(responseCode);
+            mBillingWrapper.triggerAcknowledge(billingResponseCode);
         }
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));

@@ -37,8 +37,8 @@ public class DigitalGoodsConverter {
         return toChromiumResponseCode(result.getResponseCode());
     }
 
-    static int toChromiumResponseCode(int playBillingResultCode) {
-        switch (playBillingResultCode) {
+    static int toChromiumResponseCode(int playBillingResponseCode) {
+        switch (playBillingResponseCode) {
             case BillingClient.BillingResponseCode.OK:
                 return CHROMIUM_RESULT_OK;
             case BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED:
@@ -50,7 +50,7 @@ public class DigitalGoodsConverter {
             case BillingClient.BillingResponseCode.ERROR:
                 return CHROMIUM_RESULT_ERROR;
             default:
-                logUnknownResultCode(playBillingResultCode);
+                logUnknownResultCode(playBillingResponseCode);
                 return CHROMIUM_RESULT_ERROR;
         }
     }

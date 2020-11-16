@@ -16,11 +16,15 @@
 
 apply plugin: 'com.android.application'
 
+// Switch these around for a build to upload to the Play Store.
+def appId = "com.google.androidbrowserhelper.demos.playbilling"
+// def appId = "dev.conn.drink"
+
 android {
     compileSdkVersion 30
     buildToolsVersion "29.0.2"
     defaultConfig {
-        applicationId "com.google.androidbrowserhelper.demos.playbilling"
+        applicationId appId
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 4

@@ -24,4 +24,18 @@
         }]
     </string>
     <string name="webManifestUrl">https://beer.conn.dev/manifest.json</string>
+    <string name="versionNotes">
+Change Log:\n
+Version 2:\n
+- Upgraded Play Billing Library.\n
+- Added verbose Android logging with tag "TwaBilling".\n\n
+Version 3:\n
+- Return purchase token to website.\n\n
+Version 4:\n
+- Make GetDetails and purchases work with subscriptions.\n
+- Switch consume and acknowledge to call the correct methods.\n
+- Add subscription fields to GetDetails result.\n
+- Implement ListPurchases.\n
+- Update Play Billing library to 3.0.1\n
+    </string>
 </resources>

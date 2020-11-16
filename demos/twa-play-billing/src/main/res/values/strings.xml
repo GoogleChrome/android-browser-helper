@@ -36,6 +36,8 @@ Version 4:\n
 - Switch consume and acknowledge to call the correct methods.\n
 - Add subscription fields to GetDetails result.\n
 - Implement ListPurchases.\n
-- Update Play Billing library to 3.0.1\n
+- Update Play Billing library to 3.0.1.\n\n
+Version 5:\n
+- Fix ChromeOS support.\n
     </string>
 </resources>

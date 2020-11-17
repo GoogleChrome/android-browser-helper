@@ -31,6 +31,7 @@ import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.core.content.ContextCompat;
 
+import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
 /**
@@ -172,8 +173,13 @@ public class LauncherActivity extends Activity {
             sChromeVersionChecked = true;
         }
 
-        new TwaSharedPreferencesManager(this)
+        if (ChromeOsSupport.isRunningOnArc(getApplicationContext().getPackageManager())) {
+            new TwaSharedPreferencesManager(this)
+                .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
+        } else {
+            new TwaSharedPreferencesManager(this)
                 .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+        }
 
         ManageDataLauncherActivity.addSiteSettingsShortcut(this,
                 mTwaLauncher.getProviderPackage());

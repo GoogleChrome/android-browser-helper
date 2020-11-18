@@ -251,9 +251,15 @@ public class TwaLauncher {
         FocusActivity.addToIntent(intent, mContext);
         ContextCompat.startActivity(mContext, intent, null);
 
-        // Remember who we connect to as the package that is allowed to delegate notifications
-        // to us.
-        mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
+        if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+            // If running in ARC++ on Chrome OS, set the system package as trusted.
+            mTokenStore.store(Token.create(ChromeOsSupport.ARC_PAYMENT_APP,
+                    mContext.getPackageManager()));
+        } else {
+            // Remember who we connect to as the package that is allowed to delegate notifications
+            // to us.
+            mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
+        }
 
         if (completionCallback != null) {
             completionCallback.run();

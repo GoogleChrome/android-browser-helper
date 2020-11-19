@@ -162,6 +162,7 @@ public class LauncherActivity extends Activity {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
+        Log.d("ChrOS", "Launching...");
         mTwaLauncher = new TwaLauncher(this);
         mTwaLauncher.launch(twaBuilder,
                 mSplashScreenStrategy,

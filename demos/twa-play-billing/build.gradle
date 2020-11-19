@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 // Switch these around for a build to upload to the Play Store.
-def appId = "com.google.androidbrowserhelper.demos.playbilling"
-// def appId = "dev.conn.drink"
+// def appId = "com.google.androidbrowserhelper.demos.playbilling"
+def appId = "dev.conn.drink"
 
 android {
     compileSdkVersion 30
@@ -27,12 +27,13 @@ android {
         applicationId appId
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 6
-        versionName "6.0"
+        versionCode 8
+        versionName "8.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
         sourceCompatibility = 1.8
+        targetCompatibility = 1.8
         targetCompatibility = 1.8
     }
 }

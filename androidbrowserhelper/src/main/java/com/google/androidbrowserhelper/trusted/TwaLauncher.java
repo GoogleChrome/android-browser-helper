@@ -46,6 +46,8 @@ public class TwaLauncher {
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
+        Log.d("ChrOS", "Running Custom Tab Fallback.");
+
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
         // providers installed.
         CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
@@ -54,6 +56,7 @@ public class TwaLauncher {
         }
         if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())) {
             // Work around as ARC++ does not support native TWAs at the moment.
+            Log.d("ChrOS", "Adding ARC++ specific extra.");
             intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
         intent.launchUrl(context, twaBuilder.getUri());
@@ -253,6 +256,7 @@ public class TwaLauncher {
 
         if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
             // If running in ARC++ on Chrome OS, set the system package as trusted.
+            Log.d("ChrOS", "Adding ARC++ as verified provider.");
             mTokenStore.store(Token.create(ChromeOsSupport.ARC_PAYMENT_APP,
                     mContext.getPackageManager()));
         } else {

@@ -37,9 +37,7 @@ Version 4:\n
 - Add subscription fields to GetDetails result.\n
 - Implement ListPurchases.\n
 - Update Play Billing library to 3.0.1.\n\n
-Version 5:\n
-- Allow launching as a TWA on ChromeOS.\n\n
-Version 6:\n
-- Verify the ARC service as the browser on ChromeOS.
+Version 5-8:\n
+- Various attempts to make this work on ChromeOS.
     </string>
 </resources>

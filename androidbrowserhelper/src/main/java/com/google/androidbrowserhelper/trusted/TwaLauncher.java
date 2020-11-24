@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -31,9 +33,6 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
-
-import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -173,6 +172,16 @@ public class TwaLauncher {
         } else {
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         }
+
+        // Remember who we connect to as the package that is allowed to delegate notifications
+        // to us.
+        if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+            // If running in ARC++ on Chrome OS, set the system package as trusted.
+            mTokenStore.store(
+                    Token.create(ChromeOsSupport.ARC_PAYMENT_APP, mContext.getPackageManager()));
+        } else {
+            mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
+        }
     }
 
     /**
@@ -250,16 +259,6 @@ public class TwaLauncher {
         Intent intent = builder.build(mSession).getIntent();
         FocusActivity.addToIntent(intent, mContext);
         ContextCompat.startActivity(mContext, intent, null);
-
-        if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
-            // If running in ARC++ on Chrome OS, set the system package as trusted.
-            mTokenStore.store(Token.create(ChromeOsSupport.ARC_PAYMENT_APP,
-                    mContext.getPackageManager()));
-        } else {
-            // Remember who we connect to as the package that is allowed to delegate notifications
-            // to us.
-            mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
-        }
 
         if (completionCallback != null) {
             completionCallback.run();

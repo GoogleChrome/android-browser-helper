@@ -18,7 +18,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
 
@@ -27,6 +29,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TextView textView = findViewById(R.id.textView);
+        textView.setMovementMethod(new ScrollingMovementMethod());
     }
 
     public void launch(View view) {

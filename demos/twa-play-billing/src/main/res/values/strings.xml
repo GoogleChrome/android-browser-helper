@@ -38,6 +38,8 @@ Version 4:\n
 - Implement ListPurchases.\n
 - Update Play Billing library to 3.0.1.\n\n
 Version 5-9:\n
-- Various attempts to make this work on ChromeOS.
+- Various attempts to make this work on ChromeOS.\n\n
+Version 10:\n
+- Made this TextView scrollable so this Activity works in landscape.\n\n
     </string>
 </resources>

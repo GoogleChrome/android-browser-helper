@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.browser.examples.twa_notification_delegation;
+package com.google.androidbrowserhelper.demos.twa_notification_delegation;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

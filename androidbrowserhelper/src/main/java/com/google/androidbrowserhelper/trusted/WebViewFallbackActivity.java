@@ -39,7 +39,9 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WebViewFallbackActivity extends Activity {
     private static final String TAG = WebViewFallbackActivity.class.getSimpleName();
@@ -134,7 +136,12 @@ public class WebViewFallbackActivity extends Activity {
             mWebView.restoreState(savedInstanceState);
             return;
         }
-        mWebView.loadUrl(mLaunchUrl.toString());
+
+        // Applications running in a Trusted Web Activity are supposed to have
+        // android-app://<package-name> as the referrer.
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Referer", "android-app://" + getPackageName() + "/");
+        mWebView.loadUrl(mLaunchUrl.toString(), headers);
     }
 
     @Override

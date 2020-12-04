@@ -109,6 +109,12 @@ public class LauncherActivityMetadata {
     private static final String METADATA_FILE_PROVIDER_AUTHORITY =
             "android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY";
 
+    /**
+     * Reference to a string resource with the web share target JSON. See description of
+     * {@link LauncherActivity} for more details.
+     */
+    private static final String METADATA_SHARE_TARGET =
+            "android.support.customtabs.trusted.METADATA_SHARE_TARGET";
 
     /**
      * The domains to be validated, as part of the Digital Asset Links validation
@@ -157,6 +163,7 @@ public class LauncherActivityMetadata {
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
     @ScreenOrientation.LockType public final int screenOrientation;
+    @Nullable public final String shareTarget;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -186,6 +193,8 @@ public class LauncherActivityMetadata {
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
         displayMode = getDisplayMode(metaData);
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
+        int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
+        shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {

@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.androidbrowserhelper.demo.R;
+import com.google.androidbrowserhelper.trusted.QualityEnforcer;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
 import com.google.androidbrowserhelper.trusted.TwaProviderPicker;
 
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
@@ -43,6 +45,7 @@ public class LaunchTwaActivity extends Activity {
     private final TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(
             LAUNCH_URI);
 
+    private CustomTabsCallback mCustomTabsCallback = new QualityEnforcer();
     /**
      * A bag to put all TwaLauncher in so we can dispose all at once.
      */
@@ -106,7 +109,7 @@ public class LaunchTwaActivity extends Activity {
 
 
         TwaLauncher launcher = new TwaLauncher(this);
-        launcher.launch(builder, null, null);
+        launcher.launch(builder, mCustomTabsCallback,  null, null);
         launchers.add(launcher);
     }
 
@@ -126,7 +129,7 @@ public class LaunchTwaActivity extends Activity {
 
 
         TwaLauncher launcher = new TwaLauncher(this);
-        launcher.launch(builder, null, null);
+        launcher.launch(builder, mCustomTabsCallback, null , null);
         launchers.add(launcher);
     }
 

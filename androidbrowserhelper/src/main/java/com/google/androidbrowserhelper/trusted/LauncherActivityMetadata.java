@@ -14,7 +14,6 @@
 
 package com.google.androidbrowserhelper.trusted;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -23,6 +22,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.trusted.ScreenOrientation;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 
 import java.util.Arrays;
@@ -34,6 +34,8 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
  * Parses and holds on to metadata parameters associated with {@link LauncherActivity}.
  */
 public class LauncherActivityMetadata {
+
+    private static final String TAG = "LauncherActivityMetadata";
 
     /**
      * Url to launch in a Trusted Web Activity, unless other url provided in a VIEW intent.
@@ -66,6 +68,20 @@ public class LauncherActivityMetadata {
      */
     private static final String METADATA_NAVIGATION_BAR_COLOR_DARK_ID =
             "android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK";
+
+    /**
+     * Navigation bar divider color to use for Trusted Web Activity (note: in Chrome this is supported
+     * from version 86).
+     */
+    private static final String METADATA_NAVIGATION_BAR_DIVIDER_COLOR_ID =
+            "androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR";
+
+    /**
+     * Navigation bar divider color to use for Trusted Web Activity (note: in Chrome this is supported
+     * from version 86).
+     */
+    private static final String METADATA_NAVIGATION_BAR_DIVIDER_COLOR_DARK_ID =
+            "androix.browser.trusted.NAVIGATION_BAR_DIVIDER_COLOR_DARK";
 
     /**
      * Id of the Drawable to use as a splash screen.
@@ -120,13 +136,25 @@ public class LauncherActivityMetadata {
     private static final String METADATA_DISPLAY_MODE =
             "android.support.customtabs.trusted.DISPLAY_MODE";
 
+    /**
+     * The screen orientation to use when launching the Trusted Web Activity. Possible values are
+     * "any", "natural", "landscape", "landscape-primary", "landscape-secondary",
+     * "portrait", "portrait-primary", "portrait-secondary".
+     * Taken from https://www.w3.org/TR/screen-orientation/#screenorientation-interface
+     */
+    private static final String METADATA_SCREEN_ORIENTATION =
+            "android.support.customtabs.trusted.SCREEN_ORIENTATION";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
+    private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
     @Nullable public final String defaultUrl;
     public final int statusBarColorId;
     public final int statusBarColorDarkId;
     public final int navigationBarColorId;
     public final int navigationBarColorDarkId;
+    public final int navigationBarDividerColorId;
+    public final int navigationBarDividerColorDarkId;
     public final int splashImageDrawableId;
     public final int splashScreenBackgroundColorId;
     @Nullable public final String fileProviderAuthority;
@@ -134,6 +162,7 @@ public class LauncherActivityMetadata {
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
+    @ScreenOrientation.LockType public final int screenOrientation;
     @Nullable public final String shareTarget;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
@@ -143,6 +172,10 @@ public class LauncherActivityMetadata {
         navigationBarColorId = metaData.getInt(METADATA_NAVIGATION_BAR_COLOR_ID, DEFAULT_COLOR_ID);
         navigationBarColorDarkId =
                 metaData.getInt(METADATA_NAVIGATION_BAR_COLOR_DARK_ID, navigationBarColorId);
+        navigationBarDividerColorId =
+                metaData.getInt(METADATA_NAVIGATION_BAR_DIVIDER_COLOR_ID, DEFAULT_DIVIDER_COLOR_ID);
+        navigationBarDividerColorDarkId =
+                metaData.getInt(METADATA_NAVIGATION_BAR_DIVIDER_COLOR_DARK_ID, navigationBarColorId);
         splashImageDrawableId = metaData.getInt(METADATA_SPLASH_IMAGE_DRAWABLE_ID, 0);
         splashScreenBackgroundColorId = metaData.getInt(METADATA_SPLASH_SCREEN_BACKGROUND_COLOR,
                 DEFAULT_COLOR_ID);
@@ -159,9 +192,36 @@ public class LauncherActivityMetadata {
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
         displayMode = getDisplayMode(metaData);
-
+        screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
+    }
+
+    private @ScreenOrientation.LockType int getOrientation(String orientation) {
+        if (orientation == null) {
+            return ScreenOrientation.DEFAULT;
+        }
+
+        switch (orientation) {
+            case "any":
+                return ScreenOrientation.ANY;
+            case "natural":
+                return ScreenOrientation.NATURAL;
+            case "landscape":
+                return ScreenOrientation.LANDSCAPE;
+            case "portrait":
+                return ScreenOrientation.PORTRAIT;
+            case "portrait-primary":
+                return ScreenOrientation.PORTRAIT_PRIMARY;
+            case "portrait-secondary":
+                return ScreenOrientation.PORTRAIT_SECONDARY;
+            case "landscape-primary":
+                return ScreenOrientation.LANDSCAPE_PRIMARY;
+            case "landscape-secondary":
+                return ScreenOrientation.LANDSCAPE_SECONDARY;
+            default:
+                return ScreenOrientation.DEFAULT;
+        }
     }
 
     private static TrustedWebActivityDisplayMode getDisplayMode(@NonNull Bundle metaData) {

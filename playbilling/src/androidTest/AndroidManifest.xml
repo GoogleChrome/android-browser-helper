@@ -5,7 +5,7 @@
         <activity
             android:name=".provider.PaymentActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat">
+            android:theme="@android:style/Theme.Light">
 
             <intent-filter>
                 <action android:name="org.chromium.intent.action.PAY" />
@@ -19,7 +19,7 @@
         <activity
             android:name=".provider.WrapperActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat" />
+            android:theme="@android:style/Theme.Light" />
 
         <service android:name=".provider.PaymentService">
         </service>

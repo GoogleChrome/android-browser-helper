@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
@@ -179,6 +181,16 @@ public class TwaLauncher {
         } else {
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         }
+
+        // Remember who we connect to as the package that is allowed to delegate notifications
+        // to us.
+        if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+            // If running in ARC++ on Chrome OS, set the system package as trusted.
+            mTokenStore.store(
+                    Token.create(ChromeOsSupport.ARC_PAYMENT_APP, mContext.getPackageManager()));
+        } else {
+            mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
+        }
     }
 
     /**
@@ -231,7 +243,8 @@ public class TwaLauncher {
 
         mServiceConnection.setSessionCreationRunnables(
                 onSessionCreatedRunnable, onSessionCreationFailedRunnable);
-        CustomTabsClient.bindCustomTabsService(mContext, mProviderPackage, mServiceConnection);
+        CustomTabsClient.bindCustomTabServicePreservePriority(
+                mContext, mProviderPackage, mServiceConnection);
     }
 
     private void launchWhenSessionEstablished(TrustedWebActivityIntentBuilder twaBuilder,
@@ -260,10 +273,6 @@ public class TwaLauncher {
         TrustedWebActivityIntent intent = builder.build(mSession);
         FocusActivity.addToIntent(intent.getIntent(), mContext);
         intent.launchTrustedWebActivity(mContext);
-
-        // Remember who we connect to as the package that is allowed to delegate notifications
-        // to us.
-        mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
 
         if (completionCallback != null) {
             completionCallback.run();

@@ -17,10 +17,14 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.app.Activity;
 import android.content.Context;
 
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
@@ -42,7 +46,13 @@ public class PlayBillingWrapper implements BillingWrapper {
             new PurchasesUpdatedListener() {
         @Override
         public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
-            mListener.onPurchaseFlowComplete(billingResult.getResponseCode());
+            Logging.logPurchasesUpdate(billingResult, list);
+
+            if (list == null || list.size() == 0) {
+                mListener.onPurchaseFlowComplete(billingResult, "");
+            } else {
+                mListener.onPurchaseFlowComplete(billingResult, list.get(0).getPurchaseToken());
+            }
         }
     };
 
@@ -56,29 +66,46 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void connect() {
-        mClient.startConnection(new BillingClientStateListener() {
-            @Override
-            public void onBillingSetupFinished(BillingResult billingResult) {
-                mListener.onConnected();
-            }
-
-            @Override
-            public void onBillingServiceDisconnected() {
-                mListener.onDisconnected();
-            }
-        });
+    public void connect(BillingClientStateListener callback) {
+        mClient.startConnection(callback);
     }
 
     @Override
-    public void querySkuDetails(List<String> skus, SkuDetailsResponseListener callback) {
+    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
+            SkuDetailsResponseListener callback) {
         SkuDetailsParams params = SkuDetailsParams
                 .newBuilder()
                 .setSkusList(skus)
-                .setType(BillingClient.SkuType.INAPP)
+                .setType(skuType)
                 .build();
 
         mClient.querySkuDetailsAsync(params, callback);
+    }
+
+    @Override
+    public void queryPurchases(@BillingClient.SkuType  String skuType,
+            QueryPurchasesListener callback) {
+        callback.onQueryPurchasesResponse(mClient.queryPurchases(skuType));
+    }
+
+    @Override
+    public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
+        AcknowledgePurchaseParams params = AcknowledgePurchaseParams
+                .newBuilder()
+                .setPurchaseToken(token)
+                .build();
+
+        mClient.acknowledgePurchase(params, callback);
+    }
+
+    @Override
+    public void consume(String token, ConsumeResponseListener callback) {
+        ConsumeParams params = ConsumeParams
+                .newBuilder()
+                .setPurchaseToken(token)
+                .build();
+
+        mClient.consumeAsync(params, callback);
     }
 
     @Override
@@ -89,6 +116,8 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .build();
 
         BillingResult result = mClient.launchBillingFlow(activity, params);
+
+        Logging.logLaunchPaymentFlow(result);
 
         return result.getResponseCode() == BillingClient.BillingResponseCode.OK;
     }

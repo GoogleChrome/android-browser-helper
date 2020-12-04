@@ -20,6 +20,8 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import androidx.annotation.Nullable;
+
 /**
  * Takes care of packing the information we send back to the website into JSON.
  */
@@ -30,8 +32,8 @@ public abstract class PaymentResult {
         return new Failure(reason);
     }
 
-    public static PaymentResult success(String id) {
-        return new Success(id);
+    public static PaymentResult success(String purchaseToken) {
+        return new Success(purchaseToken);
     }
 
     public abstract int getActivityResult();
@@ -50,10 +52,10 @@ public abstract class PaymentResult {
     protected abstract JSONObject toJson() throws JSONException;
 
     private static class Success extends PaymentResult {
-        private final String mId;
+        private final String mPurchaseToken;
 
-        private Success(String id) {
-            mId = id;
+        private Success(String purchaseToken) {
+            mPurchaseToken = purchaseToken;
         }
 
         @Override
@@ -69,7 +71,7 @@ public abstract class PaymentResult {
         @Override
         protected JSONObject toJson() throws JSONException {
             JSONObject obj = new JSONObject();
-            obj.put("id", mId);
+            obj.put("token", mPurchaseToken);
             return obj;
         }
 

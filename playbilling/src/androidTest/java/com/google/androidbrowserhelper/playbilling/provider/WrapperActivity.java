@@ -14,16 +14,14 @@
 
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * An Activity that launches another Activity with {@link #startActivityForResult}.
@@ -33,7 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
  *
  * I agree that having statics all over the place is ugly, but it's test code and it works.
  */
-public class WrapperActivity extends AppCompatActivity {
+public class WrapperActivity extends Activity {
     // Can't use 0, 1 or -1 as they're valid values.
     private static final int INVALID_RESULT_CODE = 666;
     private static int sResultCode = INVALID_RESULT_CODE;

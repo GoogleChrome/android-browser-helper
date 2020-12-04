@@ -14,24 +14,28 @@
 
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
+import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
 
 import java.util.Collections;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class PaymentActivity extends AppCompatActivity implements BillingWrapper.Listener {
+public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
 
-    private static final String METHOD_NAME = "https://beer.conn.dev";
+    private static final String METHOD_NAME = "https://play.google.com/billing";
+
+    static final String PROXY_PACKAGE_KEY = "PROXY_PACKAGE";
 
     private BillingWrapper mWrapper;
     private MethodData mMethodData;
@@ -51,6 +55,8 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
             return;
         }
 
+        getIntent().putExtra(PROXY_PACKAGE_KEY, component.getPackageName());
+
         mMethodData = MethodData.fromIntent(getIntent());
         if (mMethodData == null) {
             fail("Could not parse SKU.");
@@ -58,33 +64,45 @@ public class PaymentActivity extends AppCompatActivity implements BillingWrapper
         }
 
         mWrapper = BillingWrapperFactory.get(this, this);
-        mWrapper.connect();
+        mWrapper.connect(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                onConnected();
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                onDisconnected();
+            }
+        });
     }
 
-    @Override
     public void onDisconnected() {
         fail("BillingClient disconnected.");
     }
 
-    @Override
     public void onConnected() {
-        mWrapper.querySkuDetails(Collections.singletonList(mMethodData.sku),
-                (BillingResult result, List<SkuDetails> details) -> {
-            if (details == null || details.isEmpty()) {
-                fail("Play Billing returned did not find SKUs.");
-                return;
-            }
+        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>((result, details) -> {
+                    if (details == null || details.isEmpty()) {
+                        fail("Play Billing returned did not find SKUs.");
+                        return;
+                    }
 
-            if (mWrapper.launchPaymentFlow(this, details.get(0))) return;
+                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0)))
+                        return;
 
-            fail("Payment attempt failed (have you already bought the item?).");
-        });
+                    fail("Payment attempt failed (have you already bought the item?).");
+                });
+
+        List<String> ids = Collections.singletonList(mMethodData.sku);
+        mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);
+        mWrapper.querySkuDetails(BillingClient.SkuType.SUBS, ids, merger::setSubsResult);
     }
 
     @Override
-    public void onPurchaseFlowComplete(int result) {
-        if (result == BillingClient.BillingResponseCode.OK) {
-            setResultAndFinish(PaymentResult.success("success"));
+    public void onPurchaseFlowComplete(BillingResult result, String purchaseToken) {
+        if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+            setResultAndFinish(PaymentResult.success(purchaseToken));
         } else {
             fail("Purchase flow ended with result: " + result);
         }

@@ -14,8 +14,15 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.browser.trusted.TokenStore;
+import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An extension of {@link androidx.browser.trusted.TrustedWebActivityService} that implements
@@ -23,10 +30,28 @@ import androidx.browser.trusted.TokenStore;
  * {@link SharedPreferencesTokenStore}.
  */
 public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
+    private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
 
     @NonNull
     @Override
     public TokenStore getTokenStore() {
         return new SharedPreferencesTokenStore(this);
+    }
+
+    @Nullable
+    @Override
+    public Bundle onExtraCommand(
+            String commandName, Bundle args, @Nullable TrustedWebActivityCallbackRemote callback) {
+        for (ExtraCommandHandler handler : mExtraCommandHandlers) {
+            Bundle result = handler.handleExtraCommand(this, commandName, args, callback);
+            if (result.getBoolean(ExtraCommandHandler.EXTRA_COMMAND_SUCCESS)) {
+                return result;
+            }
+        }
+        return Bundle.EMPTY;
+    }
+
+    public void registerExtraCommandHandler(ExtraCommandHandler handler) {
+        mExtraCommandHandlers.add(handler);
     }
 }

@@ -1,0 +1,45 @@
+<!--
+    Copyright 2020 Google LLC
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+    <string name="app_name">TWA Play Billing Demo</string>
+    <string name="asset_statements">
+        [{
+            \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+            \"target\": {
+                \"namespace\": \"web\",
+                \"site\": \"https://beer.conn.dev/\"}
+        }]
+    </string>
+    <string name="webManifestUrl">https://beer.conn.dev/manifest.json</string>
+    <string name="versionNotes">
+Change Log:\n
+Version 2:\n
+- Upgraded Play Billing Library.\n
+- Added verbose Android logging with tag "TwaBilling".\n\n
+Version 3:\n
+- Return purchase token to website.\n\n
+Version 4:\n
+- Make GetDetails and purchases work with subscriptions.\n
+- Switch consume and acknowledge to call the correct methods.\n
+- Add subscription fields to GetDetails result.\n
+- Implement ListPurchases.\n
+- Update Play Billing library to 3.0.1.\n\n
+Version 5-9:\n
+- Various attempts to make this work on ChromeOS.\n\n
+Version 10:\n
+- Made this TextView scrollable so this Activity works in landscape.\n\n
+    </string>
+</resources>

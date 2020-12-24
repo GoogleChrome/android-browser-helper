@@ -48,7 +48,7 @@ public class FirebaseAnalyticsLauncherActivity extends LauncherActivity {
     }
 
     @Override
-    protected boolean launchImmediately() {
+    protected boolean shouldLaunchImmediately() {
         // launchImmediately() returns `false` so we can wait until Firebase Analytics is ready
         // and then launch the Trusted Web Activity with `launch()`.
         return false;

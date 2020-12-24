@@ -134,7 +134,7 @@ public class LauncherActivity extends Activity {
             return;
         }
 
-        if (launchImmediately()) {
+        if (shouldLaunchImmediately()) {
             launchTwa();
         }
     }
@@ -145,7 +145,7 @@ public class LauncherActivity extends Activity {
      * launching the Trusted Web Activity. The subclass will then be responsible for calling
      * `launch()` itself once the asynchronous task is finished.
      */
-    protected boolean launchImmediately() {
+    protected boolean shouldLaunchImmediately() {
         return true;
     }
 

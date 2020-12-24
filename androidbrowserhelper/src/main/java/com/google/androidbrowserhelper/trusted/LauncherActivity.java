@@ -118,14 +118,6 @@ public class LauncherActivity extends Activity {
     @Nullable
     private TwaLauncher mTwaLauncher;
 
-    /**
-     * Signals if `LauncherActivity` should automatically launch the Trusted Web Activity on
-     * `onCreate()`. Set to `false` when a subclass needs to perform an asynchronous task before
-     * launching the Trusted Web Activity. The subclass will then be responsible for calling
-     * `launch()` itself once the asynchronous task is finished.
-     */
-    protected boolean mLaunchImmediately = true;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,9 +134,19 @@ public class LauncherActivity extends Activity {
             return;
         }
 
-        if (mLaunchImmediately) {
-            this.launchTwa();
+        if (launchImmediately()) {
+            launchTwa();
         }
+    }
+
+    /**
+     * Signals if `LauncherActivity` should automatically launch the Trusted Web Activity on
+     * `onCreate()`. Return `false` when a subclass needs to perform an asynchronous task before
+     * launching the Trusted Web Activity. The subclass will then be responsible for calling
+     * `launch()` itself once the asynchronous task is finished.
+     */
+    protected boolean launchImmediately() {
+        return true;
     }
 
     /**

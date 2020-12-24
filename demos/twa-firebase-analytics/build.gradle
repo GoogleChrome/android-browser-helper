@@ -38,6 +38,10 @@ android {
         versionName "1.0"
     }
 
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 
     buildTypes {
         release {
@@ -50,8 +54,9 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':androidbrowserhelper')
     implementation 'androidx.browser:browser:1.3.0'
-    // Firebase : firebase bom for automatic choice version for each imported library
+    // Firebase: Firebase Bill of Materials (BoM) for automatic choice version for each imported
+    // library (See https://firebase.google.com/docs/android/learn-more#bom).
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
-    // Firebase Analytics : include firebase analytics for GA tracking
+    // Firebase Analytics: include Firebase Analytics for GA tracking.
     implementation 'com.google.firebase:firebase-analytics'
 }

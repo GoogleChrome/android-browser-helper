@@ -25,26 +25,33 @@ import com.google.android.gms.tasks.Task;
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+/**
+ * This is a custom LauncherActivity that gets the Firebase Instance ID asynchronously before
+ * launching the Trusted Web Activity and ensures the information is always available.
+ */
 public class FirebaseAnalyticsLauncherActivity extends LauncherActivity {
     private String mAppInstanceId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.mLaunchImmediately = false;
         super.onCreate(savedInstanceState);
 
-        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Start the asynchronous task to get the Firebase application instance id.
-        mFirebaseAnalytics.getAppInstanceId().addOnCompleteListener(new OnCompleteListener<String>() {
-            @Override
-            public void onComplete(@NonNull Task<String> task) {
+        firebaseAnalytics.getAppInstanceId().addOnCompleteListener(task -> {
                 // Once the task is complete, save the instance id so it can be used by
                 // getLaunchingUrl().
                 mAppInstanceId = task.getResult();
-                FirebaseAnalyticsLauncherActivity.this.launchTwa();
-            }
+                launchTwa();
         });
+    }
+
+    @Override
+    protected boolean launchImmediately() {
+        // launchImmediately() returns `false` so we can wait until Firebase Analytics is ready
+        // and then launch the Trusted Web Activity with `launch()`.
+        return false;
     }
 
     @Override

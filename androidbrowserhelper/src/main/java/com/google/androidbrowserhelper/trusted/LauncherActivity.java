@@ -140,10 +140,10 @@ public class LauncherActivity extends Activity {
     }
 
     /**
-     * Signals if `LauncherActivity` should automatically launch the Trusted Web Activity on
-     * `onCreate()`. Return `false` when a subclass needs to perform an asynchronous task before
-     * launching the Trusted Web Activity. The subclass will then be responsible for calling
-     * `launch()` itself once the asynchronous task is finished.
+     * Signals if {@link LauncherActivity} should automatically launch the Trusted Web Activity on
+     * {@linke #onCreate()}. Return {@code false} when a subclass needs to perform an asynchronous
+     * task before launching the Trusted Web Activity. The subclass will then be responsible for
+     * calling {@link #launchTwa()} itself once the asynchronous task is finished.
      */
     protected boolean shouldLaunchImmediately() {
         return true;
@@ -151,7 +151,7 @@ public class LauncherActivity extends Activity {
 
     /**
      * Launches the Trusted Web Activity. This methods should only be called when
-     * `mLaunchImmediately` has been set to `false`.
+     * {@link #shouldLaunchImmediately()} returns {@code false}.
      */
     protected void launchTwa() {
         mMetadata = LauncherActivityMetadata.parse(this);

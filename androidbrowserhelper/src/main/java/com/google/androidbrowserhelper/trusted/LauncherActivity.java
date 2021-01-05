@@ -134,6 +134,26 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        if (shouldLaunchImmediately()) {
+            launchTwa();
+        }
+    }
+
+    /**
+     * Signals if {@link LauncherActivity} should automatically launch the Trusted Web Activity on
+     * {@linke #onCreate()}. Return {@code false} when a subclass needs to perform an asynchronous
+     * task before launching the Trusted Web Activity. The subclass will then be responsible for
+     * calling {@link #launchTwa()} itself once the asynchronous task is finished.
+     */
+    protected boolean shouldLaunchImmediately() {
+        return true;
+    }
+
+    /**
+     * Launches the Trusted Web Activity. This methods should only be called when
+     * {@link #shouldLaunchImmediately()} returns {@code false}.
+     */
+    protected void launchTwa() {
         mMetadata = LauncherActivityMetadata.parse(this);
 
         if (splashScreenNeeded()) {
@@ -185,10 +205,10 @@ public class LauncherActivity extends Activity {
 
         if (ChromeOsSupport.isRunningOnArc(getApplicationContext().getPackageManager())) {
             new TwaSharedPreferencesManager(this)
-                .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
+                    .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
         } else {
             new TwaSharedPreferencesManager(this)
-                .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+                    .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
         }
 
         ManageDataLauncherActivity.addSiteSettingsShortcut(this,

@@ -230,6 +230,10 @@ public class LauncherActivityMetadata {
             return new TrustedWebActivityDisplayMode.ImmersiveMode(
                     false, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
         }
+        if ("sticky-immersive".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.ImmersiveMode(
+                    true, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+        }
         return new TrustedWebActivityDisplayMode.DefaultMode();
     }
 

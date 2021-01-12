@@ -15,6 +15,7 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,6 +36,7 @@ public class DelegationService extends androidx.browser.trusted.TrustedWebActivi
     @NonNull
     @Override
     public TokenStore getTokenStore() {
+        Log.d("DGDebug", "Fetching tokens for verified provider.");
         return new SharedPreferencesTokenStore(this);
     }
 

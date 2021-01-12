@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -40,6 +41,7 @@ public class MainActivity extends Activity {
         intent.setData(
                 Uri.parse("https://beer.conn.dev?client_version=" + BuildConfig.VERSION_CODE));
 
+        Log.d("DGDebug", "Launching LauncherActivity.");
         startActivity(intent);
     }
 }

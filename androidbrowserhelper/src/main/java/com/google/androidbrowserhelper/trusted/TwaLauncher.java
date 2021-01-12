@@ -60,6 +60,7 @@ public class TwaLauncher {
             // Work around as ARC++ does not support native TWAs at the moment.
             intent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
         }
+        Log.d("DGDebug", "Launching CCT Fallback.");
         intent.launchUrl(context, twaBuilder.getUri());
         if (completionCallback != null) {
             completionCallback.run();
@@ -126,6 +127,7 @@ public class TwaLauncher {
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
                        TokenStore tokenStore) {
+        Log.d("DGDebug", "Creating TWA Launcher.");
         mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;
@@ -171,14 +173,19 @@ public class TwaLauncher {
                        @Nullable SplashScreenStrategy splashScreenStrategy,
                        @Nullable Runnable completionCallback,
                        FallbackStrategy fallbackStrategy) {
+
+
+
         if (mDestroyed) {
             throw new IllegalStateException("TwaLauncher already destroyed");
         }
 
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
+            Log.d("DGDebug", "Launching as TWA.");
             launchTwa(twaBuilder, customTabsCallback, splashScreenStrategy, completionCallback,
                     fallbackStrategy);
         } else {
+            Log.d("DGDebug", "Launching fallback.");
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         }
 
@@ -186,9 +193,11 @@ public class TwaLauncher {
         // to us.
         if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
             // If running in ARC++ on Chrome OS, set the system package as trusted.
+            Log.d("DGDebug", "Setting ARC as verified provider.");
             mTokenStore.store(
                     Token.create(ChromeOsSupport.ARC_PAYMENT_APP, mContext.getPackageManager()));
         } else {
+            Log.d("DGDebug", "Setting browser as verified provider.");
             mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
         }
     }

@@ -41,5 +41,8 @@ Version 5-9:\n
 - Various attempts to make this work on ChromeOS.\n\n
 Version 10:\n
 - Made this TextView scrollable so this Activity works in landscape.\n\n
+Version 11:\n
+Version 12:\n
+- Added some debug info for ChromeOS.\n\n
     </string>
 </resources>

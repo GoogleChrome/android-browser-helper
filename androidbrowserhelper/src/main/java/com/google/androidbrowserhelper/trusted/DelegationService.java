@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
@@ -37,6 +38,9 @@ public class DelegationService extends androidx.browser.trusted.TrustedWebActivi
 
     @NonNull
     @Override
+    @SuppressLint("WrongThread")
+    // TokenStore#store wants to be called on a Worker thread for performance reasons, since
+    // communication with the browser is async, this shouldn't be a problem.
     public TokenStore getTokenStore() {
         if (mTokenStore == null) {
             mTokenStore = new SharedPreferencesTokenStore(this);

@@ -184,11 +184,9 @@ public class TwaLauncher {
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        if (ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
-            // If running in ARC++ on Chrome OS, set the system package as trusted.
-            mTokenStore.store(
-                    Token.create(ChromeOsSupport.ARC_PAYMENT_APP, mContext.getPackageManager()));
-        } else {
+        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+            // Since ChromeOS may not follow this path when launching a TWA, we set the verified
+            // provider in DelegationService instead.
             mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
         }
     }

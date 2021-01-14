@@ -14,10 +14,12 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
@@ -31,11 +33,24 @@ import java.util.List;
  */
 public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
     private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
+    private SharedPreferencesTokenStore mTokenStore;
 
     @NonNull
     @Override
     public TokenStore getTokenStore() {
-        return new SharedPreferencesTokenStore(this);
+        if (mTokenStore == null) {
+            mTokenStore = new SharedPreferencesTokenStore(this);
+
+            PackageManager pm = getPackageManager();
+            if (ChromeOsSupport.isRunningOnArc(pm)) {
+                // TWAs launched on ChromeOS may not always go through the normal launch flow
+                // (LauncherActivity, TwaLauncher, etc), so setting the verified browser there
+                // won't work. We must set it here instead.
+                mTokenStore.store(Token.create(ChromeOsSupport.ARC_PAYMENT_APP, pm));
+            }
+        }
+
+        return mTokenStore;
     }
 
     @Nullable

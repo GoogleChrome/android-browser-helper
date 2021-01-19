@@ -4,6 +4,7 @@ include ':playbilling'
 
 include ':demos:custom-tabs-example-app'
 include ':demos:custom-tabs-headers'
+include ':demos:custom-tabs-navigation-callbacks'
 include ':demos:custom-tabs-oauth'
 include ':demos:custom-tabs-session'
 include ':demos:twa-basic'

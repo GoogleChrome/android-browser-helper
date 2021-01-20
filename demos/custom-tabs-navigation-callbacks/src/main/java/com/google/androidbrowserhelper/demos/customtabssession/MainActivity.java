@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void extraCallback(@NonNull String callbackName, @Nullable Bundle args) {
-                appendToLog(callbackName + ": " + bundleToString(args));
+                appendToLog("Extra: " + callbackName + ": " + bundleToString(args));
             }
         };
 

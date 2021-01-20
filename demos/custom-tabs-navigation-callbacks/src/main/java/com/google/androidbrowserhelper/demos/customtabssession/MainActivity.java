@@ -140,8 +140,9 @@ public class MainActivity extends Activity {
             for (String key : bundle.keySet()) {
                 if (!first) {
                     b.append(", ");
-                    first = false;
                 }
+                first = false;
+
                 b.append(key);
                 b.append(": ");
                 b.append(bundle.get(key));

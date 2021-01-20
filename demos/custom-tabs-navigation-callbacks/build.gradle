@@ -21,7 +21,7 @@ android {
     buildToolsVersion "30.0.0"
 
     defaultConfig {
-        applicationId "com.google.androidbrowserhelper.demos.customtabssession"
+        applicationId "com.google.androidbrowserhelper.demos.customtabsnavigationcallbacks"
         minSdkVersion 25
         targetSdkVersion 30
         versionCode 1

@@ -103,7 +103,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData data) {
         mPlayBillingFlowLaunchIntent = activity.getIntent();
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;

@@ -88,7 +88,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
                         return;
                     }
 
-                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0)))
+                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0), mMethodData))
                         return;
 
                     fail("Payment attempt failed (have you already bought the item?).");

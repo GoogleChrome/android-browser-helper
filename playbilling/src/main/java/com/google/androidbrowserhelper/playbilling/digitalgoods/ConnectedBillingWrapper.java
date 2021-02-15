@@ -25,6 +25,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
+import com.google.androidbrowserhelper.playbilling.provider.MethodData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +109,7 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public boolean launchPaymentFlow(Activity activity, SkuDetails sku) {
+    public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData data) {
         throw new IllegalStateException(
                 "EnsuredConnectionBillingWrapper doesn't handle launch Payment flow");
     }

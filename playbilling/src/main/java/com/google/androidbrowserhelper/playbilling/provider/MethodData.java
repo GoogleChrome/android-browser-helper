@@ -18,8 +18,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.android.billingclient.api.BillingFlowParams;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.CDATASection;
 
 import java.util.ArrayList;
 
@@ -34,9 +37,10 @@ import androidx.annotation.Nullable;
  * {@code
  *
  * const supportedInstruments = [{
- *     supportedMethods: 'https://beer.conn/dev',
+ *     supportedMethods: 'https://play.google.com/billing',
  *     data: {
- *         sku: "android.test.purchased"
+ *         sku: "android.test.purchased",
+ *         oldSku: "oldSku"
  *     }
  * }]
  *
@@ -62,8 +66,17 @@ import androidx.annotation.Nullable;
 public class MethodData {
     public final String sku;
 
-    private MethodData(String sku) {
+    // These three optional fields are to do with upgrading/downgrading subscriptions.
+    @Nullable public final String oldSku;
+    @Nullable public final String purchaseToken;
+    @Nullable public final Integer prorationMode;
+
+    private MethodData(String sku, @Nullable String oldSku, @Nullable String purchaseToken,
+            @Nullable Integer prorationMode) {
         this.sku = sku;
+        this.oldSku = oldSku;
+        this.purchaseToken = purchaseToken;
+        this.prorationMode = prorationMode;
     }
 
     @Nullable
@@ -83,7 +96,11 @@ public class MethodData {
         String sku = dataObject.optString("sku");
         if (TextUtils.isEmpty(sku)) return null;
 
-        return new MethodData(sku);
+        String oldSku = getString(dataObject, "oldSku");
+        String purchaseToken = getString(dataObject, "purchaseToken");
+        Integer prorationMode = getProration(dataObject);
+
+        return new MethodData(sku, oldSku, purchaseToken, prorationMode);
     }
 
     @Nullable
@@ -92,7 +109,6 @@ public class MethodData {
         ArrayList<String> methods = intent.getStringArrayListExtra("methodNames");
         if (methods == null || methods.isEmpty()) return null;
 
-        // TODO: Check that this value matches something...
         String method = methods.get(0);
 
         Bundle methodDatas = intent.getBundleExtra("methodData");
@@ -102,5 +118,32 @@ public class MethodData {
         if (TextUtils.isEmpty(methodDataJson)) return null;
 
         return fromJson(methodDataJson);
+    }
+
+    private static @Nullable String getString(JSONObject object, String key) {
+        String value = object.optString(key);
+        if (TextUtils.isEmpty(value)) return null;
+        return value;
+    }
+
+    private static @Nullable Integer getProration(JSONObject object) {
+        String proration = getString(object, "prorationMode");
+
+        if (proration == null) return null;
+
+        switch (proration) {
+            case "deferred":
+                return BillingFlowParams.ProrationMode.DEFERRED;
+            case "immediateAndChargeProratedPrice":
+                return BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE;
+            case "immediateWithoutProration":
+                return BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION;
+            case "immediateWithTimeProration":
+                return BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
+            case "unknownSubscriptionUpgradeDowngradePolicy":
+                return BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY;
+            default:
+                return null;
+        }
     }
 }

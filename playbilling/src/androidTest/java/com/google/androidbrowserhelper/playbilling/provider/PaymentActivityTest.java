@@ -185,7 +185,8 @@ public class PaymentActivityTest {
     }
 
     private List<SkuDetails> getSkuDetailsList() throws JSONException {
-        return Arrays.asList(new SkuDetails("{}"));
+        String json = "{ 'productId' = 'mySku', 'type' = 'inapp' }".replace('\'', '\"');
+        return Arrays.asList(new SkuDetails(json));
     }
 
     private Intent getIntent(@Nullable String sku) {

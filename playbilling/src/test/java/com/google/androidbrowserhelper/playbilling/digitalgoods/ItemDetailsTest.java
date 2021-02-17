@@ -31,12 +31,12 @@ import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addOptionalField;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(RobolectricTestRunner.class)
-@DoNotInstrument
-@Config(manifest = Config.NONE)
 /**
  * Tests for {@link ItemDetails}.
  */
+@RunWith(RobolectricTestRunner.class)
+@DoNotInstrument
+@Config(manifest = Config.NONE)
 public class ItemDetailsTest {
 
     @Test

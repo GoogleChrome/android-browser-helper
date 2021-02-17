@@ -82,5 +82,5 @@ public interface BillingWrapper {
      * Launches the Payment Flow. If it returns {@code true},
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
-    boolean launchPaymentFlow(Activity activity, SkuDetails sku);
+    boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData);
 }

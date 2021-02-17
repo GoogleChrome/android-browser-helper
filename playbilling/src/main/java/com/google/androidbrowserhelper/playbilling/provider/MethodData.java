@@ -145,11 +145,5 @@ public class MethodData {
             default:
                 return null;
         }
-//        try {
-//            // Throws if the key doesn't exist or isn't an int.
-//            return object.getInt(key);
-//        } catch (JSONException e) {
-//            return null;
-//        }
     }
 }

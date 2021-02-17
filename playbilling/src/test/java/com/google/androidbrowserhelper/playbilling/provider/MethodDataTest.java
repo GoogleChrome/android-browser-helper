@@ -60,6 +60,7 @@ public class MethodDataTest {
         prorationMode("immediateWithoutProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
         prorationMode("immediateWithTimeProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
         prorationMode("unknownSubscriptionUpgradeDowngradePolicy", BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
+        prorationMode("invalid", null);
     }
 
     private static void assertMethodData(MethodData data, String sku, @Nullable String oldSku,
@@ -70,7 +71,7 @@ public class MethodDataTest {
         assertEquals(prorationMode, data.prorationMode);
     }
 
-    private static void prorationMode(String mode, int expected) {
+    private static void prorationMode(String mode, Integer expected) {
         String json = ("{ 'sku' = 'mySku', 'prorationMode' = '" + mode + "' }")
                 .replace('\'', '\"');
         MethodData data = MethodData.fromJson(json);

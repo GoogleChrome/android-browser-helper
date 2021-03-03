@@ -17,7 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-def VERSION = "1.0.0-alpha06";
+def VERSION = "1.0.0-alpha07";
 
 android {
     compileSdkVersion 29
@@ -59,9 +59,24 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.2.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'junit:junit:4.12'
-    implementation project(path: ':androidbrowserhelper')
+    debugImplementation project(path: ':androidbrowserhelper')
+    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.2.0'
 }
 
+/**
+ * Adds gradle dependencies to the POM dependency node.
+ */
+def addDependencies(pomDependenciesNode, gradleDependencies) {
+    gradleDependencies.each {
+        // Ensure dependencies such as fileTree are not included in the pom.
+        if (it.name != 'unspecified') {
+            def dependencyNode = pomDependenciesNode.appendNode('dependency')
+            dependencyNode.appendNode('groupId', it.group)
+            dependencyNode.appendNode('artifactId', it.name)
+            dependencyNode.appendNode('version', it.version)
+        }
+    }
+}
 
 publishing {
     publications {
@@ -88,18 +103,12 @@ publishing {
             // https://github.com/bintray/bintray-examples/blob/master/gradle-bintray-plugin-examples/android-gradle-3.0.0-maven-example/app/publish.gradle#L7-L31
             pom.withXml {
                 def dependenciesNode = asNode().appendNode('dependencies')
-
-                // Iterate over the implementation dependencies (we don't want the test ones),
-                // adding a <dependency> node for each
-                configurations.implementation.allDependencies.each {
-                    // Ensure dependencies such as fileTree are not included in the pom.
-                    if (it.name != 'unspecified') {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
+                // Import dependencies marked with 'implementation' and 'releaseImplementation'.
+                // Dependencies marked with 'debugImplementation' are ignored.
+                addDependencies(
+                        dependenciesNode, configurations.implementation.allDependencies);
+                addDependencies(
+                        dependenciesNode, configurations.releaseImplementation.allDependencies);
             }
         }
     }

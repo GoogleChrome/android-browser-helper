@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.androidbrowserhelper.demos.twa_offline_first">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Androidbrowserhelper">
+
+        <activity android:name=".OfflineFirstTWALauncherActivity">
+
+            <!-- Edit android:value to change the url opened by the Trusted Web Activity -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                android:value="https://airhorner.com" />
+
+            <!-- This intent-filter adds the Trusted Web Activity to the Android Launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Edit android:host to handle links to the target URL -->
+                <data
+                    android:host="airhorner.com"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+</manifest>

@@ -1,4 +1,4 @@
-// Copyright 2020 Google Inc. All Rights Reserved.
+// Copyright 2021 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,15 +27,19 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.tryLaunchTwa();
+        tryLaunchTwa();
     }
 
     @Override
     protected boolean shouldLaunchImmediately() {
+        // launchImmediately() returns `false` so we can check connection
+        // and then render a fallback page or launch the Trusted Web Activity with `launchTwa()`.
         return false;
     }
 
     private void tryLaunchTwa() {
+        // Check connection status. If online, launch the Trusted Web Activity with `launchTwa()`.
+        // if offline render the offline fallback screen.
         if (isOnline()) {
             launchTwa();
         } else {
@@ -46,10 +50,11 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     private void renderOfflineFallback() {
         setContentView(R.layout.activity_offline_first_twa);
 
-        final Button retryBtn = this.findViewById(R.id.retry_btn);
+        Button retryBtn = this.findViewById(R.id.retry_btn);
         retryBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                tryLaunchTwa();
+                // Check connection status. If online, launch the Trusted Web Activity with `launchTwa()`.
+                if (isOnline()) launchTwa();
             }
         });
     }

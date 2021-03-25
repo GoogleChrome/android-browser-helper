@@ -1,7 +1,7 @@
 # TWA Basic
 
 This demo creates an Android App that will start up and launch a TWA.
-The app will be called "Basic TWA" and will launch `https://svgomg.firebaseapp.com`.
+The app will be called "Basic TWA" and will launch `https://airhorner.com`.
 
 This demo contains no Java/Kotlin code and just wires together and configures components already
 existing in `androidx.browser` and `android-browser-helper`.

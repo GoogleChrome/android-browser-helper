@@ -54,7 +54,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                    android:host="svgomg.firebaseapp.com"/>
+                    android:host="airhorner.com"/>
             </intent-filter>
 
         </activity>

@@ -26,8 +26,6 @@ import android.widget.Button;
 
 public class OfflineFirstTWALauncherActivity extends LauncherActivity {
 
-    private static final String TWA_LAUNCHED_SUCCESSFULLY = "TWA_LAUNCHED_SUCCESSFULLY";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

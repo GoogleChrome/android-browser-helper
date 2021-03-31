@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
 
@@ -53,9 +54,17 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     }
 
     private boolean hasTwaLaunchedSuccessfully() {
-        // Return true if the preference "twa_launched_successfully" has already been set.
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE);
-        return sharedPref.getBoolean(getString(R.string.twa_launched_successfully), false);
+        // Return `true` if the preference "twa_launched_successfully" has already been set.
+        // The code to access shared preferences is surrounded by additional `ThreadPolicy` code to avoid
+        // the app breaking the first time it runs (as it requires a disk read, which might be slower the first time).
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+        try {
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX);
+            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE);
+            return sharedPref.getBoolean(getString(R.string.twa_launched_successfully), false);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
     }
 
     private void renderOfflineFallback() {

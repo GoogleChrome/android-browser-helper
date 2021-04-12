@@ -27,15 +27,22 @@ import androidx.browser.customtabs.CustomTabsSession;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class MainActivity extends Activity {
-    private static final Uri URL = Uri.parse("https://padr31.github.io/");
+    // This project is using a demo page hosted at Glitch. However, the demo will only work if the
+    // Digital Asset Links validation is successful. So, when testing on your computer, remix the
+    // project at https://glitch.com/edit/#!/custom-tabs-custom-he, edit the file under
+    // `public/.well-known/assetlinks.json` with your own SHA-256 fingerprint (use Tools > Terminal
+    // to find and edit the file), and update the URL below to the new project.
+    private static final Uri URL = Uri.parse("https://custom-tabs-custom-he.glitch.me/");
 
     private CustomTabsSession mSession;
     private CustomTabsServiceConnection mConnection;
@@ -50,7 +57,7 @@ public class MainActivity extends Activity {
         CustomTabsCallback callback = new CustomTabsCallback() {
             @Override
             public void onRelationshipValidationResult(int relation, @NonNull Uri requestedOrigin,
-                    boolean result, @Nullable Bundle extras) {
+                                                       boolean result, @Nullable Bundle extras) {
                 // Can launch custom tabs intent after session was validated as the same origin.
                 mExtraButton.setEnabled(true);
             }
@@ -60,7 +67,7 @@ public class MainActivity extends Activity {
         mConnection = new CustomTabsServiceConnection() {
             @Override
             public void onCustomTabsServiceConnected(@NonNull ComponentName name,
-                    @NonNull CustomTabsClient client) {
+                                                     @NonNull CustomTabsClient client) {
                 // Create session after service connected.
                 mSession = client.newSession(callback);
                 client.warmup(0);
@@ -74,10 +81,19 @@ public class MainActivity extends Activity {
             }
         };
 
-        String packageName = CustomTabsClient.getPackageName(MainActivity.this, null);
+        //Add package names for other browsers that support Custom Tabs and custom headers.
+        List<String> packageNames = Arrays.asList(
+                "com.google.android.apps.chrome",
+                "com.chrome.canary",
+                "com.chrome.dev",
+                "com.chrome.beta",
+                "com.android.chrome"
+        );
+        String packageName =
+                CustomTabsClient.getPackageName(MainActivity.this, packageNames, false);
         if (packageName == null) {
             Toast.makeText(getApplicationContext(), "Package name is null.", Toast.LENGTH_SHORT)
-                .show();
+                    .show();
         } else {
             // Bind the custom tabs service connection.
             CustomTabsClient.bindCustomTabsService(this, packageName, mConnection);
@@ -100,9 +116,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (mConnection == null) return;
-        unbindService(mConnection);
-        mConnection = null;
+
+        // Unbind from the service if we connected successfully and clear the session.
+        if (mSession != null) {
+            unbindService(mConnection);
+            mConnection = null;
+            mSession = null;
+        }
         mExtraButton.setEnabled(false);
     }
 

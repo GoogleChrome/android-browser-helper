@@ -83,10 +83,11 @@ public class MainActivity extends Activity {
 
         //Add package names for other browsers that support Custom Tabs and custom headers.
         List<String> packageNames = Arrays.asList(
-                "com.android.chrome",
-                "com.chrome.beta",
+                "com.google.android.apps.chrome",
+                "com.chrome.canary",
                 "com.chrome.dev",
-                "com.chrome.canary"
+                "com.chrome.beta",
+                "com.android.chrome"
         );
         String packageName =
                 CustomTabsClient.getPackageName(MainActivity.this, packageNames, false);

@@ -13,7 +13,7 @@ the Digital Asset Links validation.
 only work if the Digital Asset Links validation is successful. So, when testing on your computer,
 remix the project at https://glitch.com/edit/#!/custom-tabs-custom-he, edit the file under
 `public/.well-known/assetlinks.json` with your own SHA-256 fingerprint (use Tools > Terminal
-to find and edit the file), and update the opened by the application.
+to find and edit the file), and update the URL opened by the application.
 
 [1]: https://developer.chrome.com/docs/android/custom-tabs/headers/
 [2]: https://developers.google.com/digital-asset-links

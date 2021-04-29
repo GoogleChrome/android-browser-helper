@@ -126,7 +126,7 @@ public class TwaLauncher {
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
                        TokenStore tokenStore) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mSessionId = sessionId;
         mTokenStore = tokenStore;
         if (providerPackage == null) {

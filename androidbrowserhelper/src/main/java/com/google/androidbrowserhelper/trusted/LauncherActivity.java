@@ -34,7 +34,6 @@ import androidx.browser.trusted.sharing.ShareData;
 import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.core.content.ContextCompat;
 
-import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
 import org.json.JSONException;
@@ -106,6 +105,9 @@ public class LauncherActivity extends Activity {
     /** We only want to show the update prompt once per instance of this application. */
     private static boolean sChromeVersionChecked;
 
+    /** See comment in onCreate. */
+    private static int sLauncherActivitiesAlive;
+
     private LauncherActivityMetadata mMetadata;
 
     private boolean mBrowserWasLaunched;
@@ -121,6 +123,22 @@ public class LauncherActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sLauncherActivitiesAlive++;
+        if (sLauncherActivitiesAlive > 1 && getIntent().getData() == null) {
+            // If there's another LauncherActivity alive, that means that the TWA is already
+            // running. If we attempt to launch it again, we will trigger a browser navigation. For
+            // the case where an Intent comes in from a BROWSABLE Intent or a notification, that is
+            // the desired behaviour.
+
+            // However, if the TWA was originally started by a BROWSABLE Intent and the user then
+            // clicks on the Launcher icon, Android launches this Activity anew (instead of just
+            // bringing the Task to the foreground). In this case we don't want to launch the TWA
+            // again and trigger the navigation. Since launching this Activity will have brought the
+            // TWA to the foreground, we can just finish and everything will work fine.
+            finish();
+            return;
+        }
 
         if (restartInNewTask()) {
             finish();
@@ -282,6 +300,9 @@ public class LauncherActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        sLauncherActivitiesAlive--;
+
         if (mTwaLauncher != null) {
             mTwaLauncher.destroy();
         }

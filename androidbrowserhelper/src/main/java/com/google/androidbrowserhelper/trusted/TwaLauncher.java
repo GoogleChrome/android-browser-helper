@@ -76,7 +76,7 @@ public class TwaLauncher {
         }
     };
 
-    private final Context mContext;
+    private Context mContext;
 
     @Nullable
     private final String mProviderPackage;
@@ -126,7 +126,7 @@ public class TwaLauncher {
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
                        TokenStore tokenStore) {
-        mContext = context.getApplicationContext();
+        mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;
         if (providerPackage == null) {
@@ -287,6 +287,7 @@ public class TwaLauncher {
         if (mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
         }
+        mContext = null;
         mDestroyed = true;
     }
 

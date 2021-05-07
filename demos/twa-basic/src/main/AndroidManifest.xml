@@ -12,6 +12,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.google.browser.examples.twa_basic">
 
     <application
@@ -93,7 +94,12 @@
 
         <service
             android:name="com.google.androidbrowserhelper.trusted.DelegationService"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <!-- Android recommends that exported Services have a permission that allows the Android
+            system to restrict access to them. Since the TrustedWebActivityService (which the
+            DelegationService is based on) does its own access control, we don't need the permission
+            and can ignore that warning. -->
 
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>

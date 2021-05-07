@@ -76,7 +76,7 @@ public class TwaLauncher {
         }
     };
 
-    private final Context mContext;
+    private Context mContext;
 
     @Nullable
     private final String mProviderPackage;
@@ -287,6 +287,7 @@ public class TwaLauncher {
         if (mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
         }
+        mContext = null;
         mDestroyed = true;
     }
 

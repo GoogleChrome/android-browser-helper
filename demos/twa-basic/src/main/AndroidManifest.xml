@@ -27,8 +27,7 @@
             android:resource="@string/asset_statements" />
 
         <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape">
+            android:label="@string/app_name" >
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
                 android:value="https://airhorner.com" />
 

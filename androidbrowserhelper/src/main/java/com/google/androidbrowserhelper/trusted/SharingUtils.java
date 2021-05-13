@@ -34,16 +34,24 @@ public class SharingUtils {
     private SharingUtils() {}
 
     /**
+     * Returns whether the given Intent is a share intent (and {@link #retrieveShareDataFromIntent}
+     * will return non-null).
+     */
+    public static boolean isShareIntent(Intent intent) {
+        String action = intent.getAction();
+        return Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action);
+    }
+
+    /**
      * Creates a {@link ShareData} object from an {@link Intent}. Returns null if the intent is not
      * a share intent, i.e. its action isn't {@link Intent#ACTION_SEND} or
      * {@link Intent#ACTION_SEND_MULTIPLE}.
      */
     @Nullable
     public static ShareData retrieveShareDataFromIntent(Intent intent) {
+        if (!isShareIntent(intent)) return null;
+
         String action = intent.getAction();
-        if (!(Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action))) {
-            return null;
-        }
         List<Uri> uris = null;
         if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);

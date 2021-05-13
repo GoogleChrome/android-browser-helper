@@ -125,11 +125,14 @@ public class LauncherActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         sLauncherActivitiesAlive++;
-        if (sLauncherActivitiesAlive > 1 && getIntent().getData() == null) {
+        boolean twaAlreadyRunning = sLauncherActivitiesAlive > 1;
+        boolean intentHasData = getIntent().getData() != null;
+        boolean intentHasShareData = SharingUtils.isShareIntent(getIntent());
+        if (twaAlreadyRunning && !intentHasData && !intentHasShareData) {
             // If there's another LauncherActivity alive, that means that the TWA is already
             // running. If we attempt to launch it again, we will trigger a browser navigation. For
-            // the case where an Intent comes in from a BROWSABLE Intent or a notification, that is
-            // the desired behaviour.
+            // the case where an Intent comes in from a BROWSABLE Intent, a notification or with
+            // share data, that is the desired behaviour.
 
             // However, if the TWA was originally started by a BROWSABLE Intent and the user then
             // clicks on the Launcher icon, Android launches this Activity anew (instead of just

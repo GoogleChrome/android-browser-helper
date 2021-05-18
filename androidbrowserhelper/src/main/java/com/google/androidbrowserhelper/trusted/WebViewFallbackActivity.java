@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -222,11 +223,24 @@ public class WebViewFallbackActivity extends Activity {
                 if (!"data".equals(navigationUrl.getScheme()) &&
                         !uriOriginsMatch(navigationUrl, launchUrl) &&
                         !matchExtraOrigins(navigationUrl)) {
-                    CustomTabsIntent intent  = new CustomTabsIntent.Builder()
-                            .setToolbarColor(mStatusBarColor)
-                            .build();
-                    intent.launchUrl(WebViewFallbackActivity.this, navigationUrl);
-                    return true;
+                    // A Custom Tab is an ACTION_VIEW Intent with special extras that cause the
+                    // handler for that Intent to change its behaviour. This Intent should be
+                    // able to trigger both browsers or platform-specific apps that handle those
+                    // Intents.
+                    // However, some URLs, like the data:// schema must be handled by the
+                    // WebView itself. If an URL can't be handled by any app we allow the WebView
+                    // to try to handle it.
+                    try {
+                        CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                                .setToolbarColor(mStatusBarColor)
+                                .build();
+                        intent.launchUrl(WebViewFallbackActivity.this, navigationUrl);
+                        return true;
+                    } catch (ActivityNotFoundException ex) {
+                        Log.e(TAG, String.format(
+                                "ActivityNotFoundException while launching '%s'", navigationUrl));
+                        return false;
+                    }
                 }
 
                 return false;

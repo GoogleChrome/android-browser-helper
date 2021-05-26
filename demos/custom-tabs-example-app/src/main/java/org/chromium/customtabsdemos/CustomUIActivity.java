@@ -148,9 +148,7 @@ public class CustomUIActivity extends AppCompatActivity implements View.OnClickL
 
         intentBuilder.setShowTitle(mShowTitleCheckBox.isChecked());
 
-        if (mAutoHideAppBarCheckbox.isChecked()) {
-            intentBuilder.enableUrlBarHiding();
-        }
+        intentBuilder.setUrlBarHidingEnabled(mAutoHideAppBarCheckbox.isChecked());
 
         if (mCustomBackButtonCheckBox.isChecked()) {
             intentBuilder.setCloseButtonIcon(toBitmap(getDrawable(R.drawable.ic_arrow_back)));

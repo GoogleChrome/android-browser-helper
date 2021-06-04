@@ -26,6 +26,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ':androidbrowserhelper')
-    implementation project(path: ':locationdelegation')
+
+    debugImplementation project(path: ':androidbrowserhelper')
+    debugImplementation project(path: ':locationdelegation')
+
+    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.2.1'
+    releaseImplementation 'com.google.androidbrowserhelper:locationdelegation:1.0.1'
 }

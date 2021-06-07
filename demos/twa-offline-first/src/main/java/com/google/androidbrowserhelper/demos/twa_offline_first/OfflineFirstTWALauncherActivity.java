@@ -30,6 +30,12 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // The Activity was finished before the launch because an existing instance of
+        // the app was brought to front. We don't want to call launchTwa() in this case.
+        if (isFinishing()) {
+            return;
+        }
         tryLaunchTwa();
     }
 

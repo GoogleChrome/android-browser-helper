@@ -29,6 +29,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
 
 /**
@@ -110,8 +111,11 @@ public class CustomUIActivity extends AppCompatActivity implements View.OnClickL
         int secondaryColor = getColor(mCustomTabSecondaryColorEditText);
 
         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-        intentBuilder.setToolbarColor(color);
-        intentBuilder.setSecondaryToolbarColor(secondaryColor);
+        CustomTabColorSchemeParams defaultColors = new CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(color)
+                .setSecondaryToolbarColor(secondaryColor)
+                .build();
+        intentBuilder.setDefaultColorSchemeParams(defaultColors);
 
         if (mShowActionButtonCheckbox.isChecked()) {
             //Generally you do not want to decode bitmaps in the UI thread. Decoding it in the
@@ -131,9 +135,9 @@ public class CustomUIActivity extends AppCompatActivity implements View.OnClickL
             intentBuilder.addMenuItem(menuItemTitle, menuItemPendingIntent);
         }
 
-        if (mAddDefaultShareCheckbox.isChecked()) {
-            intentBuilder.addDefaultShareMenuItem();
-        }
+        int shareState = mAddDefaultShareCheckbox.isChecked() ?
+                CustomTabsIntent.SHARE_STATE_ON : CustomTabsIntent.SHARE_STATE_OFF;
+        intentBuilder.setShareState(shareState);
 
         if (mToolbarItemCheckbox.isChecked()) {
             //Generally you do not want to decode bitmaps in the UI thread. Decoding it in the

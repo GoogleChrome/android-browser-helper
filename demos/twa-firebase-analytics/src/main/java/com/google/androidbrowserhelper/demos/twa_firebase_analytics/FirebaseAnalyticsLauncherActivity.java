@@ -46,10 +46,10 @@ public class FirebaseAnalyticsLauncherActivity extends LauncherActivity {
 
         // Start the asynchronous task to get the Firebase application instance id.
         firebaseAnalytics.getAppInstanceId().addOnCompleteListener(task -> {
-            // Once the task is complete, save the instance id so it can be used by
-            // getLaunchingUrl().
-            mAppInstanceId = task.getResult();
-            launchTwa();
+                // Once the task is complete, save the instance id so it can be used by
+                // getLaunchingUrl().
+                mAppInstanceId = task.getResult();
+                launchTwa();
         });
     }
 

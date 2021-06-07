@@ -30,6 +30,11 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // `super.onCreate()` may have called `finish()`. In this case, we don't do any work.
+        if (isFinishing()) {
+            return;
+        }
         tryLaunchTwa();
     }
 

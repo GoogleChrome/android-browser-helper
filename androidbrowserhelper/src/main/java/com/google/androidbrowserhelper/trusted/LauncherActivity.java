@@ -155,6 +155,18 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        mMetadata = LauncherActivityMetadata.parse(this);
+
+        if (splashScreenNeeded()) {
+            mSplashScreenStrategy = new PwaWrapperSplashScreenStrategy(this,
+                    mMetadata.splashImageDrawableId,
+                    getColorCompat(mMetadata.splashScreenBackgroundColorId),
+                    getSplashImageScaleType(),
+                    getSplashImageTransformationMatrix(),
+                    mMetadata.splashScreenFadeOutDurationMillis,
+                    mMetadata.fileProviderAuthority);
+        }
+
         if (shouldLaunchImmediately()) {
             launchTwa();
         }
@@ -175,16 +187,12 @@ public class LauncherActivity extends Activity {
      * {@link #shouldLaunchImmediately()} returns {@code false}.
      */
     protected void launchTwa() {
-        mMetadata = LauncherActivityMetadata.parse(this);
-
-        if (splashScreenNeeded()) {
-            mSplashScreenStrategy = new PwaWrapperSplashScreenStrategy(this,
-                    mMetadata.splashImageDrawableId,
-                    getColorCompat(mMetadata.splashScreenBackgroundColorId),
-                    getSplashImageScaleType(),
-                    getSplashImageTransformationMatrix(),
-                    mMetadata.splashScreenFadeOutDurationMillis,
-                    mMetadata.fileProviderAuthority);
+        // When launching asynchronously, developers should check if the Activity is finishing
+        // before calling launchTwa(). We double check the condition here and prevent the launch
+        // if that's the case.
+        if (isFinishing()) {
+            Log.d(TAG, "Aborting launchTwa() as Activity is finishing");
+            return;
         }
 
         CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()

@@ -36,15 +36,19 @@ public class FirebaseAnalyticsLauncherActivity extends LauncherActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        // The Activity was finished before the launch because an existing instance of
+        // the app was brought to front. We don't want to call launchTwa() in this case.
+        if (!isFinishing()) {
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        // Start the asynchronous task to get the Firebase application instance id.
-        firebaseAnalytics.getAppInstanceId().addOnCompleteListener(task -> {
+            // Start the asynchronous task to get the Firebase application instance id.
+            firebaseAnalytics.getAppInstanceId().addOnCompleteListener(task -> {
                 // Once the task is complete, save the instance id so it can be used by
                 // getLaunchingUrl().
                 mAppInstanceId = task.getResult();
                 launchTwa();
-        });
+            });
+        }
     }
 
     @Override

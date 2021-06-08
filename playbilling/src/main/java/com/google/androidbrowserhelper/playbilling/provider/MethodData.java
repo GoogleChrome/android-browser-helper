@@ -136,8 +136,6 @@ public class MethodData {
                 return BillingFlowParams.ProrationMode.DEFERRED;
             case "immediateAndChargeProratedPrice":
                 return BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE;
-            case "immediateWithoutProration":
-                return BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION;
             case "immediateWithTimeProration":
                 return BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
             case "unknownSubscriptionUpgradeDowngradePolicy":

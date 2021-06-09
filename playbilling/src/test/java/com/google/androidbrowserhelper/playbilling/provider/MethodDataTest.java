@@ -57,6 +57,7 @@ public class MethodDataTest {
     public void fromJson_prorationMode() {
         prorationMode("deferred", BillingFlowParams.ProrationMode.DEFERRED);
         prorationMode("immediateAndChargeProratedPrice", BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE);
+        prorationMode("immediateWithoutProration"), BillingFlowParams.Prorationmode.IMMEDIATE_WITHOUT_PRORATION);
         prorationMode("immediateWithTimeProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
         prorationMode("unknownSubscriptionUpgradeDowngradePolicy", BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
         prorationMode("invalid", null);

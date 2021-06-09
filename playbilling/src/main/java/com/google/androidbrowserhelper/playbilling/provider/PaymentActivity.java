@@ -21,6 +21,7 @@ import android.os.Bundle;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
@@ -60,6 +61,11 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
         mMethodData = MethodData.fromIntent(getIntent());
         if (mMethodData == null) {
             fail("Could not parse SKU.");
+            return;
+        }
+
+        if (mMethodData.prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+            fail("This proration mode is currently disabled.");
             return;
         }
 

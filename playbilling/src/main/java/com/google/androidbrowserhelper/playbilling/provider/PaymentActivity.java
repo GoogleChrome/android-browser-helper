@@ -64,8 +64,16 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
             return;
         }
 
+        /**
+         * Note that we have temporarily disabled the IMMEDIATE_WITHOUT_PRORATION mode
+         * due to a potential for fraud in which a user may upgrade their subscription
+         * without paying the upgraded price for one billing cycle. While we work on
+         * the fix, please don't use this proration mode.
+         *
+         * Check chromeos.dev/publish/pwa-play-billing for more info.
+         */
         if (mMethodData.prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
-            fail("This proration mode is currently disabled.");
+            fail("This proration mode is currently disabled. Check chromeos.dev/publish/pwa-play-billing for more info");
             return;
         }
 

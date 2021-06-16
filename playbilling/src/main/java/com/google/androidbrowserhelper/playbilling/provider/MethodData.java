@@ -142,6 +142,8 @@ public class MethodData {
                 return BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
             case "unknownSubscriptionUpgradeDowngradePolicy":
                 return BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY;
+            case "immediateAndChargeFullPrice":
+                return BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE;
             default:
                 return null;
         }

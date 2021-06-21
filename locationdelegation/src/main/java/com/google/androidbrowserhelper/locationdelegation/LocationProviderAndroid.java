@@ -14,7 +14,9 @@
 
 package com.google.androidbrowserhelper.locationdelegation;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -102,7 +104,11 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
 
         try {
             Criteria criteria = new Criteria();
-            if (enableHighAccuracy) criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            if (enableHighAccuracy &&
+                    mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            }
             mLocationManager.requestLocationUpdates(0, 0, criteria,
                     this, Looper.getMainLooper());
         } catch (SecurityException e) {

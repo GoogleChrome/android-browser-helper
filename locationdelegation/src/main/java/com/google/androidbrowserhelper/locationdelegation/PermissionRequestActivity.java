@@ -27,6 +27,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.util.Arrays;
+
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 import androidx.core.app.ActivityCompat;
 
@@ -42,7 +44,8 @@ public class PermissionRequestActivity extends Activity {
     private static final String EXTRA_PERMISSIONS = "EXTRA_PERMISSIONS";
     private static final String EXTRA_GRANT_RESULTS = "EXTRA_GRANTED_RESULT";
 
-    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String[] LOCATION_PERMISSION =
+            {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     private Messenger mMessenger;
 
@@ -61,7 +64,7 @@ public class PermissionRequestActivity extends Activity {
 
         final Messenger messenger = new Messenger(handler);
         Intent intent = new Intent(context, PermissionRequestActivity.class);
-        intent.putExtra(EXTRA_PERMISSIONS, new String[]{LOCATION_PERMISSION});
+        intent.putExtra(EXTRA_PERMISSIONS, LOCATION_PERMISSION);
         intent.putExtra(EXTRA_RESULT_RECEIVER, messenger);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
@@ -71,7 +74,7 @@ public class PermissionRequestActivity extends Activity {
             TrustedWebActivityCallbackRemote callback, String[] permissions, int[] grantedResult) {
         Bundle result = new Bundle();
         for (int i = 0; i < permissions.length; i++) {
-            if (TextUtils.equals(permissions[i], LOCATION_PERMISSION)) {
+            if (Arrays.asList(LOCATION_PERMISSION).contains(permissions[i])) {
                 result.putBoolean(LOCATION_PERMISSION_RESULT,
                         grantedResult[i] == PackageManager.PERMISSION_GRANTED);
             }

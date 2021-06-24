@@ -123,7 +123,7 @@ public class PlayBillingWrapper implements BillingWrapper {
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
 
         builder.setSkuDetails(sku);
-        builder.setSubscriptionUpdateParams(subUpdateBuilder.build());
+        builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
 
         BillingResult result = mClient.launchBillingFlow(activity, builder.build());
 

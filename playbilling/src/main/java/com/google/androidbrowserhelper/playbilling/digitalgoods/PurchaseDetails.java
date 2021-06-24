@@ -64,7 +64,7 @@ public class PurchaseDetails {
      */
     public static PurchaseDetails create(Purchase purchase) {
         return new PurchaseDetails(
-                purchase.getSku(),
+                purchase.getSkus().get(0),
                 purchase.getPurchaseToken(),
                 purchase.isAcknowledged(),
                 toChromiumPurchaseState(purchase.getPurchaseState()),

@@ -110,17 +110,20 @@ public class PlayBillingWrapper implements BillingWrapper {
 
     @Override
     public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData) {
-        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
+        BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder = BillingFlowParams.SubscriptionUpdateParams.newBuilder();
 
-        builder.setSkuDetails(sku);
-
-        if (methodData.oldSku != null && methodData.purchaseToken != null) {
-            builder.setOldSku(methodData.oldSku, methodData.purchaseToken);
+        if (methodData.purchaseToken != null) {
+            subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
         }
 
         if (methodData.prorationMode != null) {
-            builder.setReplaceSkusProrationMode(methodData.prorationMode);
+            subUpdateParamsBuilder.setReplaceSkusProrationMode(methodData.prorationMode);
         }
+
+        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
+
+        builder.setSkuDetails(sku);
+        builder.setSubscriptionUpdateParams(subUpdateBuilder.build());
 
         BillingResult result = mClient.launchBillingFlow(activity, builder.build());
 

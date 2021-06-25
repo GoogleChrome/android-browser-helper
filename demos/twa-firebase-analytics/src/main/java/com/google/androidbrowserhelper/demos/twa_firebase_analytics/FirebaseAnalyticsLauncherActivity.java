@@ -36,6 +36,11 @@ public class FirebaseAnalyticsLauncherActivity extends LauncherActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // `super.onCreate()` may have called `finish()`. In this case, we don't do any work.
+        if (isFinishing()) {
+            return;
+        }
+
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Start the asynchronous task to get the Firebase application instance id.

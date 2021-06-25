@@ -21,6 +21,7 @@ import android.os.Bundle;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
@@ -60,6 +61,19 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
         mMethodData = MethodData.fromIntent(getIntent());
         if (mMethodData == null) {
             fail("Could not parse SKU.");
+            return;
+        }
+
+        /**
+         * Note that we have temporarily disabled the IMMEDIATE_WITHOUT_PRORATION mode
+         * due to a potential for fraud in which a user may upgrade their subscription
+         * without paying the upgraded price for one billing cycle. While we work on
+         * the fix, please don't use this proration mode.
+         *
+         * Check chromeos.dev/publish/pwa-play-billing for more info.
+         */
+        if (mMethodData.prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+            fail("This proration mode is currently disabled. Check chromeos.dev/publish/pwa-play-billing for more info");
             return;
         }
 

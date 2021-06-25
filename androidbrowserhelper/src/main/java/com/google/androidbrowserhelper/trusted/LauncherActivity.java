@@ -125,11 +125,14 @@ public class LauncherActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         sLauncherActivitiesAlive++;
-        if (sLauncherActivitiesAlive > 1 && getIntent().getData() == null) {
+        boolean twaAlreadyRunning = sLauncherActivitiesAlive > 1;
+        boolean intentHasData = getIntent().getData() != null;
+        boolean intentHasShareData = SharingUtils.isShareIntent(getIntent());
+        if (twaAlreadyRunning && !intentHasData && !intentHasShareData) {
             // If there's another LauncherActivity alive, that means that the TWA is already
             // running. If we attempt to launch it again, we will trigger a browser navigation. For
-            // the case where an Intent comes in from a BROWSABLE Intent or a notification, that is
-            // the desired behaviour.
+            // the case where an Intent comes in from a BROWSABLE Intent, a notification or with
+            // share data, that is the desired behaviour.
 
             // However, if the TWA was originally started by a BROWSABLE Intent and the user then
             // clicks on the Launcher icon, Android launches this Activity anew (instead of just
@@ -152,6 +155,18 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        mMetadata = LauncherActivityMetadata.parse(this);
+
+        if (splashScreenNeeded()) {
+            mSplashScreenStrategy = new PwaWrapperSplashScreenStrategy(this,
+                    mMetadata.splashImageDrawableId,
+                    getColorCompat(mMetadata.splashScreenBackgroundColorId),
+                    getSplashImageScaleType(),
+                    getSplashImageTransformationMatrix(),
+                    mMetadata.splashScreenFadeOutDurationMillis,
+                    mMetadata.fileProviderAuthority);
+        }
+
         if (shouldLaunchImmediately()) {
             launchTwa();
         }
@@ -172,16 +187,12 @@ public class LauncherActivity extends Activity {
      * {@link #shouldLaunchImmediately()} returns {@code false}.
      */
     protected void launchTwa() {
-        mMetadata = LauncherActivityMetadata.parse(this);
-
-        if (splashScreenNeeded()) {
-            mSplashScreenStrategy = new PwaWrapperSplashScreenStrategy(this,
-                    mMetadata.splashImageDrawableId,
-                    getColorCompat(mMetadata.splashScreenBackgroundColorId),
-                    getSplashImageScaleType(),
-                    getSplashImageTransformationMatrix(),
-                    mMetadata.splashScreenFadeOutDurationMillis,
-                    mMetadata.fileProviderAuthority);
+        // When launching asynchronously, developers should check if the Activity is finishing
+        // before calling launchTwa(). We double check the condition here and prevent the launch
+        // if that's the case.
+        if (isFinishing()) {
+            Log.d(TAG, "Aborting launchTwa() as Activity is finishing");
+            return;
         }
 
         CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()

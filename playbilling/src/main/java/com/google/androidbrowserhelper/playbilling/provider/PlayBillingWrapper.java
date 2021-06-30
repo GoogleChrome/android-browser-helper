@@ -111,6 +111,8 @@ public class PlayBillingWrapper implements BillingWrapper {
     @Override
     public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData) {
         BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder = BillingFlowParams.SubscriptionUpdateParams.newBuilder();
+        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
+        builder.setSkuDetails(sku);
 
         if (methodData.purchaseToken != null) {
             subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
@@ -120,10 +122,9 @@ public class PlayBillingWrapper implements BillingWrapper {
             subUpdateParamsBuilder.setReplaceSkusProrationMode(methodData.prorationMode);
         }
 
-        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
-
-        builder.setSkuDetails(sku);
-        builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
+        if (methodData.purchaseToken != null || methodData.prorationMode != null) {
+            builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
+        }
 
         BillingResult result = mClient.launchBillingFlow(activity, builder.build());
 

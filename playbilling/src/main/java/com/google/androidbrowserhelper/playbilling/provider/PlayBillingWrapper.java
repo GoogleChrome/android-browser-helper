@@ -110,7 +110,8 @@ public class PlayBillingWrapper implements BillingWrapper {
 
     @Override
     public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData) {
-        BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder = BillingFlowParams.SubscriptionUpdateParams.newBuilder();
+        BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder =
+            BillingFlowParams.SubscriptionUpdateParams.newBuilder();
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
         builder.setSkuDetails(sku);
 

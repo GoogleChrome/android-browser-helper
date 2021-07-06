@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import com.android.billingclient.api.BillingClient;
@@ -39,7 +40,7 @@ import static org.junit.Assert.assertTrue;
 /** Tests for {@link AcknowledgeCall} and {@link DigitalGoodsRequestHandler}. */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class AcknowledgeCallTest {
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;

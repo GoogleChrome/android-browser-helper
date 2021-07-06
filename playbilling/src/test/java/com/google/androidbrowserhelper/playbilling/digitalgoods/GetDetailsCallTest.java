@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -45,7 +46,7 @@ import static org.junit.Assert.assertTrue;
 /** Tests for {@link GetDetailsCall} and {@link DigitalGoodsRequestHandler}. */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class GetDetailsCallTest {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
     private final static String SKU_DETAILS = ItemDetailsTest.createSkuDetailsJson("id1",

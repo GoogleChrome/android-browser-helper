@@ -14,6 +14,8 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import android.os.Build;
+
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.SkuDetails;
 
@@ -36,7 +38,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ItemDetailsTest {
 
     @Test

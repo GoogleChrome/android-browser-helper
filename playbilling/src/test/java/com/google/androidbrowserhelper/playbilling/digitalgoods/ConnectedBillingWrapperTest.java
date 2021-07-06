@@ -14,6 +14,8 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import android.os.Build;
+
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 import com.google.androidbrowserhelper.playbilling.provider.MockBillingWrapper;
 
@@ -30,7 +32,7 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ConnectedBillingWrapperTest {
     private final MockBillingWrapper mInnerBillingWrapper = new MockBillingWrapper();
     private final BillingWrapper mConnectedWrapper =

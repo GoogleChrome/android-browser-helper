@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
+import android.os.Build;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,7 @@ import androidx.browser.customtabs.CustomTabsService;
  */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class TwaProviderPickerTest {
     private PackageManager mPackageManager;
     private ShadowPackageManager mShadowPackageManager;

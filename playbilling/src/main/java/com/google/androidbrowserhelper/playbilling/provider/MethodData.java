@@ -22,7 +22,6 @@ import com.android.billingclient.api.BillingFlowParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.CDATASection;
 
 import java.util.ArrayList;
 
@@ -65,15 +64,17 @@ import androidx.annotation.Nullable;
  */
 public class MethodData {
     public final String sku;
+    public final boolean isPriceChangeConfirmation;
 
     // These three optional fields are to do with upgrading/downgrading subscriptions.
     @Nullable public final String oldSku;
     @Nullable public final String purchaseToken;
     @Nullable public final Integer prorationMode;
 
-    private MethodData(String sku, @Nullable String oldSku, @Nullable String purchaseToken,
-            @Nullable Integer prorationMode) {
+    private MethodData(String sku, boolean isPriceChangeConfirmation, @Nullable String oldSku,
+                       @Nullable String purchaseToken, @Nullable Integer prorationMode) {
         this.sku = sku;
+        this.isPriceChangeConfirmation = isPriceChangeConfirmation;
         this.oldSku = oldSku;
         this.purchaseToken = purchaseToken;
         this.prorationMode = prorationMode;
@@ -96,11 +97,13 @@ public class MethodData {
         String sku = dataObject.optString("sku");
         if (TextUtils.isEmpty(sku)) return null;
 
+        boolean isPriceChangeConfirmation = dataObject.optBoolean("priceChangeConfirmation");
+
         String oldSku = getString(dataObject, "oldSku");
         String purchaseToken = getString(dataObject, "purchaseToken");
         Integer prorationMode = getProration(dataObject);
 
-        return new MethodData(sku, oldSku, purchaseToken, prorationMode);
+        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, prorationMode);
     }
 
     @Nullable

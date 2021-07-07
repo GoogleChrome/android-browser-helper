@@ -23,6 +23,7 @@ import static androidx.browser.customtabs.CustomTabsService.CATEGORY_NAVBAR_COLO
 import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 
 import com.google.androidbrowserhelper.trusted.testutils.RobolectricUtils;
 
@@ -43,7 +44,7 @@ import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
  */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class SystemBarColorPredictorTest {
     private static final String PACKAGE = "com.android.chrome";
     private final Context mContext = RuntimeEnvironment.application;

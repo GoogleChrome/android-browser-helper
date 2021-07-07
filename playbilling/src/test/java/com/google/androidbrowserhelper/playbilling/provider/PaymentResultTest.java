@@ -33,21 +33,27 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class PaymentResultTest {
     @Test
-    public void containsToken() {
-        String json = PaymentResult.success("abc").getDetails();
+    public void paymentSuccess_containsToken() {
+        String json = PaymentResult.paymentSuccess("abc").getDetails();
         String expected = "'purchaseToken':'abc'".replace('\'', '\"');
         assertTrue(json.contains(expected));
     }
 
     @Test
-    public void containsTokenLegacy() {
-        String json = PaymentResult.success("abc").getDetails();
+    public void paymentSuccess_containsTokenLegacy() {
+        String json = PaymentResult.paymentSuccess("abc").getDetails();
         String expected = "'token':'abc'".replace('\'', '\"');
         assertTrue(json.contains(expected));
     }
 
     @Test
-    public void failureContainsMessage() {
+    public void priceChangeSuccess() {
+        String json = PaymentResult.priceChangeSuccess().getDetails();
+        assertEquals("{}", json);
+    }
+
+    @Test
+    public void failure_containsMessage() {
         String json = PaymentResult.failure("some error").getDetails();
         String expected = "'error':'some error'".replace('\'', '\"');
         assertTrue(json.contains(expected));

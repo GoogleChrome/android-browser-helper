@@ -76,7 +76,8 @@ public class GetDetailsCall {
         }
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
+        args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE,
+                DigitalGoodsConverter.toChromiumResponseCode(result));
         args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, parcelables);
         mCallback.run(RESPONSE_GET_DETAILS, args);
     }

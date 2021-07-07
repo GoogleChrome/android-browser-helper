@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingFlowParams.ProrationMode;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -133,17 +134,17 @@ public class MethodData {
 
         switch (proration) {
             case "deferred":
-                return BillingFlowParams.ProrationMode.DEFERRED;
+                return ProrationMode.DEFERRED;
             case "immediateAndChargeProratedPrice":
-                return BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE;
+                return ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE;
             case "immediateWithoutProration":
-                return BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION;
+                return ProrationMode.IMMEDIATE_WITHOUT_PRORATION;
             case "immediateWithTimeProration":
-                return BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
+                return ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
             case "unknownSubscriptionUpgradeDowngradePolicy":
-                return BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY;
+                return ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY;
             case "immediateAndChargeFullPrice":
-                return BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE;
+                return ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE;
             default:
                 return null;
         }

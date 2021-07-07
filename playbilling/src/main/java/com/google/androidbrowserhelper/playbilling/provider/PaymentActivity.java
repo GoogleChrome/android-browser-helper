@@ -72,8 +72,10 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
          *
          * Check chromeos.dev/publish/pwa-play-billing for more info.
          */
-        if (mMethodData.prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
-            fail("This proration mode is currently disabled. Check chromeos.dev/publish/pwa-play-billing for more info");
+        if (mMethodData.prorationMode
+                == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+            fail("This proration mode is currently disabled. Check " +
+                    "chromeos.dev/publish/pwa-play-billing for more info");
             return;
         }
 
@@ -102,7 +104,8 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
                         return;
                     }
 
-                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0), mMethodData))
+                    if (mWrapper.launchPaymentFlow(
+                            PaymentActivity.this, details.get(0), mMethodData))
                         return;
 
                     fail("Payment attempt failed (have you already bought the item?).");

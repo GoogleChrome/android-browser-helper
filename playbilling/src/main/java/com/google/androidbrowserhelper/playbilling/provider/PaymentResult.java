@@ -71,7 +71,7 @@ public abstract class PaymentResult {
         @Override
         protected JSONObject toJson() throws JSONException {
             JSONObject obj = new JSONObject();
-            // "token" is deprecated, but kept around for backwatds compatibility.
+            // "token" is deprecated, but kept around for backwards compatibility.
             obj.put("token", mPurchaseToken);
             obj.put("purchaseToken", mPurchaseToken);
             return obj;

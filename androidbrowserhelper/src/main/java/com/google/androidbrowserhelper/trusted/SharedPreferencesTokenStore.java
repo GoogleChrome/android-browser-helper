@@ -43,7 +43,7 @@ public class SharedPreferencesTokenStore implements TokenStore {
      * @param mContext The {@link Context} where the {@link SharedPreferences} will be stored.
      */
     public SharedPreferencesTokenStore(Context mContext) {
-        this.mContext = mContext;
+        this.mContext = mContext.getApplicationContext();
     }
 
     /**

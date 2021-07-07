@@ -14,6 +14,8 @@
 
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.os.Build;
+
 import com.android.billingclient.api.BillingFlowParams;
 
 import org.junit.Test;
@@ -32,7 +34,7 @@ import static org.junit.Assert.assertNull;
  */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class MethodDataTest {
     @Test
     public void fromJson_basic() {
@@ -77,6 +79,7 @@ public class MethodDataTest {
         prorationMode("immediateWithoutProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
         prorationMode("immediateWithTimeProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
         prorationMode("unknownSubscriptionUpgradeDowngradePolicy", BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
+        prorationMode("immediateAndChargeFullPrice", BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE);
         prorationMode("invalid", null);
     }
 

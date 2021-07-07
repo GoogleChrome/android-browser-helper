@@ -62,6 +62,7 @@ public class MethodDataTest {
         prorationMode("immediateWithoutProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
         prorationMode("immediateWithTimeProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
         prorationMode("unknownSubscriptionUpgradeDowngradePolicy", BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
+        prorationMode("immediateAndChargeFullPrice", BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE);
         prorationMode("invalid", null);
     }
 

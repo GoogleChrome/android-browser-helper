@@ -1,5 +1,7 @@
 package com.google.androidbrowserhelper.playbilling.provider;
 
+import android.os.Build;
+
 import com.android.billingclient.api.BillingFlowParams;
 
 import org.junit.Test;
@@ -15,7 +17,7 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class MethodDataTest {
     @Test
     public void fromJson_basic() {

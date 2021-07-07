@@ -55,7 +55,7 @@ import androidx.test.InstrumentationRegistry;
  */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(manifest = Config.NONE)
+@Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ManageDataLauncherActivityTest {
     private PackageManager mPackageManager;
     private ShadowPackageManager mShadowPackageManager;

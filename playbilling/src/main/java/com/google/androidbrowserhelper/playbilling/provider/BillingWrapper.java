@@ -21,6 +21,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -83,4 +84,11 @@ public interface BillingWrapper {
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
     boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData);
+
+    /**
+     * Launches the price change confirmation flow.
+     */
+    void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
+            PriceChangeConfirmationListener listener);
+
 }

@@ -19,19 +19,17 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
 
 import java.util.Collections;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";

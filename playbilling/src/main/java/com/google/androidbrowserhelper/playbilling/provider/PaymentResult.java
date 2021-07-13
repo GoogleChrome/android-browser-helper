@@ -20,8 +20,6 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import androidx.annotation.Nullable;
-
 /**
  * Takes care of packing the information we send back to the website into JSON.
  */
@@ -32,8 +30,12 @@ public abstract class PaymentResult {
         return new Failure(reason);
     }
 
-    public static PaymentResult success(String purchaseToken) {
-        return new Success(purchaseToken);
+    public static PaymentResult paymentSuccess(String purchaseToken) {
+        return new PaymentSuccess(purchaseToken);
+    }
+
+    public static PaymentResult priceChangeSuccess() {
+        return new PriceChangeSuccess();
     }
 
     public abstract int getActivityResult();
@@ -51,10 +53,10 @@ public abstract class PaymentResult {
 
     protected abstract JSONObject toJson() throws JSONException;
 
-    private static class Success extends PaymentResult {
+    private static class PaymentSuccess extends PaymentResult {
         private final String mPurchaseToken;
 
-        private Success(String purchaseToken) {
+        private PaymentSuccess(String purchaseToken) {
             mPurchaseToken = purchaseToken;
         }
 
@@ -77,6 +79,23 @@ public abstract class PaymentResult {
             return obj;
         }
 
+    }
+
+    private static class PriceChangeSuccess extends PaymentResult {
+        @Override
+        public int getActivityResult() {
+            return Activity.RESULT_OK;
+        }
+
+        @Override
+        public void log() {
+            Log.d(TAG, "Price change successful");
+        }
+
+        @Override
+        protected JSONObject toJson() throws JSONException {
+            return new JSONObject();
+        }
     }
 
     private static class Failure extends PaymentResult {

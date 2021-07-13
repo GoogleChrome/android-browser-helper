@@ -22,6 +22,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -108,6 +109,10 @@ public class MockBillingWrapper implements BillingWrapper {
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
     }
+
+    @Override
+    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
+            PriceChangeConfirmationListener listener) { }
 
     public void triggerConnected() {
         mConnectionStateListener.onBillingSetupFinished(

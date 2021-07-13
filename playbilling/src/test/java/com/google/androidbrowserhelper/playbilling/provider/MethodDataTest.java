@@ -27,7 +27,9 @@ import org.robolectric.annotation.internal.DoNotInstrument;
 import androidx.annotation.Nullable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link MethodData}.
@@ -61,6 +63,24 @@ public class MethodDataTest {
         MethodData data = MethodData.fromJson(json);
 
         assertMethodData(data, "mySku", "myOldSku", null, null);
+    }
+
+    @Test
+    public void fromJson_priceChangeInformation() {
+        String json = "{ 'sku' = 'mySku', 'priceChangeConfirmation' = 'true' }"
+                .replace('\'', '\"');
+        MethodData data = MethodData.fromJson(json);
+
+        assertTrue(data.isPriceChangeConfirmation);
+    }
+
+    @Test
+    public void fromJson_priceChangeInformation_default() {
+        String json = "{ 'sku' = 'mySku' }"
+                .replace('\'', '\"');
+        MethodData data = MethodData.fromJson(json);
+
+        assertFalse(data.isPriceChangeConfirmation);
     }
 
     @Test

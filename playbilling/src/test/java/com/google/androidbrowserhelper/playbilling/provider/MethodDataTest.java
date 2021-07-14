@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.os.Build;
 
 import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingFlowParams.ProrationMode;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,12 +95,15 @@ public class MethodDataTest {
 
     @Test
     public void fromJson_prorationMode() {
-        prorationMode("deferred", BillingFlowParams.ProrationMode.DEFERRED);
-        prorationMode("immediateAndChargeProratedPrice", BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE);
-        prorationMode("immediateWithoutProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
-        prorationMode("immediateWithTimeProration", BillingFlowParams.ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
-        prorationMode("unknownSubscriptionUpgradeDowngradePolicy", BillingFlowParams.ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
-        prorationMode("immediateAndChargeFullPrice", BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE);
+        prorationMode("deferred", ProrationMode.DEFERRED);
+        prorationMode("immediateAndChargeProratedPrice",
+                ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE);
+        prorationMode("immediateWithoutProration", ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
+        prorationMode("immediateWithTimeProration", ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
+        prorationMode("unknownSubscriptionUpgradeDowngradePolicy",
+                ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
+        prorationMode("immediateAndChargeFullPrice",
+                ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE);
         prorationMode("invalid", null);
     }
 

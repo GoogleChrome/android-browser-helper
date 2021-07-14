@@ -75,7 +75,8 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
         Integer prorationMode = mMethodData.prorationMode;
         if (prorationMode != null
                 && prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
-            fail("This proration mode is currently disabled. Check chromeos.dev/publish/pwa-play-billing for more info");
+            fail("This proration mode is currently disabled. Check " +
+                    "chromeos.dev/publish/pwa-play-billing for more info");
             return;
         }
 

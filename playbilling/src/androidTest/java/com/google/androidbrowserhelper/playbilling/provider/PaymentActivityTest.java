@@ -91,6 +91,23 @@ public class PaymentActivityTest {
     }
 
     @Test
+    public void priceChangeConfirmationFlow() throws InterruptedException, JSONException {
+        mContext.startActivity(getIntent(SKU, true));
+        assertTrue(WrapperActivity.waitForLaunch());
+
+        assertTrue(mWrapper.waitForConnect());
+        mWrapper.triggerConnected();
+
+        assertTrue(mWrapper.waitForQuerySkuDetails());
+        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
+
+        assertTrue(mWrapper.waitForLaunchPriceChangeConfirmationFlow());
+        mWrapper.triggerOnPriceChangeConfirmationResult();
+
+        assertActivityResult(Activity.RESULT_OK);
+    }
+
+    @Test
     public void setsProxy() throws InterruptedException, JSONException {
         mWrapper.setPaymentFlowWillBeSuccessful(true);
 
@@ -190,6 +207,10 @@ public class PaymentActivityTest {
     }
 
     private Intent getIntent(@Nullable String sku) {
+        return getIntent(sku, false);
+    }
+
+    private Intent getIntent(@Nullable String sku, boolean priceChangeConfirmation) {
         Intent innerIntent = new Intent();
         innerIntent.setAction("org.chromium.intent.action.PAY");
         innerIntent.setClass(mContext, PaymentActivity.class);
@@ -200,7 +221,9 @@ public class PaymentActivityTest {
             innerIntent.putStringArrayListExtra("methodNames", paymentMethods);
 
             Bundle methodData = new Bundle();
-            methodData.putString(PAYMENT_METHOD, "{ sku: \"" + sku + "\" }");
+            methodData.putString(PAYMENT_METHOD, "{" +
+                    "sku: \"" + sku + "\"," +
+                    "priceChangeConfirmation: \"" + priceChangeConfirmation + "\"}");
 
             innerIntent.putExtra("methodData", methodData);
         }

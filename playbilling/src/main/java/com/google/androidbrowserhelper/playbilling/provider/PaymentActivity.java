@@ -19,6 +19,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
@@ -28,8 +30,6 @@ import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMer
 
 import java.util.Collections;
 import java.util.List;
-
-import androidx.annotation.Nullable;
 
 public class PaymentActivity extends Activity implements BillingWrapper.Listener {
     private static final String TAG = "PaymentActivity";
@@ -96,21 +96,43 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     public void onConnected() {
-        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>((result, details) -> {
-                    if (details == null || details.isEmpty()) {
-                        fail("Play Billing returned did not find SKUs.");
-                        return;
-                    }
-
-                    if (mWrapper.launchPaymentFlow(PaymentActivity.this, details.get(0), mMethodData))
-                        return;
-
-                    fail("Payment attempt failed (have you already bought the item?).");
-                });
+        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::onSkusQueried);
 
         List<String> ids = Collections.singletonList(mMethodData.sku);
         mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);
         mWrapper.querySkuDetails(BillingClient.SkuType.SUBS, ids, merger::setSubsResult);
+    }
+
+    private void onSkusQueried(BillingResult result, List<SkuDetails> skus) {
+        if (skus == null || skus.isEmpty()) {
+            fail("Play Billing returned did not find SKU.");
+            return;
+        }
+
+        SkuDetails sku = skus.get(0);
+
+        if (mMethodData.isPriceChangeConfirmation) {
+            launchPriceChangeConfirmationFlow(sku);
+        } else {
+            launchPaymentFlow(sku);
+        }
+    }
+
+    private void launchPriceChangeConfirmationFlow(SkuDetails sku) {
+        mWrapper.launchPriceChangeConfirmationFlow(this, sku, result -> {
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                setResultAndFinish(PaymentResult.priceChangeSuccess());
+            } else {
+                fail("Price change confirmation flow ended with result: " + result);
+            }
+        });
+    }
+
+    private void launchPaymentFlow(SkuDetails sku) {
+        if (mWrapper.launchPaymentFlow(this, sku, mMethodData))
+            return;
+
+        fail("Payment attempt failed (have you already bought the item?).");
     }
 
     @Override

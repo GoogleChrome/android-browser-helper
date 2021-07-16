@@ -2,6 +2,7 @@
     package="com.google.androidbrowserhelper.locationdelegation">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application>
         <activity android:name=".PermissionRequestActivity"/>

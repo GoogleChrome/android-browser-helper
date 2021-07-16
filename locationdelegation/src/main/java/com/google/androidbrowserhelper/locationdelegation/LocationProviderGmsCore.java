@@ -14,7 +14,9 @@
 
 package com.google.androidbrowserhelper.locationdelegation;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
@@ -46,7 +48,7 @@ public class LocationProviderGmsCore extends LocationProvider
 
     private static LocationProviderGmsCore sProvider;
     private final GoogleApiClient mGoogleApiClient;
-    private FusedLocationProviderApi mLocationProviderApi = LocationServices.FusedLocationApi;
+    private final FusedLocationProviderApi mLocationProviderApi = LocationServices.FusedLocationApi;
 
     private boolean mEnableHighAccuracy;
     private LocationRequest mLocationRequest;
@@ -68,7 +70,10 @@ public class LocationProviderGmsCore extends LocationProvider
     @Override
     public void onConnected(Bundle connectionHint) {
         mLocationRequest = LocationRequest.create();
-        if (mEnableHighAccuracy) {
+        if (mEnableHighAccuracy
+                && mGoogleApiClient.getContext().checkCallingOrSelfPermission(
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             // With enableHighAccuracy, request a faster update interval and configure the provider
             // for high accuracy mode.
             mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)

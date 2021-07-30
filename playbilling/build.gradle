@@ -89,7 +89,7 @@ publishing {
         Production(MavenPublication) {
             pom {
                 name = 'android-browser-helper-billing'
-                url = 'https://github.com/GoogleChrome/android-browser-helper/tree/master/playbilling'
+                url = 'https://github.com/GoogleChrome/android-browser-helper/tree/main/playbilling'
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'

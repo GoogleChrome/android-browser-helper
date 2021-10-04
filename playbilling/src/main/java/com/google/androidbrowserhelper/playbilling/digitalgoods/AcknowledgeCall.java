@@ -69,7 +69,8 @@ public class AcknowledgeCall {
         Logging.logAckResponse(result, makeAvailableAgain);
 
         Bundle args = new Bundle();
-        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
+        args.putInt(RESPONSE_ACKNOWLEDGE_RESPONSE_CODE,
+                DigitalGoodsConverter.toChromiumResponseCode(result));
         mCallback.run(RESPONSE_ACKNOWLEDGE, args);
     }
 

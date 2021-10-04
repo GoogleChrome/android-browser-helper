@@ -22,6 +22,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -45,6 +46,7 @@ public class MockBillingWrapper implements BillingWrapper {
     private SkuDetailsResponseListener mPendingQuerySubsSkuDetailsCallback;
     private QueryPurchasesListener mPendingQueryInAppPurchaseDetailsCallback;
     private QueryPurchasesListener mPendingQuerySubsPurchaseDetailsCallback;
+    private PriceChangeConfirmationListener mPendingPriceChangeConfirmationFlowCallback;
 
     private String mAcknowledgeToken;
     private AcknowledgePurchaseResponseListener mPendingAcknowledgeCallback;
@@ -56,6 +58,7 @@ public class MockBillingWrapper implements BillingWrapper {
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mLaunchPaymentFlowLatch = new CountDownLatch(1);
+    private final CountDownLatch mLaunchPriceChangeConfirmationFlowLatch = new CountDownLatch(1);
 
     // These two CountDownLatches are initialized to 2 because they should be called for both in app
     // and subscription SKU types.
@@ -107,6 +110,13 @@ public class MockBillingWrapper implements BillingWrapper {
         mPlayBillingFlowLaunchIntent = activity.getIntent();
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
+    }
+
+    @Override
+    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
+            PriceChangeConfirmationListener listener) {
+        mLaunchPriceChangeConfirmationFlowLatch.countDown();
+        mPendingPriceChangeConfirmationFlowCallback = listener;
     }
 
     public void triggerConnected() {
@@ -163,6 +173,11 @@ public class MockBillingWrapper implements BillingWrapper {
         mListener.onPurchaseFlowComplete(toResult(BillingClient.BillingResponseCode.OK), "");
     }
 
+    public void triggerOnPriceChangeConfirmationResult() {
+        mPendingPriceChangeConfirmationFlowCallback.onPriceChangeConfirmationResult(
+                toResult(BillingClient.BillingResponseCode.OK));
+    }
+
     public boolean waitForConnect() throws InterruptedException {
         return wait(mConnectLatch);
     }
@@ -173,6 +188,10 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public boolean waitForLaunchPaymentFlow() throws InterruptedException {
         return wait(mLaunchPaymentFlowLatch);
+    }
+
+    public boolean waitForLaunchPriceChangeConfirmationFlow() throws InterruptedException {
+        return wait(mLaunchPriceChangeConfirmationFlowLatch);
     }
 
     public boolean waitForQueryPurchases() throws InterruptedException {

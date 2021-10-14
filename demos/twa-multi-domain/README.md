@@ -61,7 +61,7 @@ The last step to add support for multiple domains is achieved by adding an extra
  <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
       ...
      <meta-data android:name="android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS"
-         android:value="@array/additional_trusted_origins" /> 
+         android:resource="@array/additional_trusted_origins" /> 
      ...
  </activity>
  ```

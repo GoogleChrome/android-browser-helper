@@ -68,4 +68,4 @@ The last step to add support for multiple domains is achieved by adding an extra
  
  Finally, don't forget that each origin must have its own assetlinks file, [connecting the origin to
  the the application](https://developers.google.com/web/updates/2019/02/using-twa#link-site-to-app).
- The file for each domain will look exacly the same.
+ The file for each domain will look exactly the same.

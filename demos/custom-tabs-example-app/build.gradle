@@ -17,7 +17,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "29.0.3"
 
     defaultConfig {
@@ -45,7 +45,7 @@ dependencies {
     implementation project(path: ':androidbrowserhelper')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.browser:browser:1.2.0'
+    implementation 'androidx.browser:browser:1.4.0'
     implementation 'androidx.core:core:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

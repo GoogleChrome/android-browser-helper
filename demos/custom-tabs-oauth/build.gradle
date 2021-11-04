@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.customtabsoauth"
@@ -42,5 +42,5 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.browser:browser:1.2.0'
+    implementation 'androidx.browser:browser:1.4.0'
 }

@@ -26,7 +26,8 @@
 
         <activity
             android:name="com.google.androidbrowserhelper.launchtwa.LaunchTwaActivity"
-            android:label="@string/launch_twa">
+            android:label="@string/launch_twa"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -21,7 +21,8 @@
         android:supportsRtl="true">
 
         <activity
-            android:name="com.google.androidbrowserhelper.webshare.MainActivity">
+            android:name="com.google.androidbrowserhelper.webshare.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -31,7 +32,8 @@
         <activity
             android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true">
 
             <!--
                 Intent filter to receive shares.

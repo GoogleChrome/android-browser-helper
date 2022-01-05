@@ -18,8 +18,6 @@ import android.os.Bundle;
 
 import com.android.billingclient.api.SkuDetails;
 
-import androidx.annotation.Nullable;
-
 /**
  * A data class representing an item (or SKU) from the Play Store.
  *
@@ -28,43 +26,54 @@ import androidx.annotation.Nullable;
  * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/GetDetailsConverter.java;drc=a04f522e96fc0eaa0bbcb6eafa96d02aabe5452a
  */
 public class ItemDetails {
-    private static final String KEY_DETAILS_ID = "itemDetails.id";
-    private static final String KEY_DETAILS_TITLE = "itemDetails.title";
-    private static final String KEY_DETAILS_DESC = "itemDetails.description";
-    private static final String KEY_DETAILS_CURRENCY = "itemDetails.currency";
-    private static final String KEY_DETAILS_VALUE = "itemDetails.value";
+    private static final String KEY_ID = "itemDetails.id";
+    private static final String KEY_TITLE = "itemDetails.title";
+    private static final String KEY_DESC = "itemDetails.description";
+    private static final String KEY_CURRENCY = "itemDetails.currency";
+    private static final String KEY_VALUE = "itemDetails.value";
+    private static final String KEY_TYPE = "itemDetails.type";
+    private static final String KEY_ICON_URL = "itemDetails.url";
 
     private static final String KEY_SUBS_PERIOD = "itemDetails.subsPeriod";
     private static final String KEY_FREE_TRIAL_PERIOD = "itemDetails.freeTrialPeriod";
     private static final String KEY_INTRO_PERIOD = "itemDetails.introPricePeriod";
     private static final String KEY_INTRO_CURRENCY = "itemDetails.introPriceCurrency";
     private static final String KEY_INTRO_VALUE = "itemDetails.introPriceValue";
+    private static final String KEY_INTRO_CYCLES = "itemDetails.introPriceCycles";
 
     public final String id;
     public final String title;
     public final String description;
     public final String currency;
     public final String value;
+    public final String type;
+    public final String iconUrl;
 
     public final String subscriptionPeriod;
     public final String freeTrialPeriod;
     public final String introductoryPricePeriod;
     public final String introductoryPriceCurrency;
     public final String introductoryPriceValue;
+    public final int introductoryPriceCycles;
 
     private ItemDetails(String id, String title, String description, String currency, String value,
-            String subscriptionPeriod, String freeTrialPeriod, String introductoryPricePeriod,
-            String introductoryPriceCurrency, String introductoryPriceValue) {
+                        String type, String iconUrl, String subscriptionPeriod,
+                        String freeTrialPeriod, String introductoryPricePeriod,
+                        String introductoryPriceCurrency, String introductoryPriceValue,
+                        int introductoryPriceCycles) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.currency = currency;
         this.value = value;
+        this.type = type;
+        this.iconUrl = iconUrl;
         this.subscriptionPeriod = subscriptionPeriod;
         this.freeTrialPeriod = freeTrialPeriod;
         this.introductoryPricePeriod = introductoryPricePeriod;
         this.introductoryPriceCurrency = introductoryPriceCurrency;
         this.introductoryPriceValue = introductoryPriceValue;
+        this.introductoryPriceCycles = introductoryPriceCycles;
     }
 
     /**
@@ -77,32 +86,36 @@ public class ItemDetails {
                 skuDetails.getDescription(),
                 skuDetails.getPriceCurrencyCode(),
                 toPrice(skuDetails.getPriceAmountMicros()),
-                skuDetails.getSubscriptionPeriod(),
+                skuDetails.getType(), skuDetails.getIconUrl(), skuDetails.getSubscriptionPeriod(),
                 skuDetails.getFreeTrialPeriod(),
                 skuDetails.getIntroductoryPricePeriod(),
                 skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getIntroductoryPriceAmountMicros()));
+                toPrice(skuDetails.getIntroductoryPriceAmountMicros()),
+                skuDetails.getIntroductoryPriceCycles());
     }
 
     /**
      * Creates this class from a {@link Bundle} previously created by {@link #toBundle};
      */
     public static ItemDetails create(Bundle bundle) {
-        String id = bundle.getString(KEY_DETAILS_ID);
-        String title = bundle.getString(KEY_DETAILS_TITLE);
-        String description = bundle.getString(KEY_DETAILS_DESC);
-        String currency = bundle.getString(KEY_DETAILS_CURRENCY);
-        String value = bundle.getString(KEY_DETAILS_VALUE);
+        String id = bundle.getString(KEY_ID);
+        String title = bundle.getString(KEY_TITLE);
+        String description = bundle.getString(KEY_DESC);
+        String currency = bundle.getString(KEY_CURRENCY);
+        String value = bundle.getString(KEY_VALUE);
+        String type = bundle.getString(KEY_TYPE);
+        String iconUrl = bundle.getString(KEY_ICON_URL);
 
         String subscriptionPeriod = bundle.getString(KEY_SUBS_PERIOD);
         String freeTrialPeriod = bundle.getString(KEY_FREE_TRIAL_PERIOD);
         String introductoryPricePeriod = bundle.getString(KEY_INTRO_PERIOD);
         String introductoryPriceCurrency = bundle.getString(KEY_INTRO_CURRENCY);
         String introductoryPriceValue = bundle.getString(KEY_INTRO_VALUE);
+        int introductoryPriceCycles = bundle.getInt(KEY_INTRO_CYCLES);
 
-        return new ItemDetails(id, title, description, currency, value, subscriptionPeriod,
-                freeTrialPeriod, introductoryPricePeriod, introductoryPriceCurrency,
-                introductoryPriceValue);
+        return new ItemDetails(id, title, description, currency, value, type, iconUrl,
+                subscriptionPeriod, freeTrialPeriod, introductoryPricePeriod,
+                introductoryPriceCurrency, introductoryPriceValue, introductoryPriceCycles);
     }
 
     /**
@@ -112,17 +125,20 @@ public class ItemDetails {
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
 
-        bundle.putString(KEY_DETAILS_ID, id);
-        bundle.putString(KEY_DETAILS_TITLE, title);
-        bundle.putString(KEY_DETAILS_DESC, description);
-        bundle.putString(KEY_DETAILS_CURRENCY, currency);
-        bundle.putString(KEY_DETAILS_VALUE, value);
+        bundle.putString(KEY_ID, id);
+        bundle.putString(KEY_TITLE, title);
+        bundle.putString(KEY_DESC, description);
+        bundle.putString(KEY_CURRENCY, currency);
+        bundle.putString(KEY_VALUE, value);
+        bundle.putString(KEY_TYPE, type);
+        bundle.putString(KEY_ICON_URL, iconUrl);
 
         bundle.putString(KEY_SUBS_PERIOD, subscriptionPeriod);
         bundle.putString(KEY_FREE_TRIAL_PERIOD, freeTrialPeriod);
         bundle.putString(KEY_INTRO_PERIOD, introductoryPricePeriod);
         bundle.putString(KEY_INTRO_CURRENCY, introductoryPriceCurrency);
         bundle.putString(KEY_INTRO_VALUE, introductoryPriceValue);
+        bundle.putInt(KEY_INTRO_CYCLES, introductoryPriceCycles);
 
         return bundle;
     }

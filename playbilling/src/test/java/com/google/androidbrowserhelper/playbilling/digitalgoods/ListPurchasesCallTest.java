@@ -31,13 +31,12 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.PurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.LegacyPurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +48,7 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ListPurchasesCallTest {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
-    private final static String PURCHASE_DETAILS = PurchaseDetailsTest.createPurchaseJson(
+    private final static String PURCHASE_DETAILS = LegacyPurchaseDetailsTest.createPurchaseJson(
             "id", "token", true, Purchase.PurchaseState.PENDING, 123_000, true);
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
@@ -86,9 +85,9 @@ public class ListPurchasesCallTest {
                     toChromiumResponseCode(BillingClient.BillingResponseCode.OK));
 
             Parcelable[] array = bundle.getParcelableArray(ListPurchasesCall.KEY_PURCHASES_LIST);
-            PurchaseDetails details = PurchaseDetails.create((Bundle) array[0]);
+            LegacyPurchaseDetails details = LegacyPurchaseDetails.create((Bundle) array[0]);
 
-            PurchaseDetailsTest.assertPurchaseDetails(details,
+            LegacyPurchaseDetailsTest.assertPurchaseDetails(details,
                     "id",
                     "token",
                     true,

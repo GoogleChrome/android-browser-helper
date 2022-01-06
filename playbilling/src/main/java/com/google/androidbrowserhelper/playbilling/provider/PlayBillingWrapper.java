@@ -17,6 +17,8 @@ package com.google.androidbrowserhelper.playbilling.provider;
 import android.app.Activity;
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
@@ -35,8 +37,6 @@ import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.List;
-
-import androidx.annotation.Nullable;
 
 /**
  * A {@link BillingWrapper} that communicates with the Play Billing libraries.

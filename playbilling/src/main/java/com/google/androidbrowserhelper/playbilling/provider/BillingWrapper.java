@@ -23,6 +23,7 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.ConnectedBillingWrapper;
@@ -42,14 +43,6 @@ public interface BillingWrapper {
         void onPurchaseFlowComplete(BillingResult result, String purchaseToken);
     }
 
-    /**
-     * Callback for {@link #queryPurchases} result.
-     */
-    interface QueryPurchasesListener {
-        /** Will be called after a call to {@link #queryPurchases}. */
-        void onQueryPurchasesResponse(Purchase.PurchasesResult result);
-    }
-
     /** Connect to the Play Billing client. */
     void connect(BillingClientStateListener callback);
 
@@ -67,7 +60,7 @@ public interface BillingWrapper {
      * {@link ConnectedBillingWrapper} which may have to connect to the BillingClient before
      * returning.
      */
-    void queryPurchases(@BillingClient.SkuType String skuType, QueryPurchasesListener callback);
+    void queryPurchases(@BillingClient.SkuType String skuType, PurchasesResponseListener callback);
 
     /**
      * Acknowledges that a purchase has occured.

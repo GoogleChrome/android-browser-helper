@@ -28,6 +28,7 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.PriceChangeFlowParams;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
@@ -86,8 +87,8 @@ public class PlayBillingWrapper implements BillingWrapper {
 
     @Override
     public void queryPurchases(@BillingClient.SkuType  String skuType,
-            QueryPurchasesListener callback) {
-        callback.onQueryPurchasesResponse(mClient.queryPurchases(skuType));
+                               PurchasesResponseListener callback) {
+        mClient.queryPurchasesAsync(skuType, callback);
     }
 
     @Override

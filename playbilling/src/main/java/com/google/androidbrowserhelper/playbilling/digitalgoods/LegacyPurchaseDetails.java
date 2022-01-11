@@ -34,10 +34,6 @@ public class LegacyPurchaseDetails extends PurchaseDetails {
     static final int CHROMIUM_PURCHASE_STATE_PURCHASED = 1;
     static final int CHROMIUM_PURCHASE_STATE_PENDING = 2;
 
-    /**
-     * This is the id according to Chromium, which corresponds to {@link Purchase#getSku}, not to
-     * {@link Purchase#getOrderId}.DIGITAL_GOODS_API_VERSION
-     */
     public final boolean acknowledged;
     public final int purchaseState;
     public final long purchaseTimeMicrosecondsPastUnixEpoch;

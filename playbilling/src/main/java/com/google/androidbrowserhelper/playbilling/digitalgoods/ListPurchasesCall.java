@@ -72,7 +72,7 @@ public class ListPurchasesCall {
 
             int index = 0;
             for (Purchase purchase : purchaseList) {
-                parcelables[index++] = PurchaseDetails.create(purchase).toBundle();
+                parcelables[index++] = LegacyPurchaseDetails.create(purchase).toBundle();
             }
         }
 

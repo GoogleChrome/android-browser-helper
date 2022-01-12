@@ -26,17 +26,8 @@ import com.android.billingclient.api.Purchase;
  * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/ListPurchasesConverter.java;drc=a04f522e96fc0eaa0bbcb6eafa96d02aabe5452a
  */
 public class PurchaseDetails {
-    private static final String KEY_ITEM_ID = "purchaseDetails.itemId";
-    private static final String KEY_PURCHASE_TOKEN = "purchaseDetails.purchaseToken";
-    private static final String KEY_ACKNOWLEDGED = "purchaseDetails.acknowledged";
-    private static final String KEY_PURCHASE_STATE = "purchaseDetails.purchaseState";
-    private static final String KEY_PURCHASE_TIME_MICROSECONDS_PAST_UNIX_EPOCH =
-            "purchaseDetails.purchaseTimeMicrosecondsPastUnixEpoch";
-    private static final String KEY_WILL_AUTO_RENEW = "purchaseDetails.willAutoRenew";
-
-    static final int CHROMIUM_PURCHASE_STATE_UNKNOWN = 0;
-    static final int CHROMIUM_PURCHASE_STATE_PURCHASED = 1;
-    static final int CHROMIUM_PURCHASE_STATE_PENDING = 2;
+    static final String KEY_ITEM_ID = "purchaseDetails.itemId";
+    static final String KEY_PURCHASE_TOKEN = "purchaseDetails.purchaseToken";
 
     /**
      * This is the id according to Chromium, which corresponds to {@link Purchase#getSku}, not to
@@ -44,33 +35,17 @@ public class PurchaseDetails {
      */
     public final String id;
     public final String purchaseToken;
-    public final boolean acknowledged;
-    public final int purchaseState;
-    public final long purchaseTimeMicrosecondsPastUnixEpoch;
-    public final boolean willAutoRenew;
 
-    private PurchaseDetails(String id, String purchaseToken, boolean acknowledged,
-            int purchaseState, long purchaseTimeMicrosecondsPastUnixEpoch, boolean willAutoRenew) {
+    protected PurchaseDetails(String id, String purchaseToken) {
         this.id = id;
         this.purchaseToken = purchaseToken;
-        this.acknowledged = acknowledged;
-        this.purchaseState = purchaseState;
-        this.purchaseTimeMicrosecondsPastUnixEpoch = purchaseTimeMicrosecondsPastUnixEpoch;
-        this.willAutoRenew = willAutoRenew;
     }
 
     /**
      * Creates this class from a Play Billing {@link Purchase}.
      */
     public static PurchaseDetails create(Purchase purchase) {
-        return new PurchaseDetails(
-                purchase.getSkus().get(0),
-                purchase.getPurchaseToken(),
-                purchase.isAcknowledged(),
-                toChromiumPurchaseState(purchase.getPurchaseState()),
-                millisecondsToMicroseconds(purchase.getPurchaseTime()),
-                purchase.isAutoRenewing()
-        );
+        return new PurchaseDetails(purchase.getSkus().get(0), purchase.getPurchaseToken());
     }
 
     /**
@@ -79,12 +54,7 @@ public class PurchaseDetails {
     public static PurchaseDetails create(Bundle bundle) {
         String id = bundle.getString(KEY_ITEM_ID);
         String token = bundle.getString(KEY_PURCHASE_TOKEN);
-        boolean acknowledged = bundle.getBoolean(KEY_ACKNOWLEDGED);
-        int state = bundle.getInt(KEY_PURCHASE_STATE);
-        long timeMsPastUnixEpoch = bundle.getLong(KEY_PURCHASE_TIME_MICROSECONDS_PAST_UNIX_EPOCH);
-        boolean willAutoRenew = bundle.getBoolean(KEY_WILL_AUTO_RENEW);
-        return new PurchaseDetails(id, token, acknowledged, state, timeMsPastUnixEpoch,
-                willAutoRenew);
+        return new PurchaseDetails(id, token);
     }
 
     /**
@@ -95,27 +65,7 @@ public class PurchaseDetails {
 
         bundle.putString(KEY_ITEM_ID, id);
         bundle.putString(KEY_PURCHASE_TOKEN, purchaseToken);
-        bundle.putBoolean(KEY_ACKNOWLEDGED, acknowledged);
-        bundle.putInt(KEY_PURCHASE_STATE, purchaseState);
-        bundle.putLong(KEY_PURCHASE_TIME_MICROSECONDS_PAST_UNIX_EPOCH,
-                purchaseTimeMicrosecondsPastUnixEpoch);
-        bundle.putBoolean(KEY_WILL_AUTO_RENEW, willAutoRenew);
 
         return bundle;
-    }
-
-    private static long millisecondsToMicroseconds(long milliseconds) {
-        return milliseconds * 1000;
-    }
-
-    private static int toChromiumPurchaseState(@Purchase.PurchaseState int purchaseState) {
-        switch (purchaseState) {
-            case Purchase.PurchaseState.PENDING:
-                return CHROMIUM_PURCHASE_STATE_PENDING;
-            case Purchase.PurchaseState.PURCHASED:
-                return CHROMIUM_PURCHASE_STATE_PURCHASED;
-            default:
-                return CHROMIUM_PURCHASE_STATE_UNKNOWN;
-        }
     }
 }

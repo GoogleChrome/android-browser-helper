@@ -24,6 +24,7 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
@@ -44,8 +45,8 @@ public class MockBillingWrapper implements BillingWrapper {
     private boolean mPaymentFlowSuccessful;
     private SkuDetailsResponseListener mPendingQueryInAppSkuDetailsCallback;
     private SkuDetailsResponseListener mPendingQuerySubsSkuDetailsCallback;
-    private QueryPurchasesListener mPendingQueryInAppPurchaseDetailsCallback;
-    private QueryPurchasesListener mPendingQuerySubsPurchaseDetailsCallback;
+    private PurchasesResponseListener mPendingQueryInAppPurchaseDetailsCallback;
+    private PurchasesResponseListener mPendingQuerySubsPurchaseDetailsCallback;
     private PriceChangeConfirmationListener mPendingPriceChangeConfirmationFlowCallback;
 
     private String mAcknowledgeToken;
@@ -84,7 +85,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void queryPurchases(String skuType, QueryPurchasesListener callback) {
+    public void queryPurchases(String skuType, PurchasesResponseListener callback) {
         mQueryPurchasesLatch.countDown();
         if (BillingClient.SkuType.INAPP.equals(skuType)) {
             mPendingQueryInAppPurchaseDetailsCallback = callback;
@@ -150,15 +151,13 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotInAppPurchaseDetails(List<Purchase> details) {
-        Purchase.PurchasesResult result = new Purchase.PurchasesResult(
+        mPendingQueryInAppPurchaseDetailsCallback.onQueryPurchasesResponse(
                 toResult(BillingClient.BillingResponseCode.OK), details);
-        mPendingQueryInAppPurchaseDetailsCallback.onQueryPurchasesResponse(result);
     }
 
     public void triggerOnGotSubsPurchaseDetails(List<Purchase> details) {
-        Purchase.PurchasesResult result = new Purchase.PurchasesResult(
+        mPendingQuerySubsPurchaseDetailsCallback.onQueryPurchasesResponse(
                 toResult(BillingClient.BillingResponseCode.OK), details);
-        mPendingQuerySubsPurchaseDetailsCallback.onQueryPurchasesResponse(result);
     }
 
     public void triggerAcknowledge(int responseCode) {

@@ -70,6 +70,14 @@ public class Logging {
         logResult(result, "ListPurchases returned:");
     }
 
+    static void logListPurchaseHistoryCall() {
+        Log.d(TAG, "Calling listPurchaseHistory");
+    }
+
+    static void logListPurchaseHistoryResult(BillingResult result) {
+        logResult(result, "ListPurchaseHistory returned:");
+    }
+
     private static void logResult(BillingResult result, String message) {
         int responseCode = result.getResponseCode();
 

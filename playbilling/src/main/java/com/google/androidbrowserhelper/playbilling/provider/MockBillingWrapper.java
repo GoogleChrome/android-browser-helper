@@ -24,6 +24,8 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -47,6 +49,8 @@ public class MockBillingWrapper implements BillingWrapper {
     private SkuDetailsResponseListener mPendingQuerySubsSkuDetailsCallback;
     private PurchasesResponseListener mPendingQueryInAppPurchaseDetailsCallback;
     private PurchasesResponseListener mPendingQuerySubsPurchaseDetailsCallback;
+    private PurchaseHistoryResponseListener mPendingInAppListPurchaseHistoryCallback;
+    private PurchaseHistoryResponseListener mPendingSubsListPurchaseHistoryCallback;
     private PriceChangeConfirmationListener mPendingPriceChangeConfirmationFlowCallback;
 
     private String mAcknowledgeToken;
@@ -61,10 +65,11 @@ public class MockBillingWrapper implements BillingWrapper {
     private final CountDownLatch mLaunchPaymentFlowLatch = new CountDownLatch(1);
     private final CountDownLatch mLaunchPriceChangeConfirmationFlowLatch = new CountDownLatch(1);
 
-    // These two CountDownLatches are initialized to 2 because they should be called for both in app
+    // These CountDownLatches are initialized to 2 because they should be called for both in app
     // and subscription SKU types.
     private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(2);
     private final CountDownLatch mQueryPurchasesLatch = new CountDownLatch(2);
+    private final CountDownLatch mQueryPurchaseHistoryLatch = new CountDownLatch(2);
 
     @Override
     public void connect(BillingClientStateListener callback) {
@@ -91,6 +96,16 @@ public class MockBillingWrapper implements BillingWrapper {
             mPendingQueryInAppPurchaseDetailsCallback = callback;
         } else {
             mPendingQuerySubsPurchaseDetailsCallback = callback;
+        }
+    }
+
+    @Override
+    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
+        mQueryPurchaseHistoryLatch.countDown();
+        if (BillingClient.SkuType.INAPP.equals(skuType)) {
+            mPendingInAppListPurchaseHistoryCallback = callback;
+        } else {
+            mPendingSubsListPurchaseHistoryCallback = callback;
         }
     }
 
@@ -160,6 +175,17 @@ public class MockBillingWrapper implements BillingWrapper {
                 toResult(BillingClient.BillingResponseCode.OK), details);
     }
 
+    public void triggerOnPurchaseHistoryResponse(String skuType,
+                                                 List<PurchaseHistoryRecord> records) {
+        if (BillingClient.SkuType.INAPP.equals(skuType)) {
+            mPendingInAppListPurchaseHistoryCallback.onPurchaseHistoryResponse(
+                    toResult(BillingClient.BillingResponseCode.OK), records);
+        } else {
+            mPendingSubsListPurchaseHistoryCallback.onPurchaseHistoryResponse(
+                    toResult(BillingClient.BillingResponseCode.OK), records);
+        }
+    }
+
     public void triggerAcknowledge(int responseCode) {
         mPendingAcknowledgeCallback.onAcknowledgePurchaseResponse(toResult(responseCode));
     }
@@ -195,6 +221,10 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public boolean waitForQueryPurchases() throws InterruptedException {
         return wait(mQueryPurchasesLatch);
+    }
+
+    public boolean waitForQueryPurchaseHistory() throws InterruptedException {
+        return wait(mQueryPurchaseHistoryLatch);
     }
 
     public void setListener(Listener listener) {

@@ -29,20 +29,24 @@ class InvocationTracker<Argument, Callback> {
     @Nullable private Callback mCallback;
     @Nullable private Argument mArgument;
 
+    /** Pretend that the method was called with the given argument and callback. */
     public void call(Argument argument, Callback callback) {
         mCallback = callback;
         mArgument = argument;
         mCalledLatch.countDown();
     }
 
-    public Argument getArgument() {
+    /** Returns the argument that the method was previously called with, if any. */
+    public @Nullable Argument getArgument() {
         return mArgument;
     }
 
-    public Callback getCallback() {
+    /** Returns the callback that the method was previously called with, if any. */
+    public @Nullable Callback getCallback() {
         return mCallback;
     }
 
+    /** Wait until the method was called, returns {@code false} if the wait timed out. */
     public boolean waitUntilCalled() throws InterruptedException {
         return mCalledLatch.await(5, TimeUnit.SECONDS);
     }

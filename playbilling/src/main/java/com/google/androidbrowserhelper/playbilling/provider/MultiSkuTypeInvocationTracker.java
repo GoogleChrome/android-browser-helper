@@ -21,7 +21,7 @@ import com.android.billingclient.api.BillingClient;
  * and the arguments they were called with. This class keeps track of two calls - one for the inapp
  * SkuType and one for the subs SkuType.
  */
-public class MultiSkuTypeInvocationTracker<Argument, Callback> {
+class MultiSkuTypeInvocationTracker<Argument, Callback> {
     private final InvocationTracker<Argument, Callback> mInAppInvocation =
             new InvocationTracker<>();
     private final InvocationTracker<Argument, Callback> mSubsInvocation = new InvocationTracker<>();
@@ -31,18 +31,22 @@ public class MultiSkuTypeInvocationTracker<Argument, Callback> {
         return BillingClient.SkuType.INAPP.equals(skuType) ? mInAppInvocation : mSubsInvocation;
     }
 
+    /** Pretend that the method was called with the given SKU type, argument and callback. */
     public void call(@BillingClient.SkuType String skuType, Argument arg, Callback callback) {
         getTracker(skuType).call(arg, callback);
     }
 
+    /** Returns the argument that the method was previously called with, if any. */
     public Argument getArgument(@BillingClient.SkuType String skuType) {
         return getTracker(skuType).getArgument();
     }
 
+    /** Returns the callback that the method was previously called with, if any. */
     public Callback getCallback(@BillingClient.SkuType String skuType) {
         return getTracker(skuType).getCallback();
     }
 
+    /** Wait until the method was called, returns {@code false} if the wait timed out. */
     public boolean waitUntilCalled() throws InterruptedException {
         return mInAppInvocation.waitUntilCalled() && mSubsInvocation.waitUntilCalled();
     }

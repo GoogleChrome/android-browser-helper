@@ -22,6 +22,7 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
@@ -53,13 +54,14 @@ public interface BillingWrapper {
 
     /**
      * Returns details for currently owned items.
-     *
-     * The corresponding method on {@link BillingClient} returns the results synchronously. We
-     * changed this to a callback based method to support the use case of
-     * {@link ConnectedBillingWrapper} which may have to connect to the BillingClient before
-     * returning.
      */
     void queryPurchases(@BillingClient.SkuType String skuType, PurchasesResponseListener callback);
+
+    /**
+     * Returns details for all previously purchased items.
+     */
+    void queryPurchaseHistory(@BillingClient.SkuType String skuType,
+                              PurchaseHistoryResponseListener callback);
 
     /**
      * Acknowledges that a purchase has occured.

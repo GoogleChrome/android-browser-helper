@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import android.os.Bundle;
 
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
 
 /**
  * A data class representing a purchase from the Play Store.
@@ -46,6 +47,13 @@ public class PurchaseDetails {
      */
     public static PurchaseDetails create(Purchase purchase) {
         return new PurchaseDetails(purchase.getSkus().get(0), purchase.getPurchaseToken());
+    }
+
+    /**
+     * Creates this class from a Play Billing {@link PurchaseHistoryRecord}.
+     */
+    public static PurchaseDetails create(PurchaseHistoryRecord record) {
+        return new PurchaseDetails(record.getSkus().get(0), record.getPurchaseToken());
     }
 
     /**

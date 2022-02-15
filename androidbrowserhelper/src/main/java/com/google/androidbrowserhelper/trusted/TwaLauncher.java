@@ -321,11 +321,17 @@ public class TwaLauncher {
                     .supportsLaunchWithoutWarmup(mContext.getPackageManager(), mProviderPackage)) {
                 client.warmup(0);
             }
-            mSession = client.newSession(mCustomTabsCallback, mSessionId);
 
-            if (mSession != null && mOnSessionCreatedRunnable != null) {
-                mOnSessionCreatedRunnable.run();
-            } else if (mSession == null && mOnSessionCreationFailedRunnable != null) {
+            try {
+                mSession = client.newSession(mCustomTabsCallback, mSessionId);
+
+                if (mSession != null && mOnSessionCreatedRunnable != null) {
+                    mOnSessionCreatedRunnable.run();
+                } else if (mSession == null && mOnSessionCreationFailedRunnable != null) {
+                    mOnSessionCreationFailedRunnable.run();
+                }
+            } catch (RuntimeException e) {
+                Log.w(TAG, e);
                 mOnSessionCreationFailedRunnable.run();
             }
 

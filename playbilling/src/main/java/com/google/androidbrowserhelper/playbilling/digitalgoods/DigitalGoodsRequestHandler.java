@@ -81,6 +81,11 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 if (acknowledgeCall == null) break;
                 acknowledgeCall.call(mWrapper);
                 return true;
+            case ConsumeCall.COMMAND_NAME:
+                ConsumeCall consumeCall = ConsumeCall.create(args, callback);
+                if (consumeCall == null) break;
+                consumeCall.call(mWrapper);
+                return true;
             case ListPurchasesCall.COMMAND_NAME:
                 ListPurchasesCall listPurchasesCall = ListPurchasesCall.create(callback);
                 if (listPurchasesCall == null) break;

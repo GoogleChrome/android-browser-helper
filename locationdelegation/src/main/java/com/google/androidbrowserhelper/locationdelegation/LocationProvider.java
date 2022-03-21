@@ -17,24 +17,27 @@ package com.google.androidbrowserhelper.locationdelegation;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
+
+import com.google.android.gms.location.LocationServices;
 
 /**
  * Abstract LocationProvider class for start and stop getting location updates.
  */
 public abstract class LocationProvider {
     private static final String TAG = "TWA_LocationProvider";
-    private static final String EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK = "onNewLocationAvailable";
-    private static final String EXTRA_NEW_ERROR_AVAILABLE_CALLBACK = "onNewErrorAvailable";
+    static final String EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK = "onNewLocationAvailable";
+    static final String EXTRA_NEW_ERROR_AVAILABLE_CALLBACK = "onNewErrorAvailable";
 
-    protected TrustedWebActivityCallbackRemote mCallback;
+    protected TrustedWebActivityLocationCallback mCallback;
 
     static LocationProvider create(Context context) {
         if (LocationProviderGmsCore.isGooglePlayServicesAvailable(context)) {
-            return new LocationProviderGmsCore(context);
+            return new LocationProviderGmsCore(
+                    context, LocationServices.getFusedLocationProviderClient(context));
         }
         return new LocationProviderAndroid(context);
     }
@@ -46,7 +49,7 @@ public abstract class LocationProvider {
      * @param callback           Callback to provide location updates.
      * @param enableHighAccuracy Whether or not to enable high accuracy location.
      */
-    abstract void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy);
+    abstract void start(TrustedWebActivityLocationCallback callback, boolean enableHighAccuracy);
 
     /**
      * Stop listening for location updates.
@@ -58,7 +61,9 @@ public abstract class LocationProvider {
      */
     abstract boolean isRunning();
 
-    protected void onNewLocationAvailable(Location location) {
+    protected void onNewLocationAvailable(@Nullable Location location) {
+        if (location == null) return;
+
         Bundle locationResult = new Bundle();
         locationResult.putDouble("latitude", location.getLatitude());
         locationResult.putDouble("longitude", location.getLongitude());
@@ -76,22 +81,16 @@ public abstract class LocationProvider {
             locationResult.putDouble("speed", location.getSpeed());
         }
 
-        try {
-            mCallback.runExtraCallback(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Caught RemoteException sending location update callback.");
-            stop();
+        if (mCallback != null) {
+            mCallback.run(EXTRA_NEW_LOCATION_AVAILABLE_CALLBACK, locationResult);
         }
     }
 
     protected void notifyLocationErrorWithMessage(String message) {
-        try {
-            Bundle locationResult = new Bundle();
-            locationResult.putString("message", message);
-            mCallback.runExtraCallback(EXTRA_NEW_ERROR_AVAILABLE_CALLBACK, locationResult);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Caught RemoteException sending location error callback.");
-            stop();
+        Bundle locationResult = new Bundle();
+        locationResult.putString("message", message);
+        if (mCallback != null) {
+            mCallback.run(EXTRA_NEW_ERROR_AVAILABLE_CALLBACK, locationResult);
         }
     }
 }

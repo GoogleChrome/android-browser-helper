@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.locationdelegation;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,18 +33,24 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
 
     public Bundle handleExtraCommand(Context context, String commandName, Bundle args,
             @Nullable TrustedWebActivityCallbackRemote callback) {
+        TrustedWebActivityLocationCallback wrappedCallback = (callbackName, callbackArgs) -> {
+            try {
+                callback.runExtraCallback(callbackName, callbackArgs);
+            } catch (RemoteException e) {
+                // The remote app crashed/got shut down. Stop location provider.
+                stopLocationProvider(context);
+            }
+        };
+
         Bundle result = new Bundle();
         result.putBoolean(EXTRA_COMMAND_SUCCESS, false);
         switch (commandName) {
             case CHECK_LOCATION_PERMISSION_COMMAND_NAME:
-                if (callback == null) break;
                 requestPermission(context, callback);
-
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;
             case START_LOCATION_COMMAND_NAME:
-                if (callback == null) break;
-                startLocationProvider(context, callback, args.getBoolean("enableHighAccuracy"));
+                startLocationProvider(context, wrappedCallback, args.getBoolean("enableHighAccuracy"));
 
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;
@@ -62,7 +69,7 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
     }
 
     private void startLocationProvider(
-            Context context, @NonNull TrustedWebActivityCallbackRemote locationChangeCallback,
+            Context context, @NonNull TrustedWebActivityLocationCallback locationChangeCallback,
             boolean enableHighAccuracy) {
         getLocationProvider(context).start(locationChangeCallback, enableHighAccuracy);
     }

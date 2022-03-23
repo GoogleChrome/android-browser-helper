@@ -49,15 +49,10 @@ import java.util.concurrent.TimeUnit;
 
 import androidx.test.core.app.ApplicationProvider;
 
-
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.common.collect.ImmutableList;
 
@@ -69,8 +64,8 @@ import com.google.common.collect.ImmutableList;
 public class LocationProviderGmsCoreTest {
     private LocationProviderGmsCore mLocationProvider;
 
-    FusedLocationProviderClient mMockLocationClient;
-    LocationCallback mPendingCallback;
+    private FusedLocationProviderClient mMockLocationClient;
+    private LocationCallback mPendingCallback;
 
     @Before
     public void setUp() throws Exception {

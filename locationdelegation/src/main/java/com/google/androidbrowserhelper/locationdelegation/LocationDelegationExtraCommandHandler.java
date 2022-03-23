@@ -35,7 +35,9 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
             @Nullable TrustedWebActivityCallbackRemote callback) {
         TrustedWebActivityLocationCallback wrappedCallback = (callbackName, callbackArgs) -> {
             try {
-                callback.runExtraCallback(callbackName, callbackArgs);
+                if (callback != null) {
+                    callback.runExtraCallback(callbackName, callbackArgs);
+                }
             } catch (RemoteException e) {
                 // The remote app crashed/got shut down. Stop location provider.
                 stopLocationProvider(context);
@@ -46,10 +48,12 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
         result.putBoolean(EXTRA_COMMAND_SUCCESS, false);
         switch (commandName) {
             case CHECK_LOCATION_PERMISSION_COMMAND_NAME:
+                if (callback == null) break;
                 requestPermission(context, callback);
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;
             case START_LOCATION_COMMAND_NAME:
+                if (callback == null) break;
                 startLocationProvider(context, wrappedCallback, args.getBoolean("enableHighAccuracy"));
 
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);

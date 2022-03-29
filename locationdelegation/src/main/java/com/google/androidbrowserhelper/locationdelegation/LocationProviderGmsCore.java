@@ -17,48 +17,58 @@ package com.google.androidbrowserhelper.locationdelegation;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
-import com.google.android.gms.location.FusedLocationProviderApi;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationResult;
 
-import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
+import androidx.annotation.Nullable;
 
 /**
  * This is a LocationProvider using Google Play Services.
  * https://developers.google.com/android/reference/com/google/android/gms/location/package-summary
  */
-public class LocationProviderGmsCore extends LocationProvider
-        implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
+public class LocationProviderGmsCore extends LocationProvider {
     private static final String TAG = "TWA_LocationProviderGms";
 
     // Values for the LocationRequest's setInterval for normal and high accuracy, respectively.
     private static final long UPDATE_INTERVAL_MS = 1000;
     private static final long UPDATE_INTERVAL_FAST_MS = 500;
 
-    private static LocationProviderGmsCore sProvider;
-    private final GoogleApiClient mGoogleApiClient;
-    private final FusedLocationProviderApi mLocationProviderApi = LocationServices.FusedLocationApi;
+    final FusedLocationProviderClient mLocationProviderClient;
 
-    private boolean mEnableHighAccuracy;
+    private boolean mIsRunning;
+    private Context mContext;
+
+    @Nullable
     private LocationRequest mLocationRequest;
 
-    LocationProviderGmsCore(Context context) {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+    private final LocationCallback mLocationCallback =
+            new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult result) {
+                    onNewLocationAvailable(result.getLastLocation());
+                }
+
+                @Override
+                // Called when there is a change in the availability of location data.
+                public void onLocationAvailability(LocationAvailability availability) {
+                    if (!availability.isLocationAvailable()) {
+                        unregisterFromLocationUpdates();
+                        notifyLocationErrorWithMessage("Location not available.");
+                    }
+                }
+            };
+
+    LocationProviderGmsCore(Context context, FusedLocationProviderClient locationClient) {
+        mContext = context;
+        mLocationProviderClient = locationClient;
     }
 
     public static boolean isGooglePlayServicesAvailable(Context context) {
@@ -66,13 +76,28 @@ public class LocationProviderGmsCore extends LocationProvider
                 == ConnectionResult.SUCCESS;
     }
 
-    // ConnectionCallbacks implementation
+    // LocationProvider implementations
     @Override
-    public void onConnected(Bundle connectionHint) {
+    void start(TrustedWebActivityLocationCallback callback, boolean enableHighAccuracy) {
+        unregisterFromLocationUpdates();
+        mCallback = callback;
+        registerForLocationUpdates(enableHighAccuracy);
+    }
+
+    @Override
+    void stop() {
+        unregisterFromLocationUpdates();
+    }
+
+    @Override
+    boolean isRunning() {
+        return mIsRunning;
+    }
+
+    private void registerForLocationUpdates(boolean enableHighAccuracy) {
         mLocationRequest = LocationRequest.create();
-        if (mEnableHighAccuracy
-                && mGoogleApiClient.getContext().checkCallingOrSelfPermission(
-                        Manifest.permission.ACCESS_FINE_LOCATION)
+        if (enableHighAccuracy && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             // With enableHighAccuracy, request a faster update interval and configure the provider
             // for high accuracy mode.
@@ -83,64 +108,33 @@ public class LocationProviderGmsCore extends LocationProvider
                     .setInterval(UPDATE_INTERVAL_MS);
         }
 
-        try {
-            final Location location = mLocationProviderApi.getLastLocation(mGoogleApiClient);
-            if (location != null) {
-                onNewLocationAvailable(location);
-            }
+        mLocationProviderClient.getLastLocation().continueWith(task -> {
+            onNewLocationAvailable(task.getResult());
+            return null;
+        });
 
-            mLocationProviderApi.requestLocationUpdates(
-                    mGoogleApiClient, mLocationRequest, this, Looper.getMainLooper());
-        } catch (IllegalStateException | SecurityException e) {
+        try {
+            mLocationProviderClient.requestLocationUpdates(
+                    mLocationRequest, mLocationCallback, Looper.getMainLooper()).continueWith(task -> {
+                        mIsRunning = task.isSuccessful();
+                        if (!mIsRunning) {
+                            notifyLocationErrorWithMessage("Unable to request location updates.");
+                        }
+                        return null;
+            });
+        } catch (IllegalStateException e) {
             // IllegalStateException is thrown "If this method is executed in a thread that has not
-            // called Looper.prepare()". SecurityException is thrown if there is no permission.
+            // called Looper.prepare()".
             Log.e(TAG, " mLocationProviderApi.requestLocationUpdates() " + e);
             notifyLocationErrorWithMessage(
-                    "Failed to request location updates: " + e.toString());
+                    "Error when requesting location updates: " + e.toString());
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int cause) {
-    }
-
-    // OnConnectionFailedListener implementation
-    @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        notifyLocationErrorWithMessage("Failed to connect to Google Play Services: " + result.toString());
-    }
-
-    // LocationProvider implementations
-    @Override
-    void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
-        if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
-        mCallback = callback;
-        mEnableHighAccuracy = enableHighAccuracy;
-
-        mGoogleApiClient.connect(); // Should return via onConnected().
-    }
-
-    @Override
-    void stop() {
-        if (!mGoogleApiClient.isConnected()) return;
-
-        mLocationProviderApi.removeLocationUpdates(mGoogleApiClient, this);
-
-        mGoogleApiClient.disconnect();
+    private void unregisterFromLocationUpdates() {
+        if (!mIsRunning) return;
+        mIsRunning = false;
         mCallback = null;
-    }
-
-    @Override
-    boolean isRunning() {
-        if (mGoogleApiClient == null) return false;
-        return mGoogleApiClient.isConnecting() || mGoogleApiClient.isConnected();
-    }
-
-    // LocationListener implementation
-    @Override
-    public void onLocationChanged(Location location) {
-        if (isRunning()) {
-            onNewLocationAvailable(location);
-        }
+        mLocationProviderClient.removeLocationUpdates(mLocationCallback);
     }
 }

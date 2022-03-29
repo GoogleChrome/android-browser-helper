@@ -27,8 +27,6 @@ import android.util.Log;
 
 import java.util.List;
 
-import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
-
 /**
  * This is a LocationProvider using Android APIs [1]. It is a separate class for clarity so that it
  * can manage all processing completely on the UI thread. The container class ensures that the
@@ -47,7 +45,7 @@ public class LocationProviderAndroid extends LocationProvider implements Locatio
     }
 
     @Override
-    void start(TrustedWebActivityCallbackRemote callback, boolean enableHighAccuracy) {
+    void start(TrustedWebActivityLocationCallback callback, boolean enableHighAccuracy) {
         unregisterFromLocationUpdates();
         mCallback = callback;
         registerForLocationUpdates(enableHighAccuracy);

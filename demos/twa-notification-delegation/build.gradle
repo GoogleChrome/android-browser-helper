@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
+    compileSdkPreview "Tiramisu"
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.twa_notification_delegation"
-        minSdkVersion 21
-        targetSdkVersion 31
+        minSdkPreview "Tiramisu"
+        targetSdkPreview "Tiramisu"
         versionCode 1
         versionName "1.0"
     }

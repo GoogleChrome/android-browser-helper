@@ -23,4 +23,10 @@
             <data android:scheme="https" />
         </intent>
     </queries>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <activity android:name=".trusted.PermissionRequestActivity" />
+    </application>
 </manifest>

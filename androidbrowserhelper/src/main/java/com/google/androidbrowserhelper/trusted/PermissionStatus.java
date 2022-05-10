@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 })
 @Retention(RetentionPolicy.SOURCE)
 public @interface PermissionStatus {
-  int ALLOW = 0;
-  int BLOCK = 1;
-  int ASK = 2;
+    int ALLOW = 0;
+    int BLOCK = 1;
+    int ASK = 2;
 }

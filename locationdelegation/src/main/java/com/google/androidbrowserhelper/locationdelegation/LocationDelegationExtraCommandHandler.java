@@ -21,7 +21,6 @@ import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
-import androidx.browser.trusted.TrustedWebActivityService;
 
 import com.google.androidbrowserhelper.trusted.ExtraCommandHandler;
 
@@ -32,9 +31,7 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
 
     private LocationProvider mLocationProvider;
 
-    @NonNull
-    @Override
-    public Bundle handleExtraCommand(TrustedWebActivityService service, String commandName, Bundle args,
+    public Bundle handleExtraCommand(Context context, String commandName, Bundle args,
             @Nullable TrustedWebActivityCallbackRemote callback) {
         TrustedWebActivityLocationCallback wrappedCallback = (callbackName, callbackArgs) -> {
             try {
@@ -52,18 +49,17 @@ public class LocationDelegationExtraCommandHandler implements ExtraCommandHandle
         switch (commandName) {
             case CHECK_LOCATION_PERMISSION_COMMAND_NAME:
                 if (callback == null) break;
-                requestPermission(service, callback);
-
+                requestPermission(context, callback);
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;
             case START_LOCATION_COMMAND_NAME:
                 if (callback == null) break;
-                startLocationProvider(service, wrappedCallback, args.getBoolean("enableHighAccuracy"));
+                startLocationProvider(context, wrappedCallback, args.getBoolean("enableHighAccuracy"));
 
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;
             case STOP_LOCATION_COMMAND_NAME:
-                stopLocationProvider(service);
+                stopLocationProvider(context);
 
                 result.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;

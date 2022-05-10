@@ -25,7 +25,6 @@ import com.google.androidbrowserhelper.trusted.ExtraCommandHandler;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
-import androidx.browser.trusted.TrustedWebActivityService;
 
 public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
     /**
@@ -51,7 +50,7 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
 
     @NonNull
     @Override
-    public Bundle handleExtraCommand(TrustedWebActivityService service, String commandName, Bundle args,
+    public Bundle handleExtraCommand(Context context, String commandName, Bundle args,
             @Nullable TrustedWebActivityCallbackRemote callback) {
         DigitalGoodsCallback wrappedCallback = (callbackName, callbackArgs) -> {
             try {

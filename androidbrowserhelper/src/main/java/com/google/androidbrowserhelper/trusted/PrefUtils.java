@@ -22,22 +22,24 @@ import android.content.SharedPreferences;
  * file name and using the application context.
  */
 public class PrefUtils {
-  private static final String SHARED_PREFERENCES_NAME = "com.google.androidbrowserhelper";
-  private static final String KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION = "HAS_REQUESTED_NOTIFICATION_PERMISSION";
+    private PrefUtils() {}
 
-  /**
-   * Returns the application level {@link SharedPreferences} using the application context.
-   */
-  public static SharedPreferences getAppSharedPreferences(Context context) {
-    return context.getApplicationContext().getSharedPreferences(SHARED_PREFERENCES_NAME,
-        Context.MODE_PRIVATE);
-  }
+    private static final String SHARED_PREFERENCES_NAME = "com.google.androidbrowserhelper";
+    private static final String KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION = "HAS_REQUESTED_NOTIFICATION_PERMISSION";
 
-  public static boolean hasRequestedNotificationPermission(Context context) {
-    return getAppSharedPreferences(context).getBoolean(KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION, false);
-  }
+    /**
+     * Returns the application level {@link SharedPreferences} using the application context.
+     */
+    public static SharedPreferences getAppSharedPreferences(Context context) {
+        return context.getApplicationContext().getSharedPreferences(SHARED_PREFERENCES_NAME,
+                Context.MODE_PRIVATE);
+    }
 
-  public static void setHasRequestedNotificationPermission(Context context, boolean requested) {
-    getAppSharedPreferences(context).edit().putBoolean(KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION, requested).apply();
-  }
+    public static boolean hasRequestedNotificationPermission(Context context) {
+        return getAppSharedPreferences(context).getBoolean(KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION, false);
+    }
+
+    public static void setHasRequestedNotificationPermission(Context context) {
+        getAppSharedPreferences(context).edit().putBoolean(KEY_HAS_REQUESTED_NOTIFICATION_PERMISSION, true).apply();
+    }
 }

@@ -19,6 +19,9 @@ import androidx.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Represents the permission state in TWA service calls.
+ */
 @IntDef({
     PermissionStatus.ALLOW, PermissionStatus.BLOCK, PermissionStatus.ASK
 })

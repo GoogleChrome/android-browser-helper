@@ -33,7 +33,7 @@ import androidx.core.app.ActivityCompat;
  * send the result via the {@link Messenger} provided with the intent, and then finish.
  */
 public class NotificationPermissionRequestActivity extends Activity {
-    private static final String TAG = "NotificationPermissionRequestActivity";
+    private static final String TAG = "Notifications";
 
     static final String KEY_PERMISSION_STATUS = "permissionStatus";
 

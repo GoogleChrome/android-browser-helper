@@ -44,6 +44,8 @@ public class NotificationUtils {
      * Creates a notification channel using the given channel name.
      */
     public static void createNotificationChannel(Context context, String channelName) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+
         NotificationChannel channel = new NotificationChannel(channelNameToId(channelName),
                 channelName, NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManagerCompat.from(context).createNotificationChannel(channel);

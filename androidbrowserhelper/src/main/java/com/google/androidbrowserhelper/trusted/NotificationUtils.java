@@ -53,6 +53,7 @@ public class NotificationUtils {
 
     /**
      * Generates a notification channel id from a channel name.
+     * TODO: Remove this when we can use the method defined in AndroidX instead.
      */
     private static String channelNameToId(String name) {
         return name.toLowerCase(Locale.ROOT).replace(' ', '_') + "_channel_id";

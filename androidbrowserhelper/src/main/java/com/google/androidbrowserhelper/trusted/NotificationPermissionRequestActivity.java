@@ -70,6 +70,7 @@ public class NotificationPermissionRequestActivity extends Activity {
         if (mChannelName == null || mMessenger == null) {
             Log.w(TAG, "Finishing because no channel name or messenger for returning the result was provided.");
             finish();
+            return;
         }
 
         // When running on T or greater, with the app targeting less than T, creating a channel for the first time will

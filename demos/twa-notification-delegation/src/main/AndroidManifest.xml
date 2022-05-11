@@ -14,6 +14,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.androidbrowserhelper.demos.twa_notification_delegation">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -75,6 +77,8 @@
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+
+        <activity android:name="com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

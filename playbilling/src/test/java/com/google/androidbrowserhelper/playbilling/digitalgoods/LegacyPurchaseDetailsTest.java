@@ -27,20 +27,19 @@ import org.robolectric.annotation.internal.DoNotInstrument;
 
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addField;
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addFieldWithoutLeadingComma;
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.JsonUtils.addOptionalField;
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.PurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
+import static com.google.androidbrowserhelper.playbilling.digitalgoods.LegacyPurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
-public class PurchaseDetailsTest {
+public class LegacyPurchaseDetailsTest {
     @Test
     public void create() throws JSONException {
         Purchase purchase = new Purchase(createPurchaseJson("id", "token", true,
                 Purchase.PurchaseState.PENDING, 123_000, true), "");
 
-        PurchaseDetails details = PurchaseDetails.create(purchase);
+        LegacyPurchaseDetails details = LegacyPurchaseDetails.create(purchase);
 
         assertPurchaseDetails(details,
                 "id",
@@ -56,8 +55,8 @@ public class PurchaseDetailsTest {
         Purchase purchase = new Purchase(createPurchaseJson("id", "token", true,
                 Purchase.PurchaseState.PENDING, 123_000, true), "");
 
-        PurchaseDetails details =
-                PurchaseDetails.create(PurchaseDetails.create(purchase).toBundle());
+        LegacyPurchaseDetails details =
+                LegacyPurchaseDetails.create(LegacyPurchaseDetails.create(purchase).toBundle());
 
         assertPurchaseDetails(details,
                 "id",
@@ -68,9 +67,9 @@ public class PurchaseDetailsTest {
                 true);
     }
 
-    static void assertPurchaseDetails(PurchaseDetails details, String id, String token,
-            boolean acknowledged, int state, long purchaseTimeMicrosecondsPastUnixEpoch,
-            boolean willAutoRenew) {
+    static void assertPurchaseDetails(LegacyPurchaseDetails details, String id, String token,
+                                      boolean acknowledged, int state, long purchaseTimeMicrosecondsPastUnixEpoch,
+                                      boolean willAutoRenew) {
         assertEquals(details.id, id);
         assertEquals(details.purchaseToken, token);
         assertEquals(details.acknowledged, acknowledged);

@@ -1,4 +1,4 @@
-// Copyright 2020 Google Inc. All Rights Reserved.
+// Copyright 2022 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 import com.google.androidbrowserhelper.playbilling.provider.MockBillingWrapper;
 
@@ -31,25 +31,24 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.LegacyPurchaseDetails.CHROMIUM_PURCHASE_STATE_PENDING;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/** Tests for {@link ListPurchasesCall} and {@link DigitalGoodsRequestHandler}. */
+/** Tests for {@link ListPurchaseHistoryCall} and {@link DigitalGoodsRequestHandler}. */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
-public class ListPurchasesCallTest {
+public class ListPurchaseHistoryCallTest {
+    private final static String PURCHASE_RECORD =
+            "{ 'productId' = 'id', 'purchaseToken' = 'token' }"
+                    .replace('\'', '"');
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
-    private final static String PURCHASE_DETAILS = LegacyPurchaseDetailsTest.createPurchaseJson(
-            "id", "token", true, Purchase.PurchaseState.PENDING, 123_000, true);
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;
@@ -62,48 +61,51 @@ public class ListPurchasesCallTest {
 
     @Test
     public void goodArgs() {
-        assertTrue(mHandler.handle(ListPurchasesCall.COMMAND_NAME, new Bundle(), EMPTY_CALLBACK));
+        assertTrue(mHandler.handle(
+                ListPurchaseHistoryCall.COMMAND_NAME, new Bundle(), EMPTY_CALLBACK));
     }
 
     @Test
     public void parsesResult_inApp() throws JSONException, InterruptedException {
-        call(singletonList(new Purchase(PURCHASE_DETAILS, "")), emptyList());
+        PurchaseHistoryRecord record = new PurchaseHistoryRecord(PURCHASE_RECORD, "");
+
+        call(Collections.singletonList(record), Collections.emptyList());
     }
 
     @Test
     public void parsesResult_subs() throws JSONException, InterruptedException {
-        call(emptyList(), singletonList(new Purchase(PURCHASE_DETAILS, "")));
+        PurchaseHistoryRecord record = new PurchaseHistoryRecord(PURCHASE_RECORD, "");
+
+        call(Collections.emptyList(), Collections.singletonList(record));
     }
 
-    private void call(List<Purchase> inAppPurchaseDetails,
-            List<Purchase> subsPurchaseDetails) throws InterruptedException {
+    private void call(List<PurchaseHistoryRecord> inAppPurchaseHistory,
+                      List<PurchaseHistoryRecord> subsPurchaseHistory) throws InterruptedException {
         CountDownLatch callbackTriggered = new CountDownLatch(1);
 
         DigitalGoodsCallback callback = (name, bundle) -> {
-            assertEquals(ListPurchasesCall.RESPONSE_COMMAND, name);
-            assertEquals(bundle.getInt(ListPurchasesCall.KEY_RESPONSE_CODE),
+            assertEquals(ListPurchaseHistoryCall.RESPONSE_COMMAND, name);
+            assertEquals(bundle.getInt(ListPurchaseHistoryCall.KEY_RESPONSE_CODE),
                     toChromiumResponseCode(BillingClient.BillingResponseCode.OK));
 
-            Parcelable[] array = bundle.getParcelableArray(ListPurchasesCall.KEY_PURCHASES_LIST);
-            LegacyPurchaseDetails details = LegacyPurchaseDetails.create((Bundle) array[0]);
+            Parcelable[] array = bundle
+                    .getParcelableArray(ListPurchaseHistoryCall.KEY_PURCHASE_HISTORY_LIST);
+            PurchaseDetails details = PurchaseDetails.create((Bundle) array[0]);
 
-            LegacyPurchaseDetailsTest.assertPurchaseDetails(details,
-                    "id",
-                    "token",
-                    true,
-                    CHROMIUM_PURCHASE_STATE_PENDING,
-                    123_000_000,
-                    true);
+            assertEquals("id", details.id);
+            assertEquals("token", details.purchaseToken);
 
             callbackTriggered.countDown();
         };
 
-        assertTrue(mHandler.handle(ListPurchasesCall.COMMAND_NAME, new Bundle(), callback));
+        assertTrue(mHandler.handle(ListPurchaseHistoryCall.COMMAND_NAME, new Bundle(), callback));
         mBillingWrapper.triggerConnected();
 
-        assertTrue(mBillingWrapper.waitForQueryPurchases());
-        mBillingWrapper.triggerOnGotInAppPurchaseDetails(inAppPurchaseDetails);
-        mBillingWrapper.triggerOnGotSubsPurchaseDetails(subsPurchaseDetails);
+        assertTrue(mBillingWrapper.waitForQueryPurchaseHistory());
+        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.SkuType.INAPP,
+                inAppPurchaseHistory);
+        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.SkuType.SUBS,
+                subsPurchaseHistory);
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }

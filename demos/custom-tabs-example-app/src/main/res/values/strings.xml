@@ -27,14 +27,19 @@
     <string name="label_add_menus">Add Menus</string>
     <string name="label_add_action_button">Add Action Button</string>
     <string name="label_action">Perform Action</string>
+    <string name="label_fixed_height">Fixed height</string>
+    <string name="label_interact_background_app">Interactable background app</string>
+    <string name="label_corner_radius">Corner radius</string>
 
     <string name="label_toobar_color">Toolbar Color:</string>
     <string name="default_toolbar_color">#980e03</string>
     <string name="menu_item_title">Sample Menu Item</string>
     <string name="label_may_launch_url">May Launch URL</string>
+    <string name="dp_template">%ddp</string>
 
     <!-- Demo Activities Titles -->
     <string name="title_activity_simple_chrome_tab">Simple Chrome Custom Tab</string>
+    <string name="title_activity_partial_custom_tab">Partial Custom Tab</string>
     <string name="title_activity_customized_chrome_tab">Customized UI Chrome Custom Tab</string>
     <string name="title_activity_service_connection">Service Connection Activity</string>
     <string name="title_activity_browser_actions">Browser Actions Demo</string>
@@ -43,6 +48,11 @@
     <string name="description_activity_simple_chrome_tab">
         It is the minimal possible implementation of Chrome Custom Tabs. Doesn’t have any
         customizations, warm-up or pre-fetch. Allows the user to choose which URL to open.
+    </string>
+
+    <string name="description_activity_partial_custom_tab">
+        It is a Chrome Custom Tab that works like a bottom sheet. Users can resize the tab,
+        interact with the parent activity. Also, additional UI customization is possible.
     </string>
 
     <string name="description_activity_customized_chrome_tab">

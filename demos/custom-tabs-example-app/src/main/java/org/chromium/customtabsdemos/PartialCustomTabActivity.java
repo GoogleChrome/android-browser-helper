@@ -99,7 +99,7 @@ public class PartialCustomTabActivity extends AppCompatActivity implements View.
         mFixedHeightCheckbox = findViewById(R.id.fixed_height);
         mBackgroundAppCheckbox = findViewById(R.id.background_app);
 
-        mToolbarCornerRadiusLabel = findViewById(R.id.corner_radius_label);
+        mToolbarCornerRadiusLabel = findViewById(R.id.radius_dp_label);
         mToolbarCornerRadiusSlider = findViewById(R.id.corner_radius_slider);
         mToolbarCornerRadiusSlider.setMax(CORNER_RADIUS_MAX_DP);
         mToolbarCornerRadiusSlider.setProgress(CORNER_RADIUS_DEFAULT_DP);
@@ -148,7 +148,7 @@ public class PartialCustomTabActivity extends AppCompatActivity implements View.
     private void openCustomTab() {
         String url = mUrlEditText.getText().toString();
 
-        // Make sure session connection is established for partial CCT to work.
+        // Uses the established session to build a PCCT intent.
         CustomTabsSession session = mCustomTabActivityHelper.getSession();
         CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder(session);
         int resizeBehavior = mFixedHeightCheckbox.isChecked()

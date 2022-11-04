@@ -46,6 +46,11 @@ public class DemoListActivity extends AppCompatActivity {
                 SimpleCustomTabActivity.class);
         activityDescList.add(activityDesc);
 
+        activityDesc = createActivityDesc(R.string.title_activity_partial_custom_tab,
+                R.string.description_activity_partial_custom_tab,
+                PartialCustomTabActivity.class);
+        activityDescList.add(activityDesc);
+
         activityDesc = createActivityDesc(R.string.title_activity_service_connection,
                 R.string.description_activity_service_connection,
                 ServiceConnectionActivity.class);

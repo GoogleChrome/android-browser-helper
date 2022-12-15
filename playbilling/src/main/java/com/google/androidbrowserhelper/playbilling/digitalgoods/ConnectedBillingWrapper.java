@@ -22,7 +22,8 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
-import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
+import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
@@ -95,8 +96,13 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void queryPurchases(String skuType, QueryPurchasesListener callback) {
+    public void queryPurchases(String skuType, PurchasesResponseListener callback) {
         execute(() -> mInner.queryPurchases(skuType, callback));
+    }
+
+    @Override
+    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
+        execute(() -> mInner.queryPurchaseHistory(skuType, callback));
     }
 
     @Override

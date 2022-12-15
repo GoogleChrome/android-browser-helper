@@ -27,6 +27,20 @@ import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 
 public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
+    /**
+     * A version number used to track the communication format between the TWA shell and the
+     * browser.
+     *
+     * Version 1 of this API corresponds to DGAPI v1 and v2.0 (there were no changes in
+     * shell/browser communication between DGAPI v1 and v2.0). However, we didn't put the API
+     * version into the Bundle at that point, so v1 is implied by this extra missing from the
+     * returned Bundle.
+     *
+     * Version 2 corresponds to DGAPI v2.1.
+     */
+    private static final String EXTRA_DIGITAL_GOODS_API_VERSION = "digital_goods_api_version";
+    private static final int DIGITAL_GOODS_API_VERSION = 2;
+
     private final BillingWrapper mWrapper;
     private final BillingWrapper.Listener mListener = (result, token) -> { };
 
@@ -50,6 +64,7 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
 
         Bundle bundle = new Bundle();
         bundle.putBoolean(EXTRA_COMMAND_SUCCESS, success);
+        bundle.putInt(EXTRA_DIGITAL_GOODS_API_VERSION, DIGITAL_GOODS_API_VERSION);
         return bundle;
     }
 
@@ -66,10 +81,19 @@ public class DigitalGoodsRequestHandler implements ExtraCommandHandler {
                 if (acknowledgeCall == null) break;
                 acknowledgeCall.call(mWrapper);
                 return true;
+            case ConsumeCall.COMMAND_NAME:
+                ConsumeCall consumeCall = ConsumeCall.create(args, callback);
+                if (consumeCall == null) break;
+                consumeCall.call(mWrapper);
+                return true;
             case ListPurchasesCall.COMMAND_NAME:
                 ListPurchasesCall listPurchasesCall = ListPurchasesCall.create(callback);
                 if (listPurchasesCall == null) break;
                 listPurchasesCall.call(mWrapper);
+                return true;
+            case ListPurchaseHistoryCall.COMMAND_NAME:
+                ListPurchaseHistoryCall call = ListPurchaseHistoryCall.create(callback);
+                call.call(mWrapper);
                 return true;
         }
 

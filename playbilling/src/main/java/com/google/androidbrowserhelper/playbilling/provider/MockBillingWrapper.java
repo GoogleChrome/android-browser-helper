@@ -24,9 +24,13 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchaseHistoryRecord;
+import com.android.billingclient.api.PurchaseHistoryResponseListener;
+import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -40,30 +44,27 @@ public class MockBillingWrapper implements BillingWrapper {
 
     private BillingClientStateListener mConnectionStateListener;
 
-    private List<String> mQueriedSkuDetails;
     private boolean mPaymentFlowSuccessful;
-    private SkuDetailsResponseListener mPendingQueryInAppSkuDetailsCallback;
-    private SkuDetailsResponseListener mPendingQuerySubsSkuDetailsCallback;
-    private QueryPurchasesListener mPendingQueryInAppPurchaseDetailsCallback;
-    private QueryPurchasesListener mPendingQuerySubsPurchaseDetailsCallback;
-    private PriceChangeConfirmationListener mPendingPriceChangeConfirmationFlowCallback;
 
-    private String mAcknowledgeToken;
-    private AcknowledgePurchaseResponseListener mPendingAcknowledgeCallback;
+    private InvocationTracker<String, AcknowledgePurchaseResponseListener>
+            mAcknowledgeInvocation = new InvocationTracker<>();
+    private InvocationTracker<String, ConsumeResponseListener>
+            mConsumeInvocation = new InvocationTracker<>();
 
-    private String mConsumeToken;
-    private ConsumeResponseListener mPendingConsumeCallback;
+    private MultiSkuTypeInvocationTracker<List<String>, SkuDetailsResponseListener>
+            mQuerySkuDetailsInvocation = new MultiSkuTypeInvocationTracker<>();
+    private MultiSkuTypeInvocationTracker<Void, PurchasesResponseListener>
+            mQueryPurchasesInvocation = new MultiSkuTypeInvocationTracker<>();
+    private MultiSkuTypeInvocationTracker<Void, PurchaseHistoryResponseListener>
+            mQueryPurchaseHistoryInvocation = new MultiSkuTypeInvocationTracker<>();
+
+    private InvocationTracker<SkuDetails, PriceChangeConfirmationListener>
+            mPriceChangeConfirmationFlow = new InvocationTracker<>();
 
     private Intent mPlayBillingFlowLaunchIntent;
 
     private final CountDownLatch mConnectLatch = new CountDownLatch(1);
     private final CountDownLatch mLaunchPaymentFlowLatch = new CountDownLatch(1);
-    private final CountDownLatch mLaunchPriceChangeConfirmationFlowLatch = new CountDownLatch(1);
-
-    // These two CountDownLatches are initialized to 2 because they should be called for both in app
-    // and subscription SKU types.
-    private final CountDownLatch mQuerySkuDetailsLatch = new CountDownLatch(2);
-    private final CountDownLatch mQueryPurchasesLatch = new CountDownLatch(2);
 
     @Override
     public void connect(BillingClientStateListener callback) {
@@ -74,35 +75,27 @@ public class MockBillingWrapper implements BillingWrapper {
     @Override
     public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
             SkuDetailsResponseListener callback) {
-        mQueriedSkuDetails = skus;
-        mQuerySkuDetailsLatch.countDown();
-        if (BillingClient.SkuType.INAPP.equals(skuType)) {
-            mPendingQueryInAppSkuDetailsCallback = callback;
-        } else {
-            mPendingQuerySubsSkuDetailsCallback = callback;
-        }
+        mQuerySkuDetailsInvocation.call(skuType, skus, callback);
     }
 
     @Override
-    public void queryPurchases(String skuType, QueryPurchasesListener callback) {
-        mQueryPurchasesLatch.countDown();
-        if (BillingClient.SkuType.INAPP.equals(skuType)) {
-            mPendingQueryInAppPurchaseDetailsCallback = callback;
-        } else {
-            mPendingQuerySubsPurchaseDetailsCallback = callback;
-        }
+    public void queryPurchases(String skuType, PurchasesResponseListener callback) {
+        mQueryPurchasesInvocation.call(skuType, null, callback);
+    }
+
+    @Override
+    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
+        mQueryPurchaseHistoryInvocation.call(skuType, null, callback);
     }
 
     @Override
     public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
-        mAcknowledgeToken = token;
-        mPendingAcknowledgeCallback = callback;
+        mAcknowledgeInvocation.call(token, callback);
     }
 
     @Override
     public void consume(String token, ConsumeResponseListener callback) {
-        mConsumeToken = token;
-        mPendingConsumeCallback = callback;
+        mConsumeInvocation.call(token, callback);
     }
 
     @Override
@@ -115,8 +108,7 @@ public class MockBillingWrapper implements BillingWrapper {
     @Override
     public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
             PriceChangeConfirmationListener listener) {
-        mLaunchPriceChangeConfirmationFlowLatch.countDown();
-        mPendingPriceChangeConfirmationFlowCallback = listener;
+        mPriceChangeConfirmationFlow.call(sku, listener);
     }
 
     public void triggerConnected() {
@@ -138,7 +130,8 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotInAppSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
-        mPendingQueryInAppSkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
+        mQuerySkuDetailsInvocation.getCallback(BillingClient.SkuType.INAPP)
+                .onSkuDetailsResponse(toResult(responseCode), skuDetails);
     }
 
     public void triggerOnGotSubsSkuDetails(List<SkuDetails> skuDetails) {
@@ -146,27 +139,32 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnGotSubsSkuDetails(int responseCode, List<SkuDetails> skuDetails) {
-        mPendingQuerySubsSkuDetailsCallback.onSkuDetailsResponse(toResult(responseCode), skuDetails);
+        mQuerySkuDetailsInvocation.getCallback(BillingClient.SkuType.SUBS)
+                .onSkuDetailsResponse(toResult(responseCode), skuDetails);
     }
 
     public void triggerOnGotInAppPurchaseDetails(List<Purchase> details) {
-        Purchase.PurchasesResult result = new Purchase.PurchasesResult(
-                toResult(BillingClient.BillingResponseCode.OK), details);
-        mPendingQueryInAppPurchaseDetailsCallback.onQueryPurchasesResponse(result);
+        mQueryPurchasesInvocation.getCallback(BillingClient.SkuType.INAPP)
+                .onQueryPurchasesResponse(toResult(BillingClient.BillingResponseCode.OK), details);
     }
 
     public void triggerOnGotSubsPurchaseDetails(List<Purchase> details) {
-        Purchase.PurchasesResult result = new Purchase.PurchasesResult(
-                toResult(BillingClient.BillingResponseCode.OK), details);
-        mPendingQuerySubsPurchaseDetailsCallback.onQueryPurchasesResponse(result);
+        mQueryPurchasesInvocation.getCallback(BillingClient.SkuType.SUBS)
+                .onQueryPurchasesResponse(toResult(BillingClient.BillingResponseCode.OK), details);
+    }
+
+    public void triggerOnPurchaseHistoryResponse(String skuType,
+                                                 List<PurchaseHistoryRecord> records) {
+        mQueryPurchaseHistoryInvocation.getCallback(skuType)
+                .onPurchaseHistoryResponse(toResult(BillingClient.BillingResponseCode.OK), records);
     }
 
     public void triggerAcknowledge(int responseCode) {
-        mPendingAcknowledgeCallback.onAcknowledgePurchaseResponse(toResult(responseCode));
+        mAcknowledgeInvocation.getCallback().onAcknowledgePurchaseResponse(toResult(responseCode));
     }
 
     public void triggerConsume(int responseCode, String token) {
-        mPendingConsumeCallback.onConsumeResponse(toResult(responseCode), token);
+        mConsumeInvocation.getCallback().onConsumeResponse(toResult(responseCode), token);
     }
 
     public void triggerOnPurchasesUpdated() {
@@ -174,7 +172,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public void triggerOnPriceChangeConfirmationResult() {
-        mPendingPriceChangeConfirmationFlowCallback.onPriceChangeConfirmationResult(
+        mPriceChangeConfirmationFlow.getCallback().onPriceChangeConfirmationResult(
                 toResult(BillingClient.BillingResponseCode.OK));
     }
 
@@ -183,7 +181,7 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public boolean waitForQuerySkuDetails() throws InterruptedException {
-        return wait(mQuerySkuDetailsLatch);
+        return mQuerySkuDetailsInvocation.waitUntilCalled();
     }
 
     public boolean waitForLaunchPaymentFlow() throws InterruptedException {
@@ -191,11 +189,15 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public boolean waitForLaunchPriceChangeConfirmationFlow() throws InterruptedException {
-        return wait(mLaunchPriceChangeConfirmationFlowLatch);
+        return mPriceChangeConfirmationFlow.waitUntilCalled();
     }
 
     public boolean waitForQueryPurchases() throws InterruptedException {
-        return wait(mQueryPurchasesLatch);
+        return mQueryPurchasesInvocation.waitUntilCalled();
+    }
+
+    public boolean waitForQueryPurchaseHistory() throws InterruptedException {
+        return mQueryPurchaseHistoryInvocation.waitUntilCalled();
     }
 
     public void setListener(Listener listener) {
@@ -207,15 +209,25 @@ public class MockBillingWrapper implements BillingWrapper {
     }
 
     public List<String> getQueriedSkuDetails() {
-        return mQueriedSkuDetails;
+        List<String> skuDetails = new ArrayList<>();
+
+        List<String> inapp = mQuerySkuDetailsInvocation.getArgument(BillingClient.SkuType.INAPP);
+        List<String> subs = mQuerySkuDetailsInvocation.getArgument(BillingClient.SkuType.SUBS);
+
+        if (inapp == null && subs == null) return null;
+
+        if (inapp != null) skuDetails.addAll(inapp);
+        if (subs != null) skuDetails.addAll(subs);
+
+        return skuDetails;
     }
 
     public String getConsumeToken() {
-        return mConsumeToken;
+        return mConsumeInvocation.getArgument();
     }
 
     public String getAcknowledgeToken() {
-        return mAcknowledgeToken;
+        return mAcknowledgeInvocation.getArgument();
     }
 
     public Intent getPlayBillingFlowLaunchIntent() {

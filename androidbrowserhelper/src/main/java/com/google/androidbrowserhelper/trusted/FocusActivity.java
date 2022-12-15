@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -39,8 +40,12 @@ public class FocusActivity extends Activity {
         // flag.
         focusIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+        // Setting FLAG_MUTABLE or FLAG_IMMUTABLE is required from API Level 31 and above. However,
+        // the flag is not available below API level 23.
+        int flags =
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
         containerIntent.putExtra(EXTRA_FOCUS_INTENT,
-                PendingIntent.getActivity(context, 0, focusIntent, 0));
+                PendingIntent.getActivity(context, 0, focusIntent, flags));
     }
 
     @Override

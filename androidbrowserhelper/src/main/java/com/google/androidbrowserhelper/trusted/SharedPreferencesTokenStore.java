@@ -31,11 +31,9 @@ import androidx.browser.trusted.TokenStore;
  * return the new value).
  */
 public class SharedPreferencesTokenStore implements TokenStore {
-    private static final String SHARED_PREFERENCES_NAME = "com.google.androidbrowserhelper";
-    private static final String KEY_TOKEN =
-            "SharedPreferencesTokenStore.TOKEN";
+    private static final String KEY_TOKEN = "SharedPreferencesTokenStore.TOKEN";
 
-    private Context mContext;
+    private final Context mContext;
 
     /**
      * Creates a new SharedPreferencesTokenStore.
@@ -54,8 +52,7 @@ public class SharedPreferencesTokenStore implements TokenStore {
      */
     @Override
     public void store(@Nullable Token token) {
-        SharedPreferences preferences =
-                mContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = PrefUtils.getAppSharedPreferences(mContext);
 
         // Clear the preference if the token is null
         if (token == null) {
@@ -79,8 +76,7 @@ public class SharedPreferencesTokenStore implements TokenStore {
     @Nullable
     @Override
     public Token load() {
-        SharedPreferences preferences =
-                mContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = PrefUtils.getAppSharedPreferences(mContext);
         String stringifiedToken = preferences.getString(KEY_TOKEN, null);
         if (stringifiedToken == null) {
             return null;

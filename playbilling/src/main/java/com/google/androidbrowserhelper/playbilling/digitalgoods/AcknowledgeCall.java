@@ -26,6 +26,8 @@ import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGo
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
  * suitable for calling the Play Billing library.
+ *
+ * This class is kept around for legacy reasons, Consume should be used by clients on DGAPI v2.1.
  */
 public class AcknowledgeCall {
     public static final String COMMAND_NAME = "acknowledge";

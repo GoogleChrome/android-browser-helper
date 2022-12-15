@@ -14,6 +14,7 @@
 
 package org.chromium.customtabsdemos;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -35,6 +36,7 @@ import androidx.core.app.NotificationCompat;
 public class NotificationParentActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int NOTIFICATION_ID  = 1;
     public static final String EXTRA_URL = "extra.url";
+    private static final String CT_NOTIFICATION_CHANNEL_ID = "999";
 
     private View mMessageTextView;
     private View mCreateNotificationButton;
@@ -69,8 +71,16 @@ public class NotificationParentActivity extends AppCompatActivity implements Vie
     }
 
     private void createAndShowNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel mChannel = notificationManager.getNotificationChannel(CT_NOTIFICATION_CHANNEL_ID);
+        if (mChannel == null) {
+            mChannel = new NotificationChannel(CT_NOTIFICATION_CHANNEL_ID, "Custom Tab Demo app", NotificationManager.IMPORTANCE_DEFAULT);
+            mChannel.enableVibration(true);
+            notificationManager.createNotificationChannel(mChannel);
+        }
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
+                new NotificationCompat.Builder(this, CT_NOTIFICATION_CHANNEL_ID)
                         .setSmallIcon(R.drawable.abc_popup_background_mtrl_mult)
                         .setContentTitle(getString(R.string.notification_title))
                         .setContentText(getString(R.string.notification_text));
@@ -84,14 +94,12 @@ public class NotificationParentActivity extends AppCompatActivity implements Vie
         resultIntent.setAction(Intent.ACTION_VIEW);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
-                this.getApplicationContext(), 0, resultIntent, 0);
+                this.getApplicationContext(), 0, resultIntent, PendingIntent.FLAG_IMMUTABLE);
 
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setAutoCancel(true);
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
     }
 
     private void startChromeCustomTab(Intent intent) {

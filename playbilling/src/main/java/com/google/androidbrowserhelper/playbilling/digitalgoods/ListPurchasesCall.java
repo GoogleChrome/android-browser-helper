@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -59,10 +60,8 @@ public class ListPurchasesCall {
 
         BillingResultMerger<Purchase> merger = new BillingResultMerger<>(this::respond);
 
-        billing.queryPurchases(BillingClient.SkuType.INAPP, result ->
-                merger.setInAppResult(result.getBillingResult(), result.getPurchasesList()));
-        billing.queryPurchases(BillingClient.SkuType.SUBS, result ->
-                merger.setSubsResult(result.getBillingResult(), result.getPurchasesList()));
+        billing.queryPurchases(BillingClient.SkuType.INAPP, merger::setInAppResult);
+        billing.queryPurchases(BillingClient.SkuType.SUBS, merger::setSubsResult);
     }
 
     private void respond(BillingResult result, @Nullable List<Purchase> purchaseList) {
@@ -74,7 +73,7 @@ public class ListPurchasesCall {
 
             int index = 0;
             for (Purchase purchase : purchaseList) {
-                parcelables[index++] = PurchaseDetails.create(purchase).toBundle();
+                parcelables[index++] = LegacyPurchaseDetails.create(purchase).toBundle();
             }
         }
 

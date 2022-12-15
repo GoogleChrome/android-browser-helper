@@ -23,7 +23,8 @@
         android:theme="@style/Theme.Design.NoActionBar">
 
         <activity android:name=".OfflineFirstTWALauncherActivity"
-            android:theme="@style/Theme.Design.NoActionBar">
+            android:theme="@style/Theme.Design.NoActionBar"
+            android:exported="true">
 
             <!-- Edit android:value to change the url opened by the Trusted Web Activity -->
             <intent-filter>

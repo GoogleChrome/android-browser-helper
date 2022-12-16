@@ -17,12 +17,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "29.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
     defaultConfig {
         applicationId "com.google.androidbrowserhelper"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.2.0-alpha07'
+    api 'androidx.browser:browser:1.4.0'
     implementation project(path: ':androidbrowserhelper')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

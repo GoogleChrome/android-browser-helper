@@ -40,69 +40,106 @@ import static org.junit.Assert.assertEquals;
 @DoNotInstrument
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ItemDetailsTest {
+    private static final String ID = "id";
+    private static final String TITLE = "title";
+    private static final String DESC = "desc";
+    private static final String CURRENCY = "GBP";
+    private static final long VALUE = 123_000_000;
+    private static final String TYPE = "inapp";
+    private static final String ICON_URL = "https://www.example.com/image.png";
+
+    private static final String SUBS_PERIOD = "month";
+    private static final String FREE_PERIOD = "week";
+    private static final String INTRO_PERIOD = "day";
+    private static final long INTRO_VALUE = 45_000_000;
+    private static final int INTRO_CYCLES = 3;
+
+    // Variables only used in checking the output;
+    private static final String INTRO_CURRENCY = CURRENCY;
+    private static final String VALUE_STR = "123.000000";
+    private static final String INTRO_VALUE_STR = "45.000000";
 
     @Test
     public void create() throws JSONException {
-        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, "month", "week",
-                "day", 45_000_000L);
-
+        String json = createTestJsonSkuDetails();
         ItemDetails item = ItemDetails.create(new SkuDetails(json));
-        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "month", "week", "day",
-                "GBP", "45.000000");
+
+        assertTestItemDetails(item);
     }
 
     @Test
-    public void create_optionalOnly() throws JSONException {
-        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, null, null,
-                null, null);
+    public void create_mandatoryOnly() throws JSONException {
+        String json = createTestJsonSkuDetails_mandatoryOnly();
 
         ItemDetails item = ItemDetails.create(new SkuDetails(json));
-        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "", "", "", "GBP",
-                "0.000000");
+        assertTestItemDetails_mandatoryOnly(item);
     }
 
     @Test
     public void bundleConversion() throws JSONException {
-        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, "month", "week",
-                "day", 45_000_000L);
+        String json = createTestJsonSkuDetails();
 
         ItemDetails item =
                 ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
-        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "month", "week", "day",
-                "GBP", "45.000000");
+        assertTestItemDetails(item);
     }
 
     @Test
-    public void bundleConversion_optionalOnly() throws JSONException {
-        String json = createSkuDetailsJson("id", "title", "desc", "GBP", 123_000_000, null, null,
-                null, null);
+    public void bundleConversion_mandatoryOnly() throws JSONException {
+        String json = createTestJsonSkuDetails_mandatoryOnly();
 
         ItemDetails item =
                 ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
-        assertItemDetails(item, "id", "title", "desc", "GBP", "123.000000", "", "", "", "GBP",
-                "0.000000");
+        assertTestItemDetails_mandatoryOnly(item);
+    }
+
+    public static String createTestJsonSkuDetails() {
+        return createSkuDetailsJson(ID, TITLE, DESC, CURRENCY, VALUE, TYPE,
+                ICON_URL, SUBS_PERIOD, FREE_PERIOD, INTRO_PERIOD, INTRO_VALUE, INTRO_CYCLES);
+    }
+
+    public static void assertTestItemDetails(ItemDetails item) {
+        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, TYPE, ICON_URL,
+                SUBS_PERIOD, FREE_PERIOD, INTRO_PERIOD, INTRO_CURRENCY, INTRO_VALUE_STR,
+                INTRO_CYCLES);
+    }
+
+    private static String createTestJsonSkuDetails_mandatoryOnly() {
+        return createSkuDetailsJson(ID, TITLE, DESC, CURRENCY, VALUE, TYPE,
+                null, null, null, null, null, 0);
+    }
+
+    private static void assertTestItemDetails_mandatoryOnly(ItemDetails item) {
+        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, TYPE, "",
+                "", "", "", INTRO_CURRENCY, "0.000000", 0);
     }
 
     static void assertItemDetails(ItemDetails item, String id, String title,
-            String description, String currency, String value, String subscriptionPeriod,
+            String description, String currency, String value, String type, String iconUrl,
+            String subscriptionPeriod,
             String freeTrialPeriod, String introductoryPricePeriod,
-            String introductoryPriceCurrency, String introductoryPriceValue) {
+            String introductoryPriceCurrency, String introductoryPriceValue,
+            int introductoryPriceCycles) {
         assertEquals(item.id, id);
         assertEquals(item.title, title);
         assertEquals(item.description, description);
         assertEquals(item.currency, currency);
         assertEquals(item.value, value);
+        assertEquals(item.type, type);
+        assertEquals(item.iconUrl, iconUrl);
         assertEquals(item.subscriptionPeriod, subscriptionPeriod);
         assertEquals(item.freeTrialPeriod, freeTrialPeriod);
         assertEquals(item.introductoryPricePeriod, introductoryPricePeriod);
         assertEquals(item.introductoryPriceCurrency, introductoryPriceCurrency);
         assertEquals(item.introductoryPriceValue, introductoryPriceValue);
+        assertEquals(item.introductoryPriceCycles, introductoryPriceCycles);
     }
 
     static String createSkuDetailsJson(String id, String title, String description,
-            String currency, long value, @Nullable String subscriptionPeriod,
-            @Nullable String freeTrialPeriod, @Nullable String introductoryPricePeriod,
-            @Nullable Long introductoryPriceValue) {
+            String currency, long value, String type, @Nullable String iconUrl,
+            @Nullable String subscriptionPeriod, @Nullable String freeTrialPeriod,
+            @Nullable String introductoryPricePeriod, @Nullable Long introductoryPriceValue,
+            int introductoryPriceCycles) {
         StringBuilder b = new StringBuilder();
 
         b.append("{");
@@ -112,11 +149,14 @@ public class ItemDetailsTest {
         addField(b, "description", description);
         addField(b, "price_amount_micros", value);
         addField(b, "price_currency_code", currency);
+        addField(b, "type", type);
+        addOptionalField(b, "iconUrl", iconUrl);
 
         addOptionalField(b, "subscriptionPeriod", subscriptionPeriod);
         addOptionalField(b, "freeTrialPeriod", freeTrialPeriod);
         addOptionalField(b, "introductoryPricePeriod", introductoryPricePeriod);
         addOptionalField(b, "introductoryPriceAmountMicros", introductoryPriceValue);
+        addField(b, "introductoryPriceCycles", introductoryPriceCycles);
 
         // The Play Billing library requires that all SkuDetails have a type, but we don't use it
         // in our testing, so just set it to an arbitrary type.

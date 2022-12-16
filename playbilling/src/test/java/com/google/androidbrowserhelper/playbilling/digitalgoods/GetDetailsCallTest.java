@@ -49,8 +49,7 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class GetDetailsCallTest {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
-    private final static String SKU_DETAILS = ItemDetailsTest.createSkuDetailsJson("id1",
-            "My item", "Some description.", "GBP", 123450000, null, null, null, null);
+    private final static String SKU_DETAILS = ItemDetailsTest.createTestJsonSkuDetails();
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;
@@ -122,8 +121,7 @@ public class GetDetailsCallTest {
             Parcelable[] array = bundle.getParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST);
             ItemDetails details = ItemDetails.create((Bundle) array[0]);
 
-            ItemDetailsTest.assertItemDetails(details, "id1", "My item", "Some description.",
-                    "GBP", "123.450000", "", "", "", "GBP", "0.000000");
+            ItemDetailsTest.assertTestItemDetails(details);
 
             callbackTriggered.countDown();
         };

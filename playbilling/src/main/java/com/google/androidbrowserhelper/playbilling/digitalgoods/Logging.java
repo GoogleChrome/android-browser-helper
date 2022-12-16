@@ -44,6 +44,14 @@ public class Logging {
         logResult(result, command + " returned:");
     }
 
+    static void logConsumeCall(String token) {
+        Log.d(TAG, "Calling consume (v2.1) " + token);
+    }
+
+    static void logConsumeResponse(BillingResult result) {
+        logResult(result, "Consume (v2.1) returned:");
+    }
+
     static void logGetDetailsCall(List<String> ids) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
@@ -68,6 +76,14 @@ public class Logging {
 
     static void logListPurchasesResult(BillingResult result) {
         logResult(result, "ListPurchases returned:");
+    }
+
+    static void logListPurchaseHistoryCall() {
+        Log.d(TAG, "Calling listPurchaseHistory");
+    }
+
+    static void logListPurchaseHistoryResult(BillingResult result) {
+        logResult(result, "ListPurchaseHistory returned:");
     }
 
     private static void logResult(BillingResult result, String message) {

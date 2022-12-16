@@ -23,18 +23,23 @@ import androidx.annotation.Nullable;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
+import androidx.browser.trusted.TrustedWebActivityService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An extension of {@link androidx.browser.trusted.TrustedWebActivityService} that implements
- * {@link androidx.browser.trusted.TrustedWebActivityService#getTokenStore()} using a
+ * An extension of {@link TrustedWebActivityService} that implements
+ * {@link TrustedWebActivityService#getTokenStore()} using a
  * {@link SharedPreferencesTokenStore}.
  */
-public class DelegationService extends androidx.browser.trusted.TrustedWebActivityService {
+public class DelegationService extends TrustedWebActivityService {
     private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
     private SharedPreferencesTokenStore mTokenStore;
+
+    public DelegationService() {
+        registerExtraCommandHandler(new NotificationDelegationExtraCommandHandler());
+    }
 
     @NonNull
     @Override
@@ -60,7 +65,7 @@ public class DelegationService extends androidx.browser.trusted.TrustedWebActivi
     @Nullable
     @Override
     public Bundle onExtraCommand(
-            String commandName, Bundle args, @Nullable TrustedWebActivityCallbackRemote callback) {
+        @NonNull String commandName, @NonNull Bundle args, @Nullable TrustedWebActivityCallbackRemote callback) {
         for (ExtraCommandHandler handler : mExtraCommandHandlers) {
             Bundle result = handler.handleExtraCommand(this, commandName, args, callback);
             if (result.getBoolean(ExtraCommandHandler.EXTRA_COMMAND_SUCCESS)) {

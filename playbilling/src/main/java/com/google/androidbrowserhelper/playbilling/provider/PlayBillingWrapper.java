@@ -124,15 +124,12 @@ public class PlayBillingWrapper implements BillingWrapper {
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
         builder.setSkuDetails(sku);
 
-        if (methodData.purchaseToken != null) {
-            subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
-        }
-
         if (methodData.prorationMode != null) {
             subUpdateParamsBuilder.setReplaceSkusProrationMode(methodData.prorationMode);
         }
 
-        if (methodData.purchaseToken != null || methodData.prorationMode != null) {
+        if (methodData.purchaseToken != null) {
+            subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
             builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
         }
 

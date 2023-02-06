@@ -115,8 +115,6 @@ public class LauncherActivity extends Activity {
     @Nullable
     private PwaWrapperSplashScreenStrategy mSplashScreenStrategy;
 
-    private CustomTabsCallback mCustomTabsCallback = new QualityEnforcer();
-
     @Nullable
     private TwaLauncher mTwaLauncher;
 
@@ -222,7 +220,7 @@ public class LauncherActivity extends Activity {
 
         mTwaLauncher = createTwaLauncher();
         mTwaLauncher.launch(twaBuilder,
-                mCustomTabsCallback,
+                getCustomTabsCallback(),
                 mSplashScreenStrategy,
                 () -> mBrowserWasLaunched = true,
                 getFallbackStrategy());
@@ -242,6 +240,10 @@ public class LauncherActivity extends Activity {
 
         ManageDataLauncherActivity.addSiteSettingsShortcut(this,
                 mTwaLauncher.getProviderPackage());
+    }
+
+    protected CustomTabsCallback getCustomTabsCallback() {
+        return new QualityEnforcer();
     }
 
     protected TwaLauncher createTwaLauncher() {

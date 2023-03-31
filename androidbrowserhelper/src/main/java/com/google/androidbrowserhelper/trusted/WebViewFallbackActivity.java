@@ -29,6 +29,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -296,10 +297,10 @@ public class WebViewFallbackActivity extends Activity {
                 // exiting the fullscreen.
                 this.originalOrientation = getRequestedOrientation();
 
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 getWindow().addContentView(this.fullScreenView,
                         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-                getWindow().addFlags(View.SYSTEM_UI_FLAG_FULLSCREEN);
             }
 
             @Override
@@ -308,9 +309,10 @@ public class WebViewFallbackActivity extends Activity {
                 if (fullScreenView == null) {
                     return;
                 }
+
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 ((ViewGroup) fullScreenView.getParent()).removeView(fullScreenView);
                 this.fullScreenView = null;
-                getWindow().clearFlags(View.SYSTEM_UI_FLAG_FULLSCREEN);
                 setRequestedOrientation(this.originalOrientation);
             }
         };

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.androidbrowserhelper.demos.twapostmessage">
+
+
+<application
+      android:allowBackup="true"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/app_name"
+      android:roundIcon="@mipmap/ic_launcher_round"
+      android:supportsRtl="true"
+      android:theme="@style/Theme.Androidbrowserhelper">
+    <activity
+        android:name=".MainActivity"
+        android:exported="true">
+      <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
+          android:value="https://peconn.github.io/starters" />
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+
+      <meta-data
+          android:name="android.app.lib_name"
+          android:value="" />
+    </activity>
+  </application>
+
+</manifest>

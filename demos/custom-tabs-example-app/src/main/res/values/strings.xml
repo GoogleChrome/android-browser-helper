@@ -89,4 +89,13 @@
     <string name="toolbar_toast_text">Toolbar Clicked with URL: %s</string>
     <string name="unknown_toast_text">Unknown Action Clicked with URL: %s</string>
     <string name="browser_actions_desc">Tap the button to open custom tab. Long press the button to see the actions menu.</string>
+    <string name="title_activity_engagement_signals">Engagement Signals Demo</string>
+    <string name="description_activity_engagement_signals">Demonstrates which user engagement events are fired by a Custom Tab.</string>
+    <string name="open">Open</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="label_event_vertical_scroll"></string>
+    <string name="label_event_greatest_percentage"></string>
+    <string name="label_event_session_ended"></string>
+    <string name="label_event_navigation"></string>
 </resources>

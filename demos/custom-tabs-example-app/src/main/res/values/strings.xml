@@ -94,8 +94,4 @@
     <string name="open">Open</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-    <string name="label_event_vertical_scroll"></string>
-    <string name="label_event_greatest_percentage"></string>
-    <string name="label_event_session_ended"></string>
-    <string name="label_event_navigation"></string>
 </resources>

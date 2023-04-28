@@ -29,8 +29,7 @@
         <activity
             android:name=".EngagementSignalsActivity"
             android:exported="false"
-            android:label="@string/title_activity_engagement_signals"
-            android:theme="@style/NoActionBar">
+            android:label="@string/title_activity_engagement_signals">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

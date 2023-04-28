@@ -48,7 +48,7 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
     private CustomTabsClient mClient;
     private CustomTabsSession mCustomTabsSession;
 
-    private final ServiceConnectionCallback mServiceConnectionCallback = new ServiceConnectionCallback() {
+    private ServiceConnectionCallback mServiceConnectionCallback = new ServiceConnectionCallback() {
         @Override
         public void onServiceConnected(CustomTabsClient client) {
             mClient = client;
@@ -60,10 +60,14 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
                             "latest Chrome version and enable via chrome://flags/#cct-real-time-engagement-signals");
                     return;
                 }
-                mCustomTabsSession.setEngagementSignalsCallback(mEngagementSignalsCallback, Bundle.EMPTY);
+                boolean signalsCallback = mCustomTabsSession.setEngagementSignalsCallback(mEngagementSignalsCallback, Bundle.EMPTY);
+                if (!signalsCallback) {
+                    Log.w(TAG, "Could not set EngagementSignalsCallback");
+                }
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed registering engagement signals callback", e);
-                return;
+                Log.w(TAG, "The Service died while responding to the request.", e);
+            } catch (UnsupportedOperationException e) {
+                Log.w(TAG, "Engagement Signals API isn't supported by the browser.", e);
             }
         }
 
@@ -75,7 +79,7 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
         }
     };
 
-    private final EngagementSignalsCallback mEngagementSignalsCallback = new EngagementSignalsCallback() {
+    private EngagementSignalsCallback mEngagementSignalsCallback = new EngagementSignalsCallback() {
         @Override
         public void onVerticalScrollEvent(boolean isDirectionUp, @NonNull Bundle extras) {
             Log.d(TAG, "onVerticalScrollEvent (isDirectionUp=" + isDirectionUp + ')');
@@ -95,7 +99,7 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
         }
     };
 
-    private final CustomTabsCallback mCustomTabsCallback = new CustomTabsCallback() {
+    private CustomTabsCallback mCustomTabsCallback = new CustomTabsCallback() {
         @Override
         public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
             String event;
@@ -184,7 +188,6 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
         intentBuilder.setInitialActivityHeightPx(INITIAL_HEIGHT_DEFAULT_PX);
         CustomTabsIntent customTabsIntent = intentBuilder.build();
         customTabsIntent.launchUrl(this, Uri.parse(url));
-        startActivityForResult(customTabsIntent.intent, 1);
     }
 
 }

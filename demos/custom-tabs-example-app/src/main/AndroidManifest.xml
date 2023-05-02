@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
     Copyright 2019 Google Inc. All Rights Reserved.
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -26,14 +25,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        <activity
-            android:name=".EngagementSignalsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_engagement_signals">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+
         <activity
             android:name=".DemoListActivity"
             android:exported="true"
@@ -43,6 +35,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".EngagementSignalsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_engagement_signals">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".DemoListActivity" />
         </activity>
         <activity
             android:name=".NotificationParentActivity"

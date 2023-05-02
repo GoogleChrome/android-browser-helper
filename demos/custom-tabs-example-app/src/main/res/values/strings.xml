@@ -21,7 +21,7 @@
     <string name="notification_text">Open your web content on Chrome Custom Tabs</string>
     <string name="notification_sample_url">https://developer.chrome.com/multidevice/android/customtabs</string>
     <string name="label_url">URL:</string>
-    <string name="default_test_url">http://developer.android.com</string>
+    <string name="default_test_url">http://developer.chrome.com</string>
     <string name="back_to_app">Back to your application!</string>
     <string name="label_start_custom_tab">Open Custom Tab</string>
     <string name="label_add_menus">Add Menus</string>

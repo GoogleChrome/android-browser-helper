@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package org.chromium.customtabsdemos;
 
 import static androidx.browser.customtabs.CustomTabsIntent.ACTIVITY_HEIGHT_ADJUSTABLE;
@@ -35,7 +36,7 @@ import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.EngagementSignalsCallback;
 
 public class EngagementSignalsActivity extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = EngagementSignalsActivity.class.getSimpleName();
+    private static final String TAG = "EngagementSignals";
     private static final int INITIAL_HEIGHT_DEFAULT_PX = 600;
 
     private EditText mUrlEditText;
@@ -44,8 +45,11 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
     private TextView mTextSessionEnd;
     private TextView mTextNavigation;
 
+    @Nullable
     private ServiceConnection mConnection;
+    @Nullable
     private CustomTabsClient mClient;
+    @Nullable
     private CustomTabsSession mCustomTabsSession;
 
     private ServiceConnectionCallback mServiceConnectionCallback = new ServiceConnectionCallback() {
@@ -57,7 +61,7 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
                 boolean engagementSignalsApiAvailable = mCustomTabsSession.isEngagementSignalsApiAvailable(Bundle.EMPTY);
                 if (!engagementSignalsApiAvailable) {
                     Log.d(TAG, "CustomTab Engagement signals not available, make sure to use the " +
-                            "latest Chrome version and enable via chrome://flags/#cct-real-time-engagement-signals");
+                            "latest Chrome version");
                     return;
                 }
                 boolean signalsCallback = mCustomTabsSession.setEngagementSignalsCallback(mEngagementSignalsCallback, Bundle.EMPTY);
@@ -115,6 +119,9 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
                     break;
                 case CustomTabsCallback.NAVIGATION_STARTED:
                     event = "NAVIGATION_STARTED";
+                    // Scroll percentage and direction should be reset
+                    mTextVerticalScroll.setText("vertical scroll: n/a");
+                    mTextGreatestPercentage.setText("scroll percentage: n/a");
                     break;
                 case CustomTabsCallback.TAB_SHOWN:
                     event = "TAB_SHOWN";
@@ -151,7 +158,10 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
 
     private void bindCustomTabsService() {
         String packageName = CustomTabsHelper.getPackageNameToUse(this);
-        if (packageName == null) return;
+        if (packageName == null) {
+            Log.w(TAG, packageName + " does not support a Custom Tab Service connection");
+            return;
+        }
         mConnection = new ServiceConnection(mServiceConnectionCallback);
         CustomTabsClient.bindCustomTabsService(this, packageName, mConnection);
     }

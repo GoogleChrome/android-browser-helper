@@ -15,10 +15,10 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:theme="@style/Theme.AppCompat.Light"
-    android:paddingTop="8dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingTop="8dp"
+    android:theme="@style/Theme.AppCompat.Light">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -29,38 +29,33 @@
         android:paddingBottom="@dimen/activity_vertical_margin"
         tools:context=".CustomUIActivity">
 
-        <LinearLayout
-            android:id="@+id/url_input"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/url_label"
+            android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:text="@string/label_url"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/url_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/label_url"
-                />
+        <EditText
+            android:id="@+id/url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textUri"
+            app:layout_constraintStart_toEndOf="@id/url_label"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/default_test_url" />
 
-            <EditText
-                android:id="@+id/url"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textUri"
-                android:text="@string/default_test_url"
-                />
-
-            <Button
-                android:id="@+id/start_custom_tab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text="@string/open"
-                />
-        </LinearLayout>
+        <Button
+            android:id="@+id/start_custom_tab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/url"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="8dp"
+            android:text="@string/open" />
 
         <TextView
             android:id="@+id/label_event_navigation"
@@ -68,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/url_input" />
+            app:layout_constraintTop_toBottomOf="@id/url_label" />
 
 
         <TextView

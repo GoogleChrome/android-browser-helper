@@ -30,9 +30,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "../../../m2repository/"
-        }
     }
 }
 

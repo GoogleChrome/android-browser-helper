@@ -171,7 +171,7 @@ public class PartialCustomTabActivity extends AppCompatActivity implements View.
                 toolbarCornerRadiusPx);
         if (resizeBehavior != CustomTabsIntent.ACTIVITY_HEIGHT_DEFAULT) {
             customTabsIntent.intent.putExtra(
-                    CustomTabsIntent.EXTRA_ACTIVITY_RESIZE_BEHAVIOR, resizeBehavior);
+                    CustomTabsIntent.EXTRA_ACTIVITY_HEIGHT_RESIZE_BEHAVIOR, resizeBehavior);
         }
         if (!mBackgroundAppCheckbox.isChecked()) {
             customTabsIntent.intent.putExtra(

@@ -17,7 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-def VERSION = "2.4.0";
+def VERSION = "2.5.0";
 
 android {
     compileSdkVersion 31

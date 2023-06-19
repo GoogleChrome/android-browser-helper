@@ -138,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     client.warmup(0L);
 
                     mSession = mClient.newSession(customTabsCallback);
-                    launchTWA();
+
+                    launch();
                     registerBroadcastReceiver();
                 }
 
@@ -150,7 +151,9 @@ public class MainActivity extends AppCompatActivity {
             });
     }
 
-    private void launchTWA() {
+
+    // The demo should work for both CCT and TWA but here we are using TWA.
+    private void launch() {
         new TrustedWebActivityIntentBuilder(URL).build(mSession)
             .launchTrustedWebActivity(MainActivity.this);
     }

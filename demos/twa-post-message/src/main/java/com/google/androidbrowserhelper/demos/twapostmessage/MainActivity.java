@@ -15,6 +15,7 @@ package com.google.androidbrowserhelper.demos.twapostmessage;
  *    limitations under the License.
  */
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -158,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
             .launchTrustedWebActivity(MainActivity.this);
     }
 
+    @SuppressLint("WrongConstant")
     private void registerBroadcastReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(PostMessageBroadcastReceiver.POST_MESSAGE_ACTION);

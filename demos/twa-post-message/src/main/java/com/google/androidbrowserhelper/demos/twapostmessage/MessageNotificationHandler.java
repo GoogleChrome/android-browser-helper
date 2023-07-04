@@ -15,6 +15,7 @@ package com.google.androidbrowserhelper.demos.twapostmessage;
  *    limitations under the License.
  */
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,6 +32,7 @@ public class MessageNotificationHandler {
     private MessageNotificationHandler() {
     }
 
+    @SuppressLint("MissingPermission")
     public static void showNotificationWithMessage(Context context, String message) {
         Intent intent = new Intent();
         intent.setAction(PostMessageBroadcastReceiver.POST_MESSAGE_ACTION);

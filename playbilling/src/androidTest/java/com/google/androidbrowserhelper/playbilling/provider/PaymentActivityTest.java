@@ -91,23 +91,6 @@ public class PaymentActivityTest {
     }
 
     @Test
-    public void priceChangeConfirmationFlow() throws InterruptedException, JSONException {
-        mContext.startActivity(getIntent(SKU, true));
-        assertTrue(WrapperActivity.waitForLaunch());
-
-        assertTrue(mWrapper.waitForConnect());
-        mWrapper.triggerConnected();
-
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
-
-        assertTrue(mWrapper.waitForLaunchPriceChangeConfirmationFlow());
-        mWrapper.triggerOnPriceChangeConfirmationResult();
-
-        assertActivityResult(Activity.RESULT_OK);
-    }
-
-    @Test
     public void setsProxy() throws InterruptedException, JSONException {
         mWrapper.setPaymentFlowWillBeSuccessful(true);
 

@@ -22,7 +22,6 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
@@ -169,11 +168,6 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public void triggerOnPurchasesUpdated() {
         mListener.onPurchaseFlowComplete(toResult(BillingClient.BillingResponseCode.OK), "");
-    }
-
-    public void triggerOnPriceChangeConfirmationResult() {
-        mPriceChangeConfirmationFlow.getCallback().onPriceChangeConfirmationResult(
-                toResult(BillingClient.BillingResponseCode.OK));
     }
 
     public boolean waitForConnect() throws InterruptedException {

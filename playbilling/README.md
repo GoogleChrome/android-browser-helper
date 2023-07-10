@@ -2,16 +2,16 @@
 
 The Play Billing module provides capabilities for your TWA app to connect with [Google Play Billing library](https://developer.android.com/google/play/billing), for example you can:
 
-* Query Purchases history
+* Query purchases history
 * Initialize a payment
-* Query SKU details (to be moved to ProductDetails later)
+* Query SKU details
 
 The module uses [Version 5](https://developer.android.com/google/play/billing/release-notes#5-2-1)  of Play Billing library.
 
 
 ## How to use it? (Website)
-To use this data from your website you can do it as follows:
-```
+To use this API from your website you can do it as follows:
+```js
 const PAYMENT_METHOD = 'https://play.google.com/billing'; 
 const SKUS = [  
      'android.test.purchased',  
@@ -25,10 +25,10 @@ console.log(details);
 
 ## How to use it? (Android Project)
 To use it from your Android project you will need to do two steps:
-Add this to your AndroidManifest.xml
+Add this to your `AndroidManifest.xml`
 
-```
-  <activity
+```xml
+      <activity
             android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:configChanges="keyboardHidden|keyboard|orientation|screenLayout|screenSize"
@@ -41,23 +41,22 @@ Add this to your AndroidManifest.xml
             <meta-data
                 android:name="org.chromium.default_payment_method_name"
                 android:value="https://play.google.com/billing" />
-        </activity>
+      </activity>
 
-        <!-- This service checks who calls it at runtime. -->
-        <service
+      <service
             android:name="com.google.androidbrowserhelper.playbilling.provider.PaymentService"
             android:exported="true" >
             <intent-filter>
                 <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
             </intent-filter>
-        </service>
+      </service>
 ```
 
-Create a new Service that extends ‘DelegationService’ with this line in ‘onCreate’
-```
+Create a new Service that extends `DelegationService` with this line in `onCreate()` method:
+```java
 registerExtraCommandHandler(new DigitalGoodsRequestHandler(getApplicationContext()));
 ```
-Then add it to your AndroidManifest and make it exported (android:exported="true").
+Then add it to your AndroidManifest and make it exported (`android:exported="true"`).
 
 
 

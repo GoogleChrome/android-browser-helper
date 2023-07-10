@@ -122,8 +122,13 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     private void launchPriceChangeConfirmationFlow(SkuDetails sku) {
-        mWrapper.launchPriceChangeConfirmationFlow(this, sku,
-            result -> fail("Price change confirmation flow is no longer supported"));
+        mWrapper.launchPriceChangeConfirmationFlow(this, sku, result -> {
+            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                setResultAndFinish(PaymentResult.priceChangeSuccess());
+            } else {
+                fail("Price change confirmation flow ended with result: " + result);
+            }
+        });
     }
 
     private void launchPaymentFlow(SkuDetails sku) {

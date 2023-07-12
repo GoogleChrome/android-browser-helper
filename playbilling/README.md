@@ -2,7 +2,7 @@
 
 The Play Billing module provides capabilities for your TWA app to connect with [Google Play Billing library](https://developer.android.com/google/play/billing), for example you can:
 
-* Query purchases history
+* Query purchase history
 * Initialize a payment
 * Query SKU details
 

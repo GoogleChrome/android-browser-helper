@@ -181,7 +181,7 @@ public class LocationProviderGmsCoreTest {
             callbackTriggered.countDown();
         };
         doThrow(new IllegalStateException())
-                .when(mMockLocationClient).requestLocationUpdates(any(), any(),any());
+                .when(mMockLocationClient).requestLocationUpdates(any(), any(LocationCallback.class),any());
 
         mLocationProvider.start(locationCallback, false);
 

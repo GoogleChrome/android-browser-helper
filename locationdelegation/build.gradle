@@ -18,7 +18,7 @@ apply plugin: 'maven-publish'
 def VERSION = "1.1.0";
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     buildToolsVersion "30.0.3"
 
     defaultConfig {
@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.5.0'
+    api 'androidx.browser:browser:1.4.0'
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'com.google.android.gms:play-services-location:21.0.1'

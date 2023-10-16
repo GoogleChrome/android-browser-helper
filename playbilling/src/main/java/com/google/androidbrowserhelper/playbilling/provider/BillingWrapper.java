@@ -21,12 +21,11 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.google.androidbrowserhelper.playbilling.digitalgoods.ConnectedBillingWrapper;
+import com.android.billingclient.api.QueryProductDetailsParams.Product;
 
 import java.util.List;
 
@@ -47,21 +46,21 @@ public interface BillingWrapper {
     void connect(BillingClientStateListener callback);
 
     /**
-     * Get {@link SkuDetails} objects for the provided SKUs.
+     * Get {@link ProductDetails} objects for the provided products.
      */
-    void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
-            SkuDetailsResponseListener callback);
+    void queryProductDetails(@BillingClient.ProductType String productType, List<String> productsIds,
+        ProductDetailsResponseListener callback);
 
     /**
      * Returns details for currently owned items.
      */
-    void queryPurchases(@BillingClient.SkuType String skuType, PurchasesResponseListener callback);
+    void queryPurchases(@BillingClient.ProductType String productType, PurchasesResponseListener callback);
 
     /**
      * Returns details for all previously purchased items.
      */
-    void queryPurchaseHistory(@BillingClient.SkuType String skuType,
-                              PurchaseHistoryResponseListener callback);
+    void queryPurchaseHistory(@BillingClient.ProductType String skuType,
+        PurchaseHistoryResponseListener callback);
 
     /**
      * Acknowledges that a purchase has occured.
@@ -77,12 +76,12 @@ public interface BillingWrapper {
      * Launches the Payment Flow. If it returns {@code true},
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
-    boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData);
+    boolean launchPaymentFlow(Activity activity, ProductDetails productDetails, MethodData methodData);
 
     /**
      * Launches the price change confirmation flow.
      */
-    void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
-            PriceChangeConfirmationListener listener);
+    void launchPriceChangeConfirmationFlow(Activity activity, ProductDetails productDetails,
+        ProductDetailsResponseListener listener);
 
 }

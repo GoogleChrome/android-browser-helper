@@ -18,8 +18,9 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import java.util.Arrays;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import androidx.annotation.Nullable;
 
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
 
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
@@ -52,7 +52,7 @@ public class GetDetailsCall {
     /** Creates this class from a {@link Bundle}, returns {@code null} if the Bundle is invalid. **/
     @Nullable
     public static GetDetailsCall create(@Nullable Bundle args,
-            @Nullable DigitalGoodsCallback callback) {
+        @Nullable DigitalGoodsCallback callback) {
         if (args == null || callback == null) return null;
 
         String[] itemIds = args.getStringArray(PARAM_GET_DETAILS_ITEM_IDS);
@@ -62,7 +62,7 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    private void respond(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    private void respond(BillingResult result, @Nullable List<ProductDetails> detailsList) {
         Logging.logGetDetailsResponse(result);
 
         Parcelable[] parcelables = new Parcelable[0];
@@ -70,14 +70,14 @@ public class GetDetailsCall {
             parcelables = new Parcelable[detailsList.size()];
 
             int index = 0;
-            for (SkuDetails details : detailsList) {
+            for (ProductDetails details : detailsList) {
                 parcelables[index++] = ItemDetails.create(details).toBundle();
             }
         }
 
         Bundle args = new Bundle();
         args.putInt(RESPONSE_GET_DETAILS_RESPONSE_CODE,
-                DigitalGoodsConverter.toChromiumResponseCode(result));
+            DigitalGoodsConverter.toChromiumResponseCode(result));
         args.putParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST, parcelables);
         mCallback.run(RESPONSE_GET_DETAILS, args);
     }
@@ -86,10 +86,10 @@ public class GetDetailsCall {
     public void call(BillingWrapper billing) {
         Logging.logGetDetailsCall(mItemIds);
 
-        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::respond);
+        BillingResultMerger<ProductDetails> merger = new BillingResultMerger<>(this::respond);
 
-        billing.querySkuDetails(BillingClient.SkuType.INAPP, mItemIds, merger::setInAppResult);
-        billing.querySkuDetails(BillingClient.SkuType.SUBS, mItemIds, merger::setSubsResult);
+        billing.queryProductDetails(BillingClient.ProductType.INAPP, mItemIds, merger::setInAppResult);
+        billing.queryProductDetails(BillingClient.ProductType.SUBS, mItemIds, merger::setSubsResult);
     }
 
     /** Creates a Bundle that can be used with {@link #create}. For testing. */

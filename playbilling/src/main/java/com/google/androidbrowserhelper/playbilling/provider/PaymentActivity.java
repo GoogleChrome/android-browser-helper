@@ -25,7 +25,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
 
 import java.util.Collections;
@@ -74,9 +74,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
          */
         Integer prorationMode = mMethodData.prorationMode;
         if (prorationMode != null
-                && prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+            && prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
             fail("This proration mode is currently disabled. Check " +
-                    "chromeos.dev/publish/pwa-play-billing for more info");
+                "chromeos.dev/publish/pwa-play-billing for more info");
             return;
         }
 
@@ -99,20 +99,20 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     public void onConnected() {
-        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::onSkusQueried);
+        BillingResultMerger<ProductDetails> merger = new BillingResultMerger<>(this::onSkusQueried);
 
         List<String> ids = Collections.singletonList(mMethodData.sku);
-        mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);
-        mWrapper.querySkuDetails(BillingClient.SkuType.SUBS, ids, merger::setSubsResult);
+        mWrapper.queryProductDetails(BillingClient.ProductType.INAPP, ids, merger::setInAppResult);
+        mWrapper.queryProductDetails(BillingClient.ProductType.SUBS, ids, merger::setSubsResult);
     }
 
-    private void onSkusQueried(BillingResult result, List<SkuDetails> skus) {
+    private void onSkusQueried(BillingResult result, List<ProductDetails> skus) {
         if (skus == null || skus.isEmpty()) {
             fail("Play Billing returned did not find SKU.");
             return;
         }
 
-        SkuDetails sku = skus.get(0);
+        ProductDetails sku = skus.get(0);
 
         if (mMethodData.isPriceChangeConfirmation) {
             launchPriceChangeConfirmationFlow(sku);
@@ -121,8 +121,8 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
         }
     }
 
-    private void launchPriceChangeConfirmationFlow(SkuDetails sku) {
-        mWrapper.launchPriceChangeConfirmationFlow(this, sku, result -> {
+    private void launchPriceChangeConfirmationFlow(ProductDetails productDetails) {
+        mWrapper.launchPriceChangeConfirmationFlow(this, productDetails, (result, productDetailsList) -> {
             if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                 setResultAndFinish(PaymentResult.priceChangeSuccess());
             } else {
@@ -131,7 +131,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
         });
     }
 
-    private void launchPaymentFlow(SkuDetails sku) {
+    private void launchPaymentFlow(ProductDetails sku) {
         if (mWrapper.launchPaymentFlow(this, sku, mMethodData))
             return;
 

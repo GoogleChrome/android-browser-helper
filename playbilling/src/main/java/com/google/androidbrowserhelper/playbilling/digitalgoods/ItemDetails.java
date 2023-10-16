@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.SkuDetails;
 
 /**
@@ -57,10 +58,10 @@ public class ItemDetails {
     public final int introductoryPriceCycles;
 
     private ItemDetails(String id, String title, String description, String currency, String value,
-                        String type, String iconUrl, String subscriptionPeriod,
-                        String freeTrialPeriod, String introductoryPricePeriod,
-                        String introductoryPriceCurrency, String introductoryPriceValue,
-                        int introductoryPriceCycles) {
+        String type, String iconUrl, String subscriptionPeriod,
+        String freeTrialPeriod, String introductoryPricePeriod,
+        String introductoryPriceCurrency, String introductoryPriceValue,
+        int introductoryPriceCycles) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -79,19 +80,19 @@ public class ItemDetails {
     /**
      * Creates this class from a Play Billing {@link SkuDetails}.
      */
-    public static ItemDetails create(SkuDetails skuDetails) {
+    public static ItemDetails create(ProductDetails skuDetails) {
         return new ItemDetails(
-                skuDetails.getSku(),
-                skuDetails.getTitle(),
-                skuDetails.getDescription(),
-                skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getPriceAmountMicros()),
-                skuDetails.getType(), skuDetails.getIconUrl(), skuDetails.getSubscriptionPeriod(),
-                skuDetails.getFreeTrialPeriod(),
-                skuDetails.getIntroductoryPricePeriod(),
-                skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getIntroductoryPriceAmountMicros()),
-                skuDetails.getIntroductoryPriceCycles());
+            skuDetails.getProductId(),
+            skuDetails.getTitle(),
+            skuDetails.getDescription(),
+            skuDetails.getOneTimePurchaseOfferDetails().getPriceCurrencyCode(),
+            toPrice(skuDetails.getOneTimePurchaseOfferDetails().getPriceAmountMicros()),
+            skuDetails.getProductType(), skuDetails.getIconUrl(), skuDetails.getSubscriptionPeriod(),
+            skuDetails.getFreeTrialPeriod(),
+            skuDetails.getIntroductoryPricePeriod(),
+            skuDetails.getPriceCurrencyCode(),
+            toPrice(skuDetails.getIntroductoryPriceAmountMicros()),
+            skuDetails.getIntroductoryPriceCycles());
     }
 
     /**
@@ -114,8 +115,8 @@ public class ItemDetails {
         int introductoryPriceCycles = bundle.getInt(KEY_INTRO_CYCLES);
 
         return new ItemDetails(id, title, description, currency, value, type, iconUrl,
-                subscriptionPeriod, freeTrialPeriod, introductoryPricePeriod,
-                introductoryPriceCurrency, introductoryPriceValue, introductoryPriceCycles);
+            subscriptionPeriod, freeTrialPeriod, introductoryPricePeriod,
+            introductoryPriceCurrency, introductoryPriceValue, introductoryPriceCycles);
     }
 
     /**

@@ -20,6 +20,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -73,7 +74,13 @@ public class CustomTabsHelper {
         }
 
         // Get all apps that can handle VIEW intents.
-        List<ResolveInfo> resolvedActivityList = pm.queryIntentActivities(activityIntent, PackageManager.MATCH_ALL);
+        List<ResolveInfo> resolvedActivityList;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            resolvedActivityList = pm.queryIntentActivities(activityIntent, PackageManager.ResolveInfoFlags.of(
+                    PackageManager.MATCH_ALL));
+        } else {
+            resolvedActivityList = pm.queryIntentActivities(activityIntent, PackageManager.MATCH_ALL);
+        }
         List<String> packagesSupportingCustomTabs = new ArrayList<>();
         for (ResolveInfo info : resolvedActivityList) {
             Intent serviceIntent = new Intent();

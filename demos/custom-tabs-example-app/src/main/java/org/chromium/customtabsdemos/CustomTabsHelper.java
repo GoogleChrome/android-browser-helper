@@ -74,6 +74,9 @@ public class CustomTabsHelper {
         }
 
         // Get all apps that can handle VIEW intents.
+        // NB: It will return only the default browser instead of all the apps which can handle
+        // Intent.ACTION_VIEW on OnePlus Pro (Android 12). Updating the flag from 0 to MATCH_ALL
+        // fixed this.
         List<ResolveInfo> resolvedActivityList;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             resolvedActivityList = pm.queryIntentActivities(activityIntent, PackageManager.ResolveInfoFlags.of(

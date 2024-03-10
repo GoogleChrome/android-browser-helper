@@ -15,9 +15,11 @@
 package com.google.androidbrowserhelper.trusted.splashscreens;
 
 import android.annotation.SuppressLint;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -69,6 +71,25 @@ public class SplashImageTransferTask {
     }
 
     /**
+     * Get the current theme mode.
+     *
+     * @param context Context to get the UiModeManager service.
+     * @return The current theme mode, either "light" or "dark".
+     */
+    private String getCurrentThemeMode(Context context) {
+        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES:
+                return "dark";
+            case Configuration.UI_MODE_NIGHT_NO:
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+            default:
+                return "light";
+        }
+    }
+
+    /**
      * Executes the task. Should be called only once.
      * @param callback {@link Callback} to be called when done.
      */
@@ -104,8 +125,13 @@ public class SplashImageTransferTask {
             File file = new File(dir, FILE_NAME);
             SharedPreferences prefs =
                     mContext.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE);
+
             long lastUpdateTime = getLastAppUpdateTime();
-            if (file.exists() && lastUpdateTime == prefs.getLong(PREF_LAST_UPDATE_TIME, 0)) {
+            String currentThemeMode = getCurrentThemeMode(mContext);
+            long savedLastUpdateTime = prefs.getLong(PREF_LAST_UPDATE_TIME, 0);
+            String savedThemeMode = prefs.getString("themeMode", "light"); // Default to light for compatibility
+
+            if (file.exists() && lastUpdateTime == savedLastUpdateTime && currentThemeMode.equals(savedThemeMode)) {
                 // Don't overwrite existing file, if it was saved later than the last time app was
                 // updated
                 return transferToCustomTabsProvider(file);
@@ -114,7 +140,10 @@ public class SplashImageTransferTask {
                 if (isCancelled()) return false;
                 mBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
                 os.flush();
-                prefs.edit().putLong(PREF_LAST_UPDATE_TIME, lastUpdateTime).commit();
+                prefs.edit()
+                        .putLong(PREF_LAST_UPDATE_TIME, lastUpdateTime)
+                        .putString("themeMode", currentThemeMode)
+                        .apply();
 
                 if (isCancelled()) return false;
                 return transferToCustomTabsProvider(file);

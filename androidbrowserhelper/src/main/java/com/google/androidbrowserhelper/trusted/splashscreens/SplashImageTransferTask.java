@@ -44,6 +44,8 @@ public class SplashImageTransferTask {
     private static final String FILE_NAME = "splash_image.png";
     private static final String PREFS_FILE = "splashImagePrefs";
     private static final String PREF_LAST_UPDATE_TIME = "lastUpdateTime";
+    private static final String PREF_THEME_MODE = "themeMode";
+    private static final String DEFAULT_THEME_MODE = "light"; // Default to light for compatibility
 
     private final Context mContext;
     private final Bitmap mBitmap;
@@ -129,7 +131,7 @@ public class SplashImageTransferTask {
             long lastUpdateTime = getLastAppUpdateTime();
             String currentThemeMode = getCurrentThemeMode(mContext);
             long savedLastUpdateTime = prefs.getLong(PREF_LAST_UPDATE_TIME, 0);
-            String savedThemeMode = prefs.getString("themeMode", "light"); // Default to light for compatibility
+            String savedThemeMode = prefs.getString(PREF_THEME_MODE, DEFAULT_THEME_MODE);
 
             if (file.exists() && lastUpdateTime == savedLastUpdateTime && currentThemeMode.equals(savedThemeMode)) {
                 // Don't overwrite existing file, if it was saved later than the last time app was
@@ -142,7 +144,7 @@ public class SplashImageTransferTask {
                 os.flush();
                 prefs.edit()
                         .putLong(PREF_LAST_UPDATE_TIME, lastUpdateTime)
-                        .putString("themeMode", currentThemeMode)
+                        .putString(PREF_THEME_MODE, currentThemeMode)
                         .apply();
 
                 if (isCancelled()) return false;

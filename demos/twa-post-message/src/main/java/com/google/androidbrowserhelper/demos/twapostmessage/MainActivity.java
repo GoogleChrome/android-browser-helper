@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private CustomTabsSession mSession;
     private Uri URL = Uri.parse("https://peconn.github.io/starters");
 
-    // This can be the app's package name, it has to either start with http or https.
-    private Uri SOURCE_ORIGIN = Uri.parse("https://my-app-origin-uri");
+    // This must be a valid origin, it has to either start with http or https.
+    private Uri SOURCE_ORIGIN = Uri.parse("https://sayedelabady.github.io/");
     private Uri TARGET_ORIGIN = Uri.parse("https://peconn.github.io");
     private boolean mValidated = false;
 

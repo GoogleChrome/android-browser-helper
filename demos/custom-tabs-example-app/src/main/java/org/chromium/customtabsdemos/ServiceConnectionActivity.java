@@ -36,21 +36,23 @@ public class ServiceConnectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_serviceconnection);
 
-        customTabActivityHelper = new CustomTabActivityHelper();
-        customTabActivityHelper.setConnectionCallback(this);
-
         mUrlEditText = findViewById(R.id.url);
         mMayLaunchUrlButton = findViewById(R.id.button_may_launch_url);
         mMayLaunchUrlButton.setEnabled(false);
         mMayLaunchUrlButton.setOnClickListener(this);
 
         findViewById(R.id.start_custom_tab).setOnClickListener(this);
+
+        customTabActivityHelper = new CustomTabActivityHelper();
+        customTabActivityHelper.setConnectionCallback(this);
+        customTabActivityHelper.bindCustomTabsService(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         customTabActivityHelper.setConnectionCallback(null);
+        customTabActivityHelper.unbindCustomTabsService(this);
     }
 
     @Override
@@ -60,19 +62,6 @@ public class ServiceConnectionActivity extends AppCompatActivity
 
     @Override
     public void onCustomTabsDisconnected() {
-        mMayLaunchUrlButton.setEnabled(false);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        customTabActivityHelper.bindCustomTabsService(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        customTabActivityHelper.unbindCustomTabsService(this);
         mMayLaunchUrlButton.setEnabled(false);
     }
 

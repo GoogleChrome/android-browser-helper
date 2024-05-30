@@ -22,21 +22,32 @@ import androidx.annotation.Nullable;
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingFlowParams.ProductDetailsParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.PriceChangeFlowParams;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsParams.Product;
+import com.android.billingclient.api.QueryPurchaseHistoryParams;
+import com.android.billingclient.api.QueryPurchasesParams;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,26 +58,26 @@ public class PlayBillingWrapper implements BillingWrapper {
     private final BillingClient mClient;
 
     private final PurchasesUpdatedListener mPurchaseUpdateListener =
-            new PurchasesUpdatedListener() {
-        @Override
-        public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
-            Logging.logPurchasesUpdate(billingResult, list);
+        new PurchasesUpdatedListener() {
+            @Override
+            public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> list) {
+                Logging.logPurchasesUpdate(billingResult, list);
 
-            if (list == null || list.size() == 0) {
-                mListener.onPurchaseFlowComplete(billingResult, "");
-            } else {
-                mListener.onPurchaseFlowComplete(billingResult, list.get(0).getPurchaseToken());
+                if (list == null || list.size() == 0) {
+                    mListener.onPurchaseFlowComplete(billingResult, "");
+                } else {
+                    mListener.onPurchaseFlowComplete(billingResult, list.get(0).getPurchaseToken());
+                }
             }
-        }
-    };
+        };
 
     public PlayBillingWrapper(Context context, Listener listener) {
         mListener = listener;
         mClient = BillingClient
-                .newBuilder(context)
-                .setListener(mPurchaseUpdateListener)
-                .enablePendingPurchases()
-                .build();
+            .newBuilder(context)
+            .setListener(mPurchaseUpdateListener)
+            .enablePendingPurchases()
+            .build();
     }
 
     @Override
@@ -75,34 +86,34 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
-            SkuDetailsResponseListener callback) {
-        SkuDetailsParams params = SkuDetailsParams
-                .newBuilder()
-                .setSkusList(skus)
-                .setType(skuType)
-                .build();
+    public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productsIds,
+        ProductDetailsResponseListener callback) {
+        QueryProductDetailsParams params = QueryProductDetailsParams
+            .newBuilder()
+            .setProductList(buildProductList(productType, productsIds))
+            .build();
 
-        mClient.querySkuDetailsAsync(params, callback);
+        mClient.queryProductDetailsAsync(params, callback);
     }
 
     @Override
-    public void queryPurchases(@BillingClient.SkuType  String skuType,
-                               PurchasesResponseListener callback) {
-        mClient.queryPurchasesAsync(skuType, callback);
+    public void queryPurchases(@BillingClient.ProductType String productType,
+        PurchasesResponseListener callback) {
+        mClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(productType).build(), callback);
     }
 
     @Override
-    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
-        mClient.queryPurchaseHistoryAsync(skuType, callback);
+    public void queryPurchaseHistory(@BillingClient.ProductType String productType, PurchaseHistoryResponseListener callback) {
+        mClient.queryPurchaseHistoryAsync(
+            QueryPurchaseHistoryParams.newBuilder().setProductType(productType).build(), callback);
     }
 
     @Override
     public void acknowledge(String token, AcknowledgePurchaseResponseListener callback) {
         AcknowledgePurchaseParams params = AcknowledgePurchaseParams
-                .newBuilder()
-                .setPurchaseToken(token)
-                .build();
+            .newBuilder()
+            .setPurchaseToken(token)
+            .build();
 
         mClient.acknowledgePurchase(params, callback);
     }
@@ -110,26 +121,34 @@ public class PlayBillingWrapper implements BillingWrapper {
     @Override
     public void consume(String token, ConsumeResponseListener callback) {
         ConsumeParams params = ConsumeParams
-                .newBuilder()
-                .setPurchaseToken(token)
-                .build();
+            .newBuilder()
+            .setPurchaseToken(token)
+            .build();
 
         mClient.consumeAsync(params, callback);
     }
 
     @Override
-    public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData) {
+    public boolean launchPaymentFlow(Activity activity, ProductDetails productDetails, MethodData methodData) {
         BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder =
             BillingFlowParams.SubscriptionUpdateParams.newBuilder();
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
-        builder.setSkuDetails(sku);
-
-        if (methodData.prorationMode != null) {
-            subUpdateParamsBuilder.setReplaceSkusProrationMode(methodData.prorationMode);
-        }
+        List<ProductDetailsParams> productDetailsParamsList = Collections.singletonList(
+            ProductDetailsParams.newBuilder()
+                .setProductDetails(productDetails)
+                .build()
+        );
+        builder.setProductDetailsParamsList(productDetailsParamsList);
 
         if (methodData.purchaseToken != null) {
-            subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
+            subUpdateParamsBuilder.setOldPurchaseToken(methodData.purchaseToken);
+        }
+
+        if (methodData.prorationMode != null) {
+            subUpdateParamsBuilder.setReplaceProrationMode(methodData.prorationMode);
+        }
+
+        if (methodData.purchaseToken != null || methodData.prorationMode != null) {
             builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
         }
 
@@ -141,12 +160,24 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
-            PriceChangeConfirmationListener listener) {
+    public void launchPriceChangeConfirmationFlow(Activity activity, ProductDetails productDetails,
+        ProductDetailsResponseListener listener) {
+
         PriceChangeFlowParams params = PriceChangeFlowParams
-                .newBuilder()
-                .setSkuDetails(sku)
-                .build();
+            .newBuilder()
+            .setSkuDetails(productDetails)
+            .build();
         mClient.launchPriceChangeConfirmationFlow(activity, params, listener);
+    }
+
+    private List<Product> buildProductList(@ProductType String productType, List<String> ids){
+        List<Product> products = new ArrayList<>();
+        for (String id : ids) {
+            products.add(Product.newBuilder()
+                .setProductId(id)
+                .setProductType(productType)
+                .build());
+        }
+        return products;
     }
 }

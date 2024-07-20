@@ -22,7 +22,6 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
@@ -57,9 +56,6 @@ public class MockBillingWrapper implements BillingWrapper {
             mQueryPurchasesInvocation = new MultiSkuTypeInvocationTracker<>();
     private MultiSkuTypeInvocationTracker<Void, PurchaseHistoryResponseListener>
             mQueryPurchaseHistoryInvocation = new MultiSkuTypeInvocationTracker<>();
-
-    private InvocationTracker<SkuDetails, PriceChangeConfirmationListener>
-            mPriceChangeConfirmationFlow = new InvocationTracker<>();
 
     private Intent mPlayBillingFlowLaunchIntent;
 
@@ -103,12 +99,6 @@ public class MockBillingWrapper implements BillingWrapper {
         mPlayBillingFlowLaunchIntent = activity.getIntent();
         mLaunchPaymentFlowLatch.countDown();
         return mPaymentFlowSuccessful;
-    }
-
-    @Override
-    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
-            PriceChangeConfirmationListener listener) {
-        mPriceChangeConfirmationFlow.call(sku, listener);
     }
 
     public void triggerConnected() {
@@ -171,11 +161,6 @@ public class MockBillingWrapper implements BillingWrapper {
         mListener.onPurchaseFlowComplete(toResult(BillingClient.BillingResponseCode.OK), "");
     }
 
-    public void triggerOnPriceChangeConfirmationResult() {
-        mPriceChangeConfirmationFlow.getCallback().onPriceChangeConfirmationResult(
-                toResult(BillingClient.BillingResponseCode.OK));
-    }
-
     public boolean waitForConnect() throws InterruptedException {
         return wait(mConnectLatch);
     }
@@ -186,10 +171,6 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public boolean waitForLaunchPaymentFlow() throws InterruptedException {
         return wait(mLaunchPaymentFlowLatch);
-    }
-
-    public boolean waitForLaunchPriceChangeConfirmationFlow() throws InterruptedException {
-        return mPriceChangeConfirmationFlow.waitUntilCalled();
     }
 
     public boolean waitForQueryPurchases() throws InterruptedException {

@@ -63,6 +63,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
             fail("Could not parse SKU.");
             return;
         }
+        if (mMethodData.isPriceChangeConfirmation) {
+            fail("Price change confirmation flow is not supported");
+        }
 
         /**
          * Note that we have temporarily disabled the IMMEDIATE_WITHOUT_PRORATION mode
@@ -114,15 +117,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
 
         SkuDetails sku = skus.get(0);
 
-        if (mMethodData.isPriceChangeConfirmation) {
-            launchPriceChangeConfirmationFlow(sku);
-        } else {
-            launchPaymentFlow(sku);
-        }
-    }
-
-    private void launchPriceChangeConfirmationFlow(SkuDetails sku) {
-        fail("Price change confirmation flow is not supported");
+        launchPaymentFlow(sku);
     }
 
     private void launchPaymentFlow(SkuDetails sku) {

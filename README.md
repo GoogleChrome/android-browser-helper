@@ -19,7 +19,7 @@ Android Browser helper is available on the Google Maven. To use it, modify your 
 ```gradle
 dependencies {
     //...
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.3.0'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.4.0'
 }
 
 ``` 

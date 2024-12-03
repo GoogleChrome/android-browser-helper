@@ -17,6 +17,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.google.androidbrowserhelper.demos.customtabssession"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 

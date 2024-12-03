@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.google.browser.examples.twa_orientation"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 

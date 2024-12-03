@@ -20,7 +20,6 @@ apply plugin: 'maven-publish'
 def VERSION = "2.5.0";
 
 android {
-    namespace "com.google.androidbrowserhelper"
     compileSdkVersion 31
 
     defaultConfig {

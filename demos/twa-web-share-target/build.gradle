@@ -17,7 +17,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.google.androidbrowserhelper.webshare"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 

@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.google.browser.examples.twawebviewfallback"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 

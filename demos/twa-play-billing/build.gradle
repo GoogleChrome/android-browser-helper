@@ -21,7 +21,6 @@ def appId = "com.google.androidbrowserhelper.demos.playbilling"
 // def appId = "dev.conn.drink"
 
 android {
-    namespace "com.google.androidbrowserhelper.demos.playbilling"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
     defaultConfig {

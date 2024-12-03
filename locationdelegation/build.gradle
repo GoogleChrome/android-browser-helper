@@ -18,7 +18,6 @@ apply plugin: 'maven-publish'
 def VERSION = "1.1.1";
 
 android {
-    namespace "com.google.androidbrowserhelper.locationdelegation"
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 

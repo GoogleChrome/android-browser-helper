@@ -19,7 +19,6 @@ plugins {
 }
 
 android {
-    namespace "com.google.androidbrowserhelper.demos.twapostmessage"
     // If you are changing this to below 31 you will need to ask for Permission
     // for notification to work.
     compileSdkVersion 33

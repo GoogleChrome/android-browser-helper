@@ -4,6 +4,7 @@ android {
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
+
     defaultConfig {
         applicationId "com.google.browser.examples.twawebviewfallback"
         minSdkVersion 26

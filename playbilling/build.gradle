@@ -20,29 +20,38 @@ apply plugin: 'maven-publish'
 def VERSION = "1.0.0-alpha11";
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "com.google.androidbrowserhelper.playbilling"
+    compileSdk 35
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 31
+        minSdkVersion 21
+        targetSdkVersion 35
         versionCode 1
-        versionName VERSION
-
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
+            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
+        }
+        debug {
+            buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
+            buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     testOptions {
@@ -53,26 +62,28 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api 'androidx.browser:browser:1.8.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.billingclient:billing:6.2.1'
+    implementation 'org.chromium.net:cronet-embedded:119.6045.31'
+    implementation 'com.android.billingclient:billing:7.1.1'
+    implementation 'com.google.androidbrowserhelper:billing:1.0.0-alpha11'
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.11'
 
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'junit:junit:4.13.2'
     debugImplementation project(path: ':androidbrowserhelper')
-    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.2.2'
+    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
 }
 
 /**
  * Adds gradle dependencies to the POM dependency node.
  */
-def addDependencies(pomDependenciesNode, gradleDependencies) {
+static def addDependencies(pomDependenciesNode, gradleDependencies) {
     gradleDependencies.each {
         // Ensure dependencies such as fileTree are not included in the pom.
         if (it.name != 'unspecified') {

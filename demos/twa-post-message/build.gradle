@@ -19,14 +19,15 @@ plugins {
 }
 
 android {
+    namespace "com.google.androidbrowserhelper.demos.twapostmessage"
+    compileSdk 35
     // If you are changing this to below 31 you will need to ask for Permission
     // for notification to work.
-    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.twapostmessage"
-        minSdkVersion 16
-        targetSdkVersion 33
+        minSdkVersion 21
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
 
@@ -34,13 +35,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    implementation 'androidx.browser:browser:1.6.0-alpha02'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation "androidx.core:core:1.10.1"
+    implementation 'androidx.browser:browser:1.8.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation "androidx.core:core:1.15.0"
 }

@@ -1,20 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "com.google.browser.examples.twa_location_delegation"
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.google.browser.examples.twa_location_delegation"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -30,6 +30,6 @@ dependencies {
     debugImplementation project(path: ':androidbrowserhelper')
     debugImplementation project(path: ':locationdelegation')
 
-    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.2.1'
-    releaseImplementation 'com.google.androidbrowserhelper:locationdelegation:1.0.1'
+    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+    releaseImplementation 'com.google.androidbrowserhelper:locationdelegation:1.1.1'
 }

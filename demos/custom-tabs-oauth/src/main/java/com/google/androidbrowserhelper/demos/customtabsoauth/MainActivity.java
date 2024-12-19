@@ -25,6 +25,11 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+@Deprecated
+/*
+ * This sample is deprecated and retained for historical purposes only.
+ * Instead use Auth Tab demo found in demos/custom-tabs-auth-tab.
+ */
 public class MainActivity extends Activity {
     private static final String AUTHORIZATION_ENDPOINT = "https://github.com/login/oauth/authorize";
     private static final String CLIENT_ID = "<github-client-id>";

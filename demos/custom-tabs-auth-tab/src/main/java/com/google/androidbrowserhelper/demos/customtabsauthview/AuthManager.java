@@ -17,6 +17,13 @@ import androidx.browser.auth.ExperimentalAuthTab;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * This class helps managing an authentication flow. It was created with the goal of demonstrating
+ * how to use Custom Tabs Auth Tab to handle auth and is not meant as a complete implementation
+ * of the OAuth protocol. We recommend checking out https://github.com/openid/AppAuth-Android for
+ * a comprehensive implementation of the OAuth protocol.
+ */
+
 @OptIn(markerClass = ExperimentalAuthTab.class)
 public class AuthManager {
     private static final String TAG = "OAuthManager";

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
@@ -29,14 +30,12 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.ExperimentalEphemeralBrowsing;
 
 public class MainActivity extends Activity {
     private static final String URL = "https://xchrdw.github.io/browsing-data/siteDataTester.html";
-    private static final String IS_EPHEMERAL_BROWSING_SUPPORTED = "isEphemeralBrowsingSupported";
-    private static final String EPHEMERAL_BROWSING_SUPPORTED_KEY = "ephemeralBrowsingSupported";
-
-    private CustomTabsClient mClient;
+    private CustomTabsSession mSession;
     private CustomTabsServiceConnection mConnection;
 
     @Override
@@ -47,8 +46,8 @@ public class MainActivity extends Activity {
             @Override
             public void onCustomTabsServiceConnected(@NonNull ComponentName name,
                                                      @NonNull CustomTabsClient client) {
-                mClient = client;
-                mClient.warmup(0);
+                mSession = client.newSession(null);
+                client.warmup(0);
             }
 
             @Override
@@ -68,9 +67,13 @@ public class MainActivity extends Activity {
 
         Button launchButton = findViewById(R.id.launch);
         launchButton.setOnClickListener(view -> {
-            if (isEphemeralTabSupported()) {
-                launchEphemeralTab();
-            } else {
+            try {
+                if (isEphemeralTabSupported()) {
+                    launchEphemeralTab();
+                } else {
+                    launchFallbackWebView();
+                }
+            } catch (RemoteException e) {
                 launchFallbackWebView();
             }
         });
@@ -103,13 +106,9 @@ public class MainActivity extends Activity {
         startActivity(webIntent);
     }
 
-    private boolean isEphemeralTabSupported() {
-        if (mClient == null) {
-            return false;
-        }
-
-        Bundle bundle = mClient.extraCommand(IS_EPHEMERAL_BROWSING_SUPPORTED, null);
-        return (bundle != null && bundle.containsKey(EPHEMERAL_BROWSING_SUPPORTED_KEY));
+    @OptIn(markerClass = ExperimentalEphemeralBrowsing.class)
+    private boolean isEphemeralTabSupported() throws RemoteException {
+        return mSession.isEphemeralBrowsingSupported(Bundle.EMPTY);
     }
 }
 

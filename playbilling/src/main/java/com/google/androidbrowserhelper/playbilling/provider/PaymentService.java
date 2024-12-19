@@ -36,10 +36,10 @@ public class PaymentService extends Service {
 
     private final IBinder mBinder = new IsReadyToPayService.Stub() {
         @Override
-        public void isReadyToPay(IsReadyToPayServiceCallback callback) throws RemoteException {
+        public void isReadyToPay(IsReadyToPayServiceCallback isReadyToPayServiceCallback) throws RemoteException {
             Context context = PaymentService.this;
             String packageName = getPackageManager().getNameForUid(Binder.getCallingUid());
-            callback.handleIsReadyToPay(
+            isReadyToPayServiceCallback.handleIsReadyToPay(
                     PaymentVerifier.shouldAllowPayments(context, packageName, TAG));
         }
     };

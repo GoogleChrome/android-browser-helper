@@ -52,7 +52,7 @@ import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -69,7 +69,7 @@ import java.util.concurrent.TimeoutException;
 public class TwaLauncherTest {
     private static final Uri URL = Uri.parse("https://www.test.com/default_url/");
 
-    private Context mContext = InstrumentationRegistry.getContext();
+    private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private static final CustomTabsCallback mCustomTabsCallback = new QualityEnforcer();
 
     @Rule
@@ -231,7 +231,7 @@ public class TwaLauncherTest {
         TrustedWebActivityIntentBuilder builder = makeBuilder();
         mTwaLauncher.launch(builder, mCustomTabsCallback, strategy, null);
         verify(strategy).onTwaLaunchInitiated(
-                eq(InstrumentationRegistry.getContext().getPackageName()),
+                eq(InstrumentationRegistry.getInstrumentation().getContext().getPackageName()),
                 eq(builder));
     }
 

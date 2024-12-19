@@ -20,13 +20,12 @@ apply plugin: 'maven-publish'
 def VERSION = "2.5.0";
 
 android {
-    compileSdkVersion 31
+    namespace "com.google.androidbrowserhelper"
+    compileSdk 35
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 31
-        versionCode 1
-        versionName VERSION
+        targetSdkVersion 35
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,8 +38,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     testOptions {
@@ -51,23 +50,23 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api 'androidx.browser:browser:1.8.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'androidx.core:core:1.0.2'
+    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.core:core:1.15.0'
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:3.0.0'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'org.robolectric:robolectric:4.11'
 
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test:rules:1.2.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'org.mockito:mockito-core:3.0.0'
-    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.19.0'
-    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'org.mockito:mockito-core:3.12.4'
+    androidTestImplementation 'com.linkedin.dexmaker:dexmaker-mockito:2.28.3'
+    androidTestImplementation 'junit:junit:4.13.2'
 }
 
 publishing {

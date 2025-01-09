@@ -65,9 +65,7 @@ dependencies {
     api 'androidx.browser:browser:1.8.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'org.chromium.net:cronet-embedded:119.6045.31'
-    implementation 'com.android.billingclient:billing:7.1.1'
-    implementation 'com.google.androidbrowserhelper:billing:1.0.0-alpha11'
+    implementation 'com.android.billingclient:billing:6.2.1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.11'

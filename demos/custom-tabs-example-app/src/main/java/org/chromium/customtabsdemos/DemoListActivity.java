@@ -94,7 +94,6 @@ public class DemoListActivity extends AppCompatActivity {
     private static class ViewHolder extends RecyclerView.ViewHolder {
         /* package */ TextView mTitleTextView;
         /* package */ TextView mDescriptionTextView;
-        /* package */ int mPosition;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -117,7 +116,7 @@ public class DemoListActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            int position = ((ViewHolder)v.getTag()).mPosition;
+            int position = ((ViewHolder)v.getTag()).getAdapterPosition();
             ActivityDesc activityDesc = mActivityDescs.get(position);
             Intent intent = new Intent(mContext, activityDesc.mActivity);
             mContext.startActivity(intent);
@@ -141,7 +140,6 @@ public class DemoListActivity extends AppCompatActivity {
 
             viewHolder.mTitleTextView.setText(title);
             viewHolder.mDescriptionTextView.setText(description);
-            viewHolder.mPosition = position;
         }
 
         @Override

@@ -13,7 +13,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.google.androidbrowserhelper.demo">
+    package="com.google.androidbrowserhelper.launchtwa">
 
     <application
         android:allowBackup="true"
@@ -25,7 +25,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name="com.google.androidbrowserhelper.launchtwa.LaunchTwaActivity"
+            android:name=".LaunchTwaActivity"
             android:label="@string/launch_twa"
             android:exported="true">
             <intent-filter>

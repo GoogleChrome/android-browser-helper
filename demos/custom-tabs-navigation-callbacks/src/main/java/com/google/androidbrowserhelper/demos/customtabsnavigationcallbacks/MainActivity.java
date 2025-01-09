@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.google.androidbrowserhelper.demos.customtabssession;
+package com.google.androidbrowserhelper.demos.customtabsnavigationcallbacks;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,8 +28,6 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;

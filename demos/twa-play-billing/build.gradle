@@ -21,29 +21,30 @@ def appId = "com.google.androidbrowserhelper.demos.playbilling"
 // def appId = "dev.conn.drink"
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "com.google.androidbrowserhelper.demos.playbilling"
+    compileSdk 35
+
     defaultConfig {
         applicationId appId
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 35
         versionCode 13
         versionName "13.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api 'androidx.browser:browser:1.8.0'
     debugImplementation project(path: ':androidbrowserhelper')
     debugImplementation project(path: ':playbilling')
 
-    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.2.2'
-    releaseImplementation 'com.google.androidbrowserhelper:billing:1.0.0-alpha08'
+    releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+    releaseImplementation 'com.google.androidbrowserhelper:billing:1.0.0-alpha11'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

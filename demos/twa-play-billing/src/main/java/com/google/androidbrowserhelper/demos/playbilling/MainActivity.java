@@ -22,7 +22,6 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.androidbrowserhelper.playbilling.BuildConfig;
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
 
 public class MainActivity extends Activity {
@@ -39,7 +38,7 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, LauncherActivity.class);
 
         intent.setData(
-                Uri.parse("https://beer.conn.dev?client_version=" + BuildConfig.VERSION_CODE)
+                Uri.parse("https://beer.conn.dev")
         );
 
         startActivity(intent);

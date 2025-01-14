@@ -30,6 +30,13 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        maven {
+            url = "https://linkedin.jfrog.io/artifactory/open-source/"
+            content {
+                includeGroup 'com.linkedin.dexmaker'
+            }
+        }
     }
 }
 

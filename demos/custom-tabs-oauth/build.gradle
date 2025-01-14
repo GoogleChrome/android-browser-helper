@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.google.androidbrowserhelper.demos.customtabsoauth"
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.customtabsoauth"

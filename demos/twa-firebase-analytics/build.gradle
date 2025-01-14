@@ -27,8 +27,8 @@ buildscript {
 }
 
 android {
+    namespace "com.google.androidbrowserhelper.demos.twa_firebase_analytics"
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.twa_firebase_analytics"

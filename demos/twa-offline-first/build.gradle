@@ -19,6 +19,7 @@ plugins {
 }
 
 android {
+    namespace "com.google.androidbrowserhelper.demos.twa_offline_first"
     compileSdkVersion 31
 
     defaultConfig {

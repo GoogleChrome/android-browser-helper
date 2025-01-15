@@ -17,13 +17,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "com.google.browser.examples.twa_basic"
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.google.browser.examples.twa_basic"
         minSdkVersion 26
-        targetSdkVersion 31
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
     }
@@ -35,8 +35,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -44,6 +44,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':androidbrowserhelper')
 
-    implementation 'androidx.browser:browser:1.4.0'
-    implementation 'androidx.core:core:1.1.0'
+    implementation 'androidx.browser:browser:1.8.0'
+    implementation 'androidx.core:core:1.15.0'
 }

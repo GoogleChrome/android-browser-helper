@@ -69,19 +69,14 @@ public class ServiceConnectionActivity extends AppCompatActivity
     public void onClick(View view) {
         int viewId = view.getId();
         Uri uri  = Uri.parse(mUrlEditText.getText().toString());
-        switch (viewId) {
-            case R.id.button_may_launch_url:
-                customTabActivityHelper.mayLaunchUrl(uri, null, null);
-                break;
-            case R.id.start_custom_tab:
-                CustomTabsIntent customTabsIntent =
-                        new CustomTabsIntent.Builder(customTabActivityHelper.getSession())
-                        .build();
-                CustomTabActivityHelper.openCustomTab(
-                        this, customTabsIntent, uri, new WebviewFallback());
-                break;
-            default:
-                //Unkown View Clicked
+        if (viewId == R.id.button_may_launch_url) {
+            customTabActivityHelper.mayLaunchUrl(uri, null, null);
+        } else if (viewId == R.id.start_custom_tab) {
+            CustomTabsIntent customTabsIntent =
+                    new CustomTabsIntent.Builder(customTabActivityHelper.getSession())
+                            .build();
+            CustomTabActivityHelper.openCustomTab(
+                    this, customTabsIntent, uri, new WebviewFallback());
         }
     }
 }

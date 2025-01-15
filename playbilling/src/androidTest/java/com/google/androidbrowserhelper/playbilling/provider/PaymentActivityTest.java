@@ -180,7 +180,7 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForQuerySkuDetails());
         List<String> queriedSkuDetails = mWrapper.getQueriedSkuDetails();
 
-        assertEquals(1, queriedSkuDetails.size());
+        assertEquals(2, queriedSkuDetails.size());
         assertTrue(queriedSkuDetails.contains(SKU));
     }
 

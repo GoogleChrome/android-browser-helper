@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.AuthTab" parent="Theme.Material3.DayNight.NoActionBar">
+    </style>
+
+    <style name="Theme.AuthTab" parent="Base.Theme.AuthTab" />
+</resources>

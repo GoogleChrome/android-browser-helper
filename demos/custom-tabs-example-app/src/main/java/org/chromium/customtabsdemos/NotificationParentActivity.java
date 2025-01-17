@@ -14,6 +14,8 @@
 
 package org.chromium.customtabsdemos;
 
+import static org.chromium.customtabsdemos.R.*;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -60,13 +62,9 @@ public class NotificationParentActivity extends AppCompatActivity implements Vie
     @Override
     public void onClick(View v) {
         int viewId = v.getId();
-        switch (viewId) {
-            case R.id.create_notification:
-                createAndShowNotification();
-                finish();
-                break;
-            default:
-                //Unknown view clicked
+        if (viewId == R.id.create_notification) {
+            createAndShowNotification();
+            finish();
         }
     }
 
@@ -81,7 +79,7 @@ public class NotificationParentActivity extends AppCompatActivity implements Vie
         }
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this, CT_NOTIFICATION_CHANNEL_ID)
-                        .setSmallIcon(R.drawable.abc_popup_background_mtrl_mult)
+                        .setSmallIcon(androidx.appcompat.R.drawable.abc_popup_background_mtrl_mult)
                         .setContentTitle(getString(R.string.notification_title))
                         .setContentText(getString(R.string.notification_text));
 

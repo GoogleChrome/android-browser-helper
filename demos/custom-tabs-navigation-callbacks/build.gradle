@@ -17,7 +17,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.google.androidbrowserhelper.demos.customtabsnavigationcallbacks"
+    namespace "com.google.androidbrowserhelper.demos.customtabssession"
     compileSdkVersion 31
 
     defaultConfig {

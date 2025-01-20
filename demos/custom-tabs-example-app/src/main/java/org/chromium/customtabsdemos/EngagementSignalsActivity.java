@@ -183,12 +183,8 @@ public class EngagementSignalsActivity extends AppCompatActivity implements View
     @Override
     public void onClick(View v) {
         int viewId = v.getId();
-        switch (viewId) {
-            case R.id.start_custom_tab:
-                openCustomTab();
-                break;
-            default:
-                // Unknown View Clicked
+        if (viewId == R.id.start_custom_tab) {
+            openCustomTab();
         }
     }
 

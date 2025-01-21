@@ -17,8 +17,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "org.chromium.customtabsdemos"
     compileSdkVersion 33
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "org.chromium.customtabsdemos"

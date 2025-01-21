@@ -17,9 +17,9 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.google.browser.examples.twa_multi_domain"
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
-
+    
 
     defaultConfig {
         applicationId "com.google.browser.examples.twa_multi_domain"

@@ -20,8 +20,8 @@ apply plugin: 'maven-publish'
 def VERSION = "1.0.0-alpha11";
 
 android {
+    namespace "com.google.androidbrowserhelper.playbilling"
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
 
     defaultConfig {
         minSdkVersion 19
@@ -31,6 +31,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildFeatures {
+        aidl = true
     }
 
     buildTypes {
@@ -59,7 +63,7 @@ dependencies {
     implementation 'com.android.billingclient:billing:6.2.1'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.robolectric:robolectric:4.12.2'
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'

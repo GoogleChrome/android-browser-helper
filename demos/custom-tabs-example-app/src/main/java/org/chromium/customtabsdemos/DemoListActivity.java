@@ -135,6 +135,7 @@ public class DemoListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
+            position = viewHolder.getAdapterPosition();
             final ActivityDesc activityDesc = mActivityDescs.get(position);
             String title = activityDesc.mTitle;
             String description = activityDesc.mDescription;

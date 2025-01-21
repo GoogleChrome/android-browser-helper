@@ -40,16 +40,11 @@ public class SimpleCustomTabActivity extends AppCompatActivity implements View.O
     @Override
     public void onClick(View v) {
         int viewId = v.getId();
-
-        switch (viewId) {
-            case R.id.start_custom_tab:
-                String url = mUrlEditText.getText().toString();
-                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-                CustomTabActivityHelper.openCustomTab(
-                        this, customTabsIntent, Uri.parse(url), new WebviewFallback());
-                break;
-            default:
-                //Unknown View Clicked
+        if (viewId == R.id.start_custom_tab) {
+            String url = mUrlEditText.getText().toString();
+            CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+            CustomTabActivityHelper.openCustomTab(
+                    this, customTabsIntent, Uri.parse(url), new WebviewFallback());
         }
     }
 }

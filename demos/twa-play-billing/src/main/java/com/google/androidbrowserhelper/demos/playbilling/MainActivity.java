@@ -38,7 +38,8 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, LauncherActivity.class);
 
         intent.setData(
-                Uri.parse("https://beer.conn.dev?client_version=" + BuildConfig.VERSION_CODE));
+                Uri.parse("https://beer.conn.dev")
+        );
 
         startActivity(intent);
     }

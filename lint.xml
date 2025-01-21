@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- TODO(https://github.com/GoogleChrome/android-browser-helper/issues/495): Must be removed!-->
+   <issue id="ExpiredTargetSdkVersion" severity="warning"/>
+</lint>

@@ -20,6 +20,7 @@ apply plugin: 'maven-publish'
 def VERSION = "2.5.0";
 
 android {
+    namespace "com.google.androidbrowserhelper"
     compileSdkVersion 31
 
     defaultConfig {
@@ -39,8 +40,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     testOptions {
@@ -60,7 +61,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:3.0.0'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.robolectric:robolectric:4.12.2'
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'

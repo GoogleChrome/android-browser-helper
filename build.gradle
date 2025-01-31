@@ -21,7 +21,7 @@ buildscript {
         google()
         jcenter()
         maven {
-            url = uri("https://androidx.dev/snapshots/builds/12502757/artifacts/repository")
+            url = "https://androidx.dev/snapshots/builds/12711855/artifacts/repository"
         }
     }
     dependencies {

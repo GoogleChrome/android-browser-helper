@@ -1,4 +1,4 @@
-package com.google.androidbrowserhelper.demos.customtabsauthview;
+package com.google.androidbrowserhelper.demos.customtabsauthtab;
 
 import android.content.Context;
 import android.content.Intent;

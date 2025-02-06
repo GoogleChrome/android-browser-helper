@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.google.androidbrowserhelper.demos.customtabsauthview;
+package com.google.androidbrowserhelper.demos.customtabsauthtab;
 
 import android.content.Intent;
 import android.net.Uri;

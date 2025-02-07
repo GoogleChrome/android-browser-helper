@@ -20,9 +20,6 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven {
-            url = "https://androidx.dev/snapshots/builds/12815573/artifacts/repository"
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.7.3'
@@ -33,11 +30,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-
-        // AndroidX snapshots repository
-        maven {
-            url = "https://androidx.dev/snapshots/builds/12815573/artifacts/repository"
-        }
 
         // Repository for DexMaker
         maven {

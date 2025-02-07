@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Google LLC
+ *    Copyright 2024 Google LLC
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  *    limitations under the License.
  */
 
-package com.google.androidbrowserhelper.demos.customtabsoauth;
+package com.google.androidbrowserhelper.demos.customtabsauthtab;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,20 +24,26 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-@Deprecated
-/*
- * This sample is deprecated and retained for historical purposes only.
- * Instead use Auth Tab demo found in demos/custom-tabs-auth-tab.
- */
-public class MainActivity extends Activity {
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.OptIn;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.auth.AuthTabIntent;
+import androidx.browser.auth.ExperimentalAuthTab;
+
+@OptIn(markerClass = ExperimentalAuthTab.class)
+public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
     private static final String AUTHORIZATION_ENDPOINT = "https://github.com/login/oauth/authorize";
     private static final String CLIENT_ID = "<github-client-id>";
     private static final String CLIENT_SECRET = "<github-client-secret>";
-    private static final String REDIRECT_URI =
-            "https://oauth-custom-tabs.glitch.me/oauth/auth-callback.html";
+    private static final String REDIRECT_SCHEME = "auth";
 
-    private static final OAuthManager OAUTH_MANAGER =
-            new OAuthManager(CLIENT_ID, CLIENT_SECRET, AUTHORIZATION_ENDPOINT, REDIRECT_URI);
+    private static final AuthManager O_AUTH_MANAGER =
+            new AuthManager(CLIENT_ID, CLIENT_SECRET, AUTHORIZATION_ENDPOINT, REDIRECT_SCHEME);
+
+    private final ActivityResultLauncher<Intent> mLauncher =
+            AuthTabIntent.registerActivityResultLauncher(this, this::handleAuthResult);
 
     private Button mLoginButton;
     private TextView mUserText;
@@ -57,25 +62,13 @@ public class MainActivity extends Activity {
         Intent intent = getIntent();
         if (intent != null) {
             Uri data = intent.getData();
-            if (data != null && data.getPath() != null
-                    && data.getPath().startsWith("/oauth/auth-callback.html")) {
+            if (data != null && data.getHost() != null
+                    && data.getHost().startsWith("callback")) {
                 mProgressBar.setVisibility(View.VISIBLE);
                 mLoginButton.setEnabled(false);
-                handleAuthCallback(data);
+                completeAuth(data);
             }
         }
-    }
-
-    private void handleAuthCallback(Uri uri) {
-        OAUTH_MANAGER.handleAuthCallback(this, uri, (accessToken, scope, tokenType) -> {
-            GithubApi.requestGithubUsername(accessToken, (username -> {
-                mLoginButton.setText(R.string.logout);
-                mLoginButton.setEnabled(true);
-                mProgressBar.setVisibility(View.INVISIBLE);
-                mUserText.setText(getString(R.string.logged_in, username));
-                mLoggedIn = true;
-            }));
-        });
     }
 
     public void login(View v) {
@@ -84,7 +77,25 @@ public class MainActivity extends Activity {
             mUserText.setText(R.string.logged_out);
             mLoggedIn = false;
         } else {
-            OAUTH_MANAGER.authorize(this, "user");
+            O_AUTH_MANAGER.authorize(this, mLauncher, "user");
         }
+    }
+
+    private void handleAuthResult(AuthTabIntent.AuthResult result) {
+        if (result.resultCode == AuthTabIntent.RESULT_OK) {
+            completeAuth(result.resultUri);
+        }
+    }
+
+    private void completeAuth(Uri uri) {
+        O_AUTH_MANAGER.continueAuthFlow(this, uri, (accessToken, scope, tokenType) -> {
+            GithubApi.requestGithubUsername(accessToken, (username -> {
+                mLoginButton.setText(R.string.logout);
+                mLoginButton.setEnabled(true);
+                mProgressBar.setVisibility(View.INVISIBLE);
+                mUserText.setText(getString(R.string.logged_in, username));
+                mLoggedIn = true;
+            }));
+        });
     }
 }

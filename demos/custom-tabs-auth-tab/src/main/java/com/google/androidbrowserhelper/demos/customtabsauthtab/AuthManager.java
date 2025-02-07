@@ -1,46 +1,51 @@
-package com.google.androidbrowserhelper.demos.customtabsoauth;
+package com.google.androidbrowserhelper.demos.customtabsauthtab;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.auth.AuthTabIntent;
+import androidx.annotation.OptIn;
+import androidx.browser.auth.ExperimentalAuthTab;
 
 import java.io.IOException;
 import java.util.UUID;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
-@Deprecated
-/*
- * This sample is deprecated and retained for historical purposes only.
- * Instead use Auth Tab demo found in demos/custom-tabs-auth-tab.
+/**
+ * This class helps managing an authentication flow. It was created with the goal of demonstrating
+ * how to use Custom Tabs Auth Tab to handle auth and is not meant as a complete implementation
+ * of the OAuth protocol. We recommend checking out https://github.com/openid/AppAuth-Android for
+ * a comprehensive implementation of the OAuth protocol.
  */
-public class OAuthManager {
+
+@OptIn(markerClass = ExperimentalAuthTab.class)
+public class AuthManager {
     private static final String TAG = "OAuthManager";
 
-    private String mClientId;
-    private String mClientSecret;
-    private String mAuthorizationEndpoint;
-    private String mRedirectUri;
+    private final String mClientId;
+    private final String mClientSecret;
+    private final String mAuthorizationEndpoint;
+    private final String mRedirectScheme;
 
     public interface OAuthCallback {
         void auth(String accessToken, String scope, String tokenType);
     }
 
-    public OAuthManager(String clientId, String clientSecret, String authorizationEndpoint,
-                        String redirectUri) {
+    public AuthManager(String clientId, String clientSecret, String authorizationEndpoint,
+                       String redirectScheme) {
         mClientId = clientId;
         mClientSecret = clientSecret;
         mAuthorizationEndpoint = authorizationEndpoint;
-        mRedirectUri = redirectUri;
+        mRedirectScheme = redirectScheme;
     }
 
-    public void authorize(Context context, String scope) {
+    public void authorize(Context context, ActivityResultLauncher<Intent> launcher, String scope) {
         // Generate a random state.
         String state = UUID.randomUUID().toString();
 
@@ -56,19 +61,16 @@ public class OAuthManager {
                 .buildUpon()
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("client_id", mClientId)
-                .appendQueryParameter("redirect_uri", mRedirectUri)
                 .appendQueryParameter("scope", scope)
                 .appendQueryParameter("state", state)
                 .build();
 
-        // Open the Authorization URI in a Custom Tab.
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
-        customTabsIntent.intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        customTabsIntent.launchUrl(context, uri);
+        // Open the Authorization URI in a Chrome Custom Auth Tab.
+        AuthTabIntent authTabIntent = new AuthTabIntent.Builder().build();
+        authTabIntent.launch(launcher, uri, mRedirectScheme);
     }
 
-    public void handleAuthCallback(
-            @NonNull Context context, @NonNull  Uri uri, @NonNull OAuthCallback callback) {
+    public void continueAuthFlow(@NonNull Context context, Uri uri, @NonNull OAuthCallback callback) {
         String code = uri.getQueryParameter("code");
         SharedPreferences preferences =
                 context.getSharedPreferences("OAUTH_STORAGE", Context.MODE_PRIVATE);
@@ -78,7 +80,6 @@ public class OAuthManager {
                 .appendQueryParameter("client_id", mClientId)
                 .appendQueryParameter("client_secret", mClientSecret)
                 .appendQueryParameter("code", code)
-                .appendQueryParameter("redirect_uri", mRedirectUri)
                 .appendQueryParameter("state", state)
                 .build();
 

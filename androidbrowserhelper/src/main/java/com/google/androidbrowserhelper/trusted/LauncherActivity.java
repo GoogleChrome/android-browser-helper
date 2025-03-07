@@ -38,6 +38,10 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 
 import org.json.JSONException;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
  * basic modifications to the behaviour.
@@ -200,8 +204,9 @@ public class LauncherActivity extends Activity {
                         getColorCompat(mMetadata.navigationBarDividerColorDarkId))
                 .build();
 
+        Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder =
-                new TrustedWebActivityIntentBuilder(getLaunchingUrl())
+                new TrustedWebActivityIntentBuilder(launchUrl)
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
                         .setNavigationBarDividerColor(
@@ -211,6 +216,12 @@ public class LauncherActivity extends Activity {
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode())
                         .setScreenOrientation(mMetadata.screenOrientation);
+
+        // TODO When available
+//        Uri intentUrl = getIntent().getData();
+//        if (!launchUrl.equals(intentUrl)) {
+//             twaBuilder.setOriginalLaunchUrl(launchUrlBundle.getOriginalUrl());
+//        }
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
@@ -330,6 +341,23 @@ public class LauncherActivity extends Activity {
         outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }
 
+    /**
+     * Override this to enable Protocol Handler support.
+     * Keys of this map are data schemes, e.g. "bitcoin", "irc", "xmpp", "web+coffee", and values
+     * are templates that will be used to construct the full URL. The template must contain a "%s"
+     * token and be an absolute location with http/https scheme and the same origin as the TWA.
+     *
+     * An example valid entry in the map would be:
+     * ["web+coffee"] -> ["https://coffee.com/?type=%s"]
+     * This would result in a link "web+coffee://latte" being converted to
+     * "https://coffee.com/?type=web%2Bcoffee%3A%2F%2Flatte".
+     *
+     * {@see https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference/protocol_handlers}
+     */
+    protected Map<String, Uri> getProtocolHandlers() {
+        return Collections.emptyMap();
+    }
+
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
@@ -347,18 +375,33 @@ public class LauncherActivity extends Activity {
      * Override this for special handling (such as ignoring or sanitising data from the Intent).
      */
     protected Uri getLaunchingUrl() {
-        Uri uri = getIntent().getData();
-        if (uri != null) {
-            Log.d(TAG, "Using URL from Intent (" + uri + ").");
-            return uri;
+        Uri defaultUrl = Uri.parse(mMetadata.defaultUrl);
+
+        Uri intentUrl = getIntent().getData();
+
+        if (intentUrl != null) {
+            Map<String, Uri> protocolHandlers = getProtocolHandlers();
+            String scheme = intentUrl.getScheme();
+
+            Uri format = protocolHandlers.get(scheme);
+            if (format != null) {
+                String target = Uri.encode(intentUrl.toString());
+                Uri targetUrl =  Uri.parse(String.format(format.toString(), target));
+                Log.d(TAG, "Using protocol handler url: " + targetUrl);
+                return targetUrl;
+            }
+
+            if ("https".equals(scheme)) {
+                Log.d(TAG, "Using url from Intent: " + intentUrl);
+                return intentUrl;
+            }
+
+            Log.w(TAG, "Scheme " + scheme + " was registered in the manifest but not in " +
+                    "getProtocolHandlers()! Ignoring it and falling back to the default url.");
         }
 
-        if (mMetadata.defaultUrl != null) {
-            Log.d(TAG, "Using URL from Manifest (" + mMetadata.defaultUrl + ").");
-            return Uri.parse(mMetadata.defaultUrl);
-        }
-
-        return Uri.parse("https://www.example.com/");
+        Log.d(TAG, "Using url from Manifest: " + defaultUrl);
+        return defaultUrl;
     }
 
     /**

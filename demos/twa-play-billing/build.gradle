@@ -22,18 +22,19 @@ def appId = "com.google.androidbrowserhelper.demos.playbilling"
 
 android {
     namespace "com.google.androidbrowserhelper.demos.playbilling"
-    compileSdkVersion 31
+
     defaultConfig {
         applicationId appId
         minSdkVersion 21
+        compileSdk 36
         targetSdkVersion 31
         versionCode 13
         versionName "13.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 

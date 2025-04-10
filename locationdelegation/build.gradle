@@ -19,10 +19,10 @@ def VERSION = "1.1.1";
 
 android {
     namespace "com.google.androidbrowserhelper.locationdelegation"
-    compileSdkVersion 31
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 21
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName VERSION

@@ -18,11 +18,11 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "org.chromium.customtabsdemos"
-    compileSdkVersion 33
 
     defaultConfig {
         applicationId "org.chromium.customtabsdemos"
         minSdkVersion 26
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
@@ -35,8 +35,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 

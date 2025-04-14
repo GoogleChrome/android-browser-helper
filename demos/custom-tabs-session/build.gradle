@@ -18,11 +18,11 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.google.androidbrowserhelper.demos.customtabssession"
-    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.customtabssession"
         minSdkVersion 25
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

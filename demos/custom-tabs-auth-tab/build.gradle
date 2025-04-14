@@ -18,10 +18,10 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'com.google.androidbrowserhelper.demos.customtabsauthtab'
-    compileSdkVersion 35
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.customtabsauthtab"
         minSdkVersion 26
+        compileSdk 36
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"

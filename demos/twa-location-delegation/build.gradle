@@ -2,19 +2,19 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.google.browser.examples.twa_location_delegation"
-    compileSdkVersion 31
 
     defaultConfig {
         applicationId "com.google.browser.examples.twa_location_delegation"
         minSdkVersion 21
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     buildTypes {

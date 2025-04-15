@@ -15,7 +15,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-def VERSION = "1.1.1";
+def VERSION = "1.1.2";
 
 android {
     namespace "com.google.androidbrowserhelper.locationdelegation"

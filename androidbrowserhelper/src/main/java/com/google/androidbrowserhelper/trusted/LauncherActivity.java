@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.FileHandlingData;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
@@ -38,7 +40,9 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 
 import org.json.JSONException;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -227,6 +231,7 @@ public class LauncherActivity extends Activity {
         }
 
         addShareDataIfPresent(twaBuilder);
+        addFileDataIfPresent(twaBuilder);
 
         mTwaLauncher = createTwaLauncher();
         mTwaLauncher.launch(twaBuilder,
@@ -286,6 +291,21 @@ public class LauncherActivity extends Activity {
         } catch (JSONException e) {
             Log.d(TAG, "Failed to parse share target json: " + e.toString());
         }
+    }
+
+    private void addFileDataIfPresent(TrustedWebActivityIntentBuilder twaBuilder) {
+        Uri uri = getIntent().getData();
+        if (uri == null || !"content".equals(uri.getScheme())) return;
+
+        int granted = checkCallingOrSelfUriPermission(uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        if (granted != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri.toString());
+            return;
+        }
+        List<Uri> uris = Arrays.asList(uri);
+        FileHandlingData fileHandlingData = new FileHandlingData(uris);
+        twaBuilder.setFileHandlingData(fileHandlingData);
     }
 
     /**
@@ -385,6 +405,15 @@ public class LauncherActivity extends Activity {
             if ("https".equals(scheme)) {
                 Log.d(TAG, "Using url from Intent: " + intentUrl);
                 return intentUrl;
+            }
+
+            if ("content".equals(scheme)) {
+                // The application was launched by opening a file - return the URL configured for
+                // this file type in the manifest
+                if (mMetadata.fileHandlingActionUrl == null) {
+                    return defaultUrl;
+                }
+                return Uri.parse(mMetadata.fileHandlingActionUrl);
             }
 
             Uri format = protocolHandlers.get(scheme);

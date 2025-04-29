@@ -14,8 +14,10 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -145,6 +147,12 @@ public class LauncherActivityMetadata {
     private static final String METADATA_SCREEN_ORIENTATION =
             "android.support.customtabs.trusted.SCREEN_ORIENTATION";
 
+    /**
+     * Url to launch in a Trusted Web Activity when handling a file
+     */
+    private static final String METADATA_FILE_HANDLING_ACTION_URL =
+            "android.support.customtabs.trusted.FILE_HANDLING_ACTION_URL";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
@@ -164,6 +172,7 @@ public class LauncherActivityMetadata {
     public final TrustedWebActivityDisplayMode displayMode;
     @ScreenOrientation.LockType public final int screenOrientation;
     @Nullable public final String shareTarget;
+    @Nullable public final String fileHandlingActionUrl;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -195,6 +204,7 @@ public class LauncherActivityMetadata {
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
+        fileHandlingActionUrl = metaData.getString(METADATA_FILE_HANDLING_ACTION_URL);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {
@@ -242,15 +252,30 @@ public class LauncherActivityMetadata {
      */
     public static LauncherActivityMetadata parse(Context context) {
         Resources resources = context.getResources();
-        Bundle metaData = null;
+        Bundle metaData = new Bundle();
         try {
-            metaData = context.getPackageManager().getActivityInfo(
-                    new ComponentName(context, context.getClass()),
-                    PackageManager.GET_META_DATA).metaData;
+            Bundle launchedComponentMetaData = context.getPackageManager().getActivityInfo(
+                new ComponentName(context, context.getClass()),
+                PackageManager.GET_META_DATA).metaData;
+            if (launchedComponentMetaData != null) {
+                metaData.putAll(launchedComponentMetaData);
+            }
+
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                ActivityInfo activityInfo = activity.getPackageManager().getActivityInfo(
+                    activity.getComponentName(),
+                    PackageManager.GET_META_DATA);
+                if (activityInfo.targetActivity != null && activityInfo.metaData != null) {
+                    // The app was launched through the activity alias -
+                    // get all the metadata from the alias too
+                    metaData.putAll(activityInfo.metaData);
+                }
+            }
         } catch (PackageManager.NameNotFoundException e) {
             // Will only happen if the package provided (the one we are running in) is not
             // installed - so should never happen.
         }
-        return new LauncherActivityMetadata(metaData == null ? new Bundle() : metaData, resources);
+        return new LauncherActivityMetadata(metaData, resources);
     }
 }

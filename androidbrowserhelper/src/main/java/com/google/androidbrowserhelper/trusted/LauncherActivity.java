@@ -300,7 +300,7 @@ public class LauncherActivity extends Activity {
         int granted = checkCallingOrSelfUriPermission(uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         if (granted != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri.toString());
+            Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri);
             return;
         }
         List<Uri> uris = Arrays.asList(uri);

@@ -28,9 +28,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.auth.AuthTabIntent;
-import androidx.browser.auth.ExperimentalAuthTab;
 
-@OptIn(markerClass = ExperimentalAuthTab.class)
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 

@@ -29,12 +29,14 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.FileHandlingData;
+import androidx.browser.trusted.LaunchHandlerClientMode;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.browser.trusted.sharing.ShareData;
 import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.core.content.ContextCompat;
+import android.content.pm.ActivityInfo;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
@@ -44,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -115,6 +116,16 @@ public class LauncherActivity extends Activity {
 
     /** See comment in onCreate. */
     private static int sLauncherActivitiesAlive;
+
+    private static final Map<String, Integer> LAUNCH_HANDLER_CLIENT_MODE_MAP =
+            Map.of(
+                    "navigate-existing", LaunchHandlerClientMode.NAVIGATE_EXISTING,
+                    "focus-existing", LaunchHandlerClientMode.FOCUS_EXISTING,
+                    "navigate-new", LaunchHandlerClientMode.NAVIGATE_NEW,
+                    "auto", LaunchHandlerClientMode.AUTO);
+
+    private static final String LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME
+            = "android.support.customtabs.trusted.LAUNCH_HANDLER_CLIENT_MODE";
 
     private LauncherActivityMetadata mMetadata;
 
@@ -219,7 +230,8 @@ public class LauncherActivity extends Activity {
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode())
-                        .setScreenOrientation(mMetadata.screenOrientation);
+                        .setScreenOrientation(mMetadata.screenOrientation)
+                        .setLaunchHandlerClientMode(getLaunchHandlerClientMode());
 
        Uri intentUrl = getIntent().getData();
        if (!launchUrl.equals(intentUrl)) {
@@ -495,5 +507,23 @@ public class LauncherActivity extends Activity {
 
         startActivity(newIntent);
         return true;
+    }
+
+    private @LaunchHandlerClientMode.ClientMode int getLaunchHandlerClientMode() {
+        String clientModeName = null;
+        try {
+            PackageManager pm = getPackageManager();
+            ActivityInfo ai = pm.getActivityInfo(this.getComponentName(), PackageManager.GET_META_DATA);
+            Bundle metaData = ai.metaData;
+
+            if (metaData != null) {
+                clientModeName = metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Couldn't get Launch Handler Client Code from a metadata", e);
+        }
+
+        Integer clientMode = LAUNCH_HANDLER_CLIENT_MODE_MAP.get(clientModeName);
+        return clientMode != null ? clientMode : LaunchHandlerClientMode.AUTO;
     }
 }

@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -219,7 +218,8 @@ public class LauncherActivity extends Activity {
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode())
-                        .setScreenOrientation(mMetadata.screenOrientation);
+                        .setScreenOrientation(mMetadata.screenOrientation)
+                        .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
 
        Uri intentUrl = getIntent().getData();
        if (!launchUrl.equals(intentUrl)) {

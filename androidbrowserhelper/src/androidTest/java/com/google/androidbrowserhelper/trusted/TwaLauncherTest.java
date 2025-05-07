@@ -70,7 +70,6 @@ public class TwaLauncherTest {
     private static final Uri URL = Uri.parse("https://www.test.com/default_url/");
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private static final CustomTabsCallback mCustomTabsCallback = new QualityEnforcer();
 
     @Rule
     public final EnableComponentsTestRule mEnableComponents = new EnableComponentsTestRule(
@@ -120,7 +119,7 @@ public class TwaLauncherTest {
         int expected = color | 0xff000000;
 
         TrustedWebActivityIntentBuilder builder = makeBuilder().setToolbarColor(color);
-        Runnable launchRunnable = () -> mTwaLauncher.launch(builder, mCustomTabsCallback,
+        Runnable launchRunnable = () -> mTwaLauncher.launch(builder, null,
                 null, null);
         Intent intent = getBrowserActivityWhenLaunched(launchRunnable).getIntent();
 
@@ -158,7 +157,7 @@ public class TwaLauncherTest {
         int expected = color | 0xff000000;
 
         TrustedWebActivityIntentBuilder builder = makeBuilder().setToolbarColor(color);
-        Runnable launchRunnable = () -> launcher.launch(builder, mCustomTabsCallback,
+        Runnable launchRunnable = () -> launcher.launch(builder, null,
                 null, null);
         Intent intent = getBrowserActivityWhenLaunched(launchRunnable).getIntent();
 
@@ -206,7 +205,7 @@ public class TwaLauncherTest {
     @Test
     public void completionCallbackCalled() {
         Runnable callback = mock(Runnable.class);
-        Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), mCustomTabsCallback,
+        Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), null,
                 null, callback);
         getBrowserActivityWhenLaunched(launchRunnable);
         verify(callback).run();
@@ -218,7 +217,7 @@ public class TwaLauncherTest {
         TwaLauncher twaLauncher = new TwaLauncher(mActivity);
 
         Runnable callback = mock(Runnable.class);
-        Runnable launchRunnable = () -> twaLauncher.launch(makeBuilder(), mCustomTabsCallback,
+        Runnable launchRunnable = () -> twaLauncher.launch(makeBuilder(), null,
                 null, callback);
         getBrowserActivityWhenLaunched(launchRunnable);
         verify(callback).run();
@@ -229,7 +228,7 @@ public class TwaLauncherTest {
     public void notifiesSplashScreenStrategyOfLaunchInitiation() {
         SplashScreenStrategy strategy = mock(SplashScreenStrategy.class);
         TrustedWebActivityIntentBuilder builder = makeBuilder();
-        mTwaLauncher.launch(builder, mCustomTabsCallback, strategy, null);
+        mTwaLauncher.launch(builder, null, strategy, null);
         verify(strategy).onTwaLaunchInitiated(
                 eq(InstrumentationRegistry.getContext().getPackageName()),
                 eq(builder));
@@ -242,7 +241,7 @@ public class TwaLauncherTest {
         // Using spy to verify intent is never built to avoid testing directly that activity is
         // not launched.
         TrustedWebActivityIntentBuilder builder = spy(makeBuilder());
-        mTwaLauncher.launch(builder, mCustomTabsCallback, strategy, null);
+        mTwaLauncher.launch(builder, null, strategy, null);
         verify(builder, never()).build(any());
     }
 
@@ -254,7 +253,7 @@ public class TwaLauncherTest {
             return null;
         }).when(strategy).configureTwaBuilder(any(), any(), any());
 
-        Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), mCustomTabsCallback,
+        Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), null,
                 strategy, null);
         assertNotNull(getBrowserActivityWhenLaunched(launchRunnable));
     }
@@ -271,7 +270,7 @@ public class TwaLauncherTest {
         }).when(strategy).configureTwaBuilder(any(), any(), any());
 
         TrustedWebActivityIntentBuilder builder = spy(makeBuilder());
-        mTwaLauncher.launch(builder, mCustomTabsCallback, strategy, null);
+        mTwaLauncher.launch(builder, null, strategy, null);
         assertTrue(latch.await(3, TimeUnit.SECONDS));
         verify(builder, never()).build(any());
     }

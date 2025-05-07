@@ -135,7 +135,7 @@ public class LauncherActivityMetadata {
 
     /**
      * The display mode to use when launching the Trusted Web Activity. Possible values are
-     * "default", "immersive" and "sticky-immersive".
+     * "default", "immersive", "sticky-immersive", "minimal-ui", and "browser".
      */
     private static final String METADATA_DISPLAY_MODE =
             "android.support.customtabs.trusted.DISPLAY_MODE";
@@ -269,6 +269,12 @@ public class LauncherActivityMetadata {
         if ("sticky-immersive".equals(displayMode)) {
             return new TrustedWebActivityDisplayMode.ImmersiveMode(
                     true, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
+        }
+        if ("minimal-ui".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.MinimalUiMode();
+        }
+        if ("browser".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.BrowserMode();
         }
         return new TrustedWebActivityDisplayMode.DefaultMode();
     }

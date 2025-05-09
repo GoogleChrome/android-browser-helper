@@ -14,6 +14,7 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -107,17 +108,17 @@ public class TwaLauncher {
      * Creates an instance that will automatically choose the browser to launch a TWA in.
      * If no browser supports TWA, will launch a usual Custom Tab (see {@link TwaProviderPicker}.
      */
-    public TwaLauncher(Context context) {
-        this(context, null);
+    public TwaLauncher(Activity activity) {
+        this(activity, null);
     }
 
     /**
      * Same as above, but also allows to specify a browser to launch. If specified, it is assumed to
      * support TWAs.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage) {
-        this(context, providerPackage, DEFAULT_SESSION_ID,
-                new SharedPreferencesTokenStore(context));
+    public TwaLauncher(Activity activity, @Nullable String providerPackage) {
+        this(activity, providerPackage, activity.getTaskId(),
+                new SharedPreferencesTokenStore(activity));
     }
 
     /**

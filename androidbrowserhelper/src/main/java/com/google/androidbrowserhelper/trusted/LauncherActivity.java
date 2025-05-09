@@ -294,18 +294,28 @@ public class LauncherActivity extends Activity {
     }
 
     private void addFileDataIfPresent(TrustedWebActivityIntentBuilder twaBuilder) {
-        Uri uri = getIntent().getData();
-        if (uri == null || !"content".equals(uri.getScheme())) return;
+        List<Uri> uris;
 
-        int granted = checkCallingOrSelfUriPermission(uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        if (granted != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri);
-            return;
+        if (getIntent().hasExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA)) {
+            Bundle bundle = getIntent().getBundleExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA);
+            if (bundle == null) return;
+            uris = FileHandlingData.fromBundle(bundle).uris;
+        } else {
+            uris = Arrays.asList(getIntent().getData());
         }
-        List<Uri> uris = Arrays.asList(uri);
-        FileHandlingData fileHandlingData = new FileHandlingData(uris);
-        twaBuilder.setFileHandlingData(fileHandlingData);
+
+        for (Uri uri : uris) {
+            if (uri == null || !"content".equals(uri.getScheme())) return;
+
+            int granted = checkCallingOrSelfUriPermission(uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            if (granted != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri);
+                return;
+            }
+        }
+
+        twaBuilder.setFileHandlingData(new FileHandlingData(uris));
     }
 
     /**

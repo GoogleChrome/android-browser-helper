@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.browser.auth.AuthTabIntent;
 import androidx.annotation.OptIn;
-import androidx.browser.auth.ExperimentalAuthTab;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -24,7 +23,6 @@ import java.util.UUID;
  * a comprehensive implementation of the OAuth protocol.
  */
 
-@OptIn(markerClass = ExperimentalAuthTab.class)
 public class AuthManager {
     private static final String TAG = "OAuthManager";
 

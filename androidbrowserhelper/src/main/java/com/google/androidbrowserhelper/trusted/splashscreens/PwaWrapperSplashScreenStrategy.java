@@ -86,6 +86,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
     @Nullable
     private Runnable mOnEnterAnimationCompleteRunnable;
 
+    private boolean mStartChromeBeforeAnimationComplete;
+
     /**
      * @param activity {@link Activity} on top of which a TWA is going to be launched.
      * @param drawableId Resource id of the Drawable of an image (e.g. logo) displayed in the
@@ -104,7 +106,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
             ImageView.ScaleType scaleType,
             @Nullable Matrix transformationMatrix,
             int fadeOutDurationMillis,
-            String fileProviderAuthority) {
+            String fileProviderAuthority,
+            boolean startChromeBeforeAnimationComplete) {
         mDrawableId = drawableId;
         mBackgroundColor = backgroundColor;
         mScaleType = scaleType;
@@ -112,6 +115,7 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         mActivity = activity;
         mFileProviderAuthority = fileProviderAuthority;
         mFadeOutDurationMillis = fadeOutDurationMillis;
+        mStartChromeBeforeAnimationComplete = startChromeBeforeAnimationComplete;
     }
 
     @Override
@@ -204,10 +208,16 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         }
         builder.setSplashScreenParams(makeSplashScreenParamsBundle());
 
-        runWhenEnterAnimationComplete(() -> {
-            onReadyCallback.run();
-            mActivity.overridePendingTransition(0, 0); // Avoid window animations during transition.
-        });
+        Runnable taskToRun = () -> {
+          onReadyCallback.run();
+          mActivity.overridePendingTransition(0, 0); // Avoid window animations during transition.
+        };
+
+        if (mStartChromeBeforeAnimationComplete) {
+            taskToRun.run();
+        } else {
+            runWhenEnterAnimationComplete(taskToRun);
+        }
     }
 
     private void runWhenEnterAnimationComplete(Runnable runnable) {

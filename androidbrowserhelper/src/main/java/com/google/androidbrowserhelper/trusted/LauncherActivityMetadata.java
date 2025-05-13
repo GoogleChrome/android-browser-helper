@@ -167,6 +167,11 @@ public class LauncherActivityMetadata {
                     "focus-existing", LaunchHandlerClientMode.FOCUS_EXISTING,
                     "navigate-new", LaunchHandlerClientMode.NAVIGATE_NEW,
                     "auto", LaunchHandlerClientMode.AUTO);
+    /**
+    * Whether to start Chrome before the enter animation is complete. Default is false.
+    */
+    private static final String METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE =
+            "android.support.customtabs.trusted.START_CHROME_BEFORE_ANIMATION_COMPLETE";
 
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
@@ -189,6 +194,7 @@ public class LauncherActivityMetadata {
     @Nullable public final String shareTarget;
     @Nullable public final String fileHandlingActionUrl;
     @LaunchHandlerClientMode.ClientMode public final int launchHandlerClientMode;
+    public final boolean startChromeBeforeAnimationComplete;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -223,6 +229,8 @@ public class LauncherActivityMetadata {
         fileHandlingActionUrl = metaData.getString(METADATA_FILE_HANDLING_ACTION_URL);
         launchHandlerClientMode = getLaunchHandlerClientMode(
                 metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME));
+        startChromeBeforeAnimationComplete =
+                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, false);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {

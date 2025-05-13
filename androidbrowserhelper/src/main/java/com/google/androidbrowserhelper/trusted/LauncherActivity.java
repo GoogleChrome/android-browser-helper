@@ -169,7 +169,8 @@ public class LauncherActivity extends Activity {
                     getSplashImageScaleType(),
                     getSplashImageTransformationMatrix(),
                     mMetadata.splashScreenFadeOutDurationMillis,
-                    mMetadata.fileProviderAuthority);
+                    mMetadata.fileProviderAuthority,
+                    mMetadata.startChromeBeforeAnimationComplete);
         }
 
         if (shouldLaunchImmediately()) {

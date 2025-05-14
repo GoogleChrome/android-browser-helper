@@ -149,7 +149,7 @@ public class TwaLauncher {
      * @param url Url to open.
      */
     public void launch(Uri url) {
-        launch(new TrustedWebActivityIntentBuilder(url), new QualityEnforcer(), null, null, null);
+        launch(new TrustedWebActivityIntentBuilder(url), null, null, null, null);
     }
 
 

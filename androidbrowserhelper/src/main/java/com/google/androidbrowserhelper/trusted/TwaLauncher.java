@@ -18,6 +18,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
@@ -47,6 +48,9 @@ public class TwaLauncher {
     private static final String TAG = "TwaLauncher";
 
     private static final int DEFAULT_SESSION_ID = 96375;
+
+    private static final String EXTRA_STARTUP_UPTIME_MILLIS =
+            "android.support.customtabs.trusted.STARTUP_UPTIME_MILLIS";
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
@@ -269,6 +273,7 @@ public class TwaLauncher {
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
         TrustedWebActivityIntent intent = builder.build(mSession);
+        intent.getIntent().putExtra(EXTRA_STARTUP_UPTIME_MILLIS, SystemClock.uptimeMillis());
         FocusActivity.addToIntent(intent.getIntent(), mContext);
         intent.launchTrustedWebActivity(mContext);
 

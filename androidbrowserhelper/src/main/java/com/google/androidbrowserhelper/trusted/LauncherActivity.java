@@ -20,6 +20,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -125,10 +126,13 @@ public class LauncherActivity extends Activity {
     @Nullable
     private TwaLauncher mTwaLauncher;
 
+    private long mStartupUptimeMillis;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mStartupUptimeMillis = SystemClock.uptimeMillis();
         sLauncherActivitiesAlive++;
         boolean twaAlreadyRunning = sLauncherActivitiesAlive > 1;
         boolean intentHasData = getIntent().getData() != null;
@@ -235,6 +239,7 @@ public class LauncherActivity extends Activity {
         addFileDataIfPresent(twaBuilder);
 
         mTwaLauncher = createTwaLauncher();
+        mTwaLauncher.setStartupUptimeMillis(mStartupUptimeMillis);
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,

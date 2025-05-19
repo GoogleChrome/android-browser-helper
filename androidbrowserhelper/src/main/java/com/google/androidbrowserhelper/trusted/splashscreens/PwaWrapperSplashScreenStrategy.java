@@ -19,6 +19,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -196,11 +197,11 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
                 mProviderPackage);
 
         mSplashImageTransferTask.execute(
-                success -> onSplashImageTransferred(builder, success, onReadyCallback));
+                success -> onSplashImageTransferred(builder, success, onReadyCallback, session));
     }
 
     private void onSplashImageTransferred(TrustedWebActivityIntentBuilder builder, boolean success,
-            Runnable onReadyCallback) {
+            Runnable onReadyCallback, CustomTabsSession session) {
         if (!success) {
             Log.w(TAG, "Failed to transfer splash image.");
             onReadyCallback.run();
@@ -216,15 +217,18 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         if (mStartChromeBeforeAnimationComplete) {
             taskToRun.run();
         } else {
-            runWhenEnterAnimationComplete(taskToRun);
+            runWhenEnterAnimationComplete(taskToRun, session, builder.getUri());
         }
     }
 
-    private void runWhenEnterAnimationComplete(Runnable runnable) {
+    private void runWhenEnterAnimationComplete(Runnable runnable, CustomTabsSession session,
+            Uri uri) {
         if (mEnterAnimationComplete) {
             runnable.run();
         } else {
             mOnEnterAnimationCompleteRunnable = runnable;
+            boolean preloadResult = session.mayLaunchUrl(uri, null, null);
+            Log.i(TAG, "Enter animation not complete, try preload url. Result: " + preloadResult);
         }
     }
 

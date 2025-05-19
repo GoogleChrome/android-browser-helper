@@ -87,6 +87,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
     @Nullable
     private Runnable mOnEnterAnimationCompleteRunnable;
 
+    private boolean mStartChromeBeforeAnimationComplete;
+
     /**
      * @param activity {@link Activity} on top of which a TWA is going to be launched.
      * @param drawableId Resource id of the Drawable of an image (e.g. logo) displayed in the
@@ -105,7 +107,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
             ImageView.ScaleType scaleType,
             @Nullable Matrix transformationMatrix,
             int fadeOutDurationMillis,
-            String fileProviderAuthority) {
+            String fileProviderAuthority,
+            boolean startChromeBeforeAnimationComplete) {
         mDrawableId = drawableId;
         mBackgroundColor = backgroundColor;
         mScaleType = scaleType;
@@ -113,6 +116,7 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         mActivity = activity;
         mFileProviderAuthority = fileProviderAuthority;
         mFadeOutDurationMillis = fadeOutDurationMillis;
+        mStartChromeBeforeAnimationComplete = startChromeBeforeAnimationComplete;
     }
 
     @Override
@@ -210,7 +214,11 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
           mActivity.overridePendingTransition(0, 0); // Avoid window animations during transition.
         };
 
-        runWhenEnterAnimationComplete(taskToRun, session, builder.getUri());
+        if (mStartChromeBeforeAnimationComplete) {
+            taskToRun.run();
+        } else {
+            runWhenEnterAnimationComplete(taskToRun, session, builder.getUri());
+        }
     }
 
     private void runWhenEnterAnimationComplete(Runnable runnable, CustomTabsSession session,

@@ -29,6 +29,8 @@ android {
         versionCode 1
         versionName VERSION
 
+        buildConfigField "int", "LIBRARY_VERSION", "${versionCode}"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +39,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     compileOptions {

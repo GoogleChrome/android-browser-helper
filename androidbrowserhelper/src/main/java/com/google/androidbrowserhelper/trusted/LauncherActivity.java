@@ -268,7 +268,7 @@ public class LauncherActivity extends Activity {
     }
 
     protected TwaLauncher createTwaLauncher() {
-        return new TwaLauncher(this);
+        return new TwaLauncher(this, getTaskId());
     }
 
     private boolean splashScreenNeeded() {

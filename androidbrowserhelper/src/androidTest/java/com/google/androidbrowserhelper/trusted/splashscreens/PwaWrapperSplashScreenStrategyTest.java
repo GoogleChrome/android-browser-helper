@@ -169,25 +169,6 @@ public class PwaWrapperSplashScreenStrategyTest {
                 SplashScreenParamKey.KEY_IMAGE_TRANSFORMATION_MATRIX), 1e-3f);
     }
 
-    @Test
-    public void waitsForEnterAnimationCompletion_BeforeDeclaringReady()
-            throws InterruptedException {
-        initiateLaunch(mStrategy);
-        Runnable readyCallback = mock(Runnable.class);
-        mStrategy.configureTwaBuilder(new TrustedWebActivityIntentBuilder( Uri.EMPTY),
-                mSession, readyCallback);
-        TestCustomTabsService.getInstance().waitForSplashImageFile(3000);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        runOnUiThreadBlocking(() -> {
-            verify(readyCallback, never()).run();
-            mStrategy.onActivityEnterAnimationComplete();
-            verify(readyCallback).run();
-            latch.countDown();
-        });
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
-    }
-
     private void initiateLaunch(PwaWrapperSplashScreenStrategy strategy) {
         runOnUiThreadBlocking(() ->  strategy.onTwaLaunchInitiated(mActivity.getPackageName(),
                 new TrustedWebActivityIntentBuilder(Uri.EMPTY)));

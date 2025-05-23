@@ -230,7 +230,7 @@ public class LauncherActivityMetadata {
         launchHandlerClientMode = getLaunchHandlerClientMode(
                 metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME));
         startChromeBeforeAnimationComplete =
-                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, false);
+                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {

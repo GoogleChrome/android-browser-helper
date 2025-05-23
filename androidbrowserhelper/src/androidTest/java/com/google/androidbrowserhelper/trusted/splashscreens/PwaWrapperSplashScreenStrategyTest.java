@@ -100,7 +100,7 @@ public class PwaWrapperSplashScreenStrategyTest {
         mActivity = mActivityTestRule.getActivity();
         mSession = mConnectionRule.establishSessionBlocking(mActivity);
         mStrategy = new PwaWrapperSplashScreenStrategy(mActivity, R.drawable.splash, 0,
-                ImageView.ScaleType.FIT_XY, null, 0, FILE_PROVIDER_AUTHORITY, false);
+                ImageView.ScaleType.FIT_XY, null, 0, FILE_PROVIDER_AUTHORITY, true);
     }
 
     @After
@@ -145,7 +145,7 @@ public class PwaWrapperSplashScreenStrategyTest {
 
         PwaWrapperSplashScreenStrategy strategy = new PwaWrapperSplashScreenStrategy(mActivity,
                 R.drawable.splash, bgColor, scaleType, matrix, fadeOutDuration,
-                FILE_PROVIDER_AUTHORITY, false);
+                FILE_PROVIDER_AUTHORITY, true);
         strategy.onActivityEnterAnimationComplete();
         initiateLaunch(strategy);
 

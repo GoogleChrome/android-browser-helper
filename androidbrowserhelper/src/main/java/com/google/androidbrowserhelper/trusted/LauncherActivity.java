@@ -184,7 +184,7 @@ public class LauncherActivity extends Activity {
 
     /**
      * Signals if {@link LauncherActivity} should automatically launch the Trusted Web Activity on
-     * {@linke #onCreate()}. Return {@code false} when a subclass needs to perform an asynchronous
+     * {@link #onCreate(Bundle)}. Return {@code false} when a subclass needs to perform an asynchronous
      * task before launching the Trusted Web Activity. The subclass will then be responsible for
      * calling {@link #launchTwa()} itself once the asynchronous task is finished.
      */

@@ -210,6 +210,11 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        CustomTabColorSchemeParams defaultColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
+                .setNavigationBarDividerColor(getColorCompat(mMetadata.navigationBarDividerColorId))
+                .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
+                .build();
         CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
                 .setToolbarColor(getColorCompat(mMetadata.statusBarColorDarkId))
                 .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorDarkId))
@@ -220,10 +225,7 @@ public class LauncherActivity extends Activity {
         Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder =
                 new TrustedWebActivityIntentBuilder(launchUrl)
-                        .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
-                        .setNavigationBarDividerColor(
-                                getColorCompat(mMetadata.navigationBarDividerColorId))
+                        .setDefaultColorSchemeParams(defaultColorScheme)
                         .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)

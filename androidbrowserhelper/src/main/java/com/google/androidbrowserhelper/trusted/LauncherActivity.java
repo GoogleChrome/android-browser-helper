@@ -371,7 +371,7 @@ public class LauncherActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }

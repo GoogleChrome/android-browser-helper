@@ -17,7 +17,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
+// Before 2.6.1, the version code was unused and was kept at 1.
+// This is now being used to report metrics, and should be bumped with
+// every version bump.
 def VERSION = "2.6.1";
+def VERSION_CODE = 1;
 
 android {
     namespace "com.google.androidbrowserhelper"
@@ -26,7 +30,7 @@ android {
         minSdkVersion 21
         compileSdk 36
         targetSdkVersion 31
-        versionCode 1
+        versionCode VERSION_CODE
         versionName VERSION
 
         buildConfigField "int", "LIBRARY_VERSION", "${versionCode}"

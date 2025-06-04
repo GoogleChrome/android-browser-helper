@@ -19,11 +19,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    namespace "com.google.androidbrowserhelper.demos.twa_offline_first"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.twa_offline_first"
-        minSdkVersion 16
+        minSdkVersion 21
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

@@ -15,11 +15,10 @@ import java.util.UUID;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
-/**
- * This class helps managing an OAuth flow. It was created with the goal of demonstrating how to
- * use Custom Tabs to handle the authorization flow and is not meant as a complete implementation
- * of the OAuth protocol. We recommend checking out https://github.com/openid/AppAuth-Android for
- * a comprehensive implementation of the OAuth protocol.
+@Deprecated
+/*
+ * This sample is deprecated and retained for historical purposes only.
+ * Instead use Auth Tab demo found in demos/custom-tabs-auth-tab.
  */
 public class OAuthManager {
     private static final String TAG = "OAuthManager";

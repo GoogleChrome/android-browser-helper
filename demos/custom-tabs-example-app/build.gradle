@@ -17,12 +17,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "org.chromium.customtabsdemos"
 
     defaultConfig {
         applicationId "org.chromium.customtabsdemos"
         minSdkVersion 26
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"
@@ -35,8 +35,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
@@ -45,7 +45,8 @@ dependencies {
     implementation project(path: ':androidbrowserhelper')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation 'androidx.browser:browser:1.6.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

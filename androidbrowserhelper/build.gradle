@@ -17,16 +17,23 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-def VERSION = "2.4.0";
+// Before 2.6.1, the version code was unused and was kept at 1.
+// This is now being used to report metrics, and should be bumped with
+// every version bump.
+def VERSION = "2.6.1";
+def VERSION_CODE = 1;
 
 android {
-    compileSdkVersion 31
+    namespace "com.google.androidbrowserhelper"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
+        compileSdk 36
         targetSdkVersion 31
-        versionCode 1
+        versionCode VERSION_CODE
         versionName VERSION
+
+        buildConfigField "int", "LIBRARY_VERSION", "${versionCode}"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,9 +45,13 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     testOptions {
@@ -51,16 +62,21 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    // Force newest versions of kotlin and coroutines to avoid duplicate classes in kotlin-stdlib
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+    implementation(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3"))
+
+    api 'androidx.browser:browser:1.9.0-alpha04'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.core:core:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:3.0.0'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.robolectric:robolectric:4.12.2'
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'

@@ -34,10 +34,12 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import androidx.core.content.ContextCompat;
 
-import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+import com.google.androidbrowserhelper.BuildConfig;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -46,7 +48,13 @@ import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrateg
 public class TwaLauncher {
     private static final String TAG = "TwaLauncher";
 
-    private static final int DEFAULT_SESSION_ID = 96375;
+    private static final Map<Integer, Integer> mTaskIdToSessionId = new HashMap<>();
+
+    private static final String EXTRA_STARTUP_UPTIME_MILLIS =
+            "org.chromium.chrome.browser.customtabs.trusted.STARTUP_UPTIME_MILLIS";
+
+    private static final String EXTRA_ANDROID_BROWSER_HELPER_VERSION =
+            "org.chromium.chrome.browser.ANDROID_BROWSER_HELPER_VERSION";
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
@@ -96,6 +104,8 @@ public class TwaLauncher {
 
     private boolean mDestroyed;
 
+    private long mStartupUptimeMillis;
+
     public interface FallbackStrategy {
         void launch(Context context,
                     TrustedWebActivityIntentBuilder twaBuilder,
@@ -112,11 +122,19 @@ public class TwaLauncher {
     }
 
     /**
+     * Same as above, but also allows to specify a task id to distinguish several sessions running
+     * for the same TWA app.
+     */
+    public TwaLauncher(Context context, @Nullable Integer taskId) {
+        this(context, null, taskId);
+    }
+
+    /**
      * Same as above, but also allows to specify a browser to launch. If specified, it is assumed to
      * support TWAs.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage) {
-        this(context, providerPackage, DEFAULT_SESSION_ID,
+    public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer taskId) {
+        this(context, providerPackage, taskId,
                 new SharedPreferencesTokenStore(context));
     }
 
@@ -124,10 +142,10 @@ public class TwaLauncher {
      * Same as above, but also accepts a session id. This allows to launch multiple TWAs in the same
      * task.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
+    public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer taskId,
                        TokenStore tokenStore) {
         mContext = context;
-        mSessionId = sessionId;
+        mSessionId = makeSessionId(taskId);
         mTokenStore = tokenStore;
         if (providerPackage == null) {
             TwaProviderPicker.Action action =
@@ -138,6 +156,19 @@ public class TwaLauncher {
             mProviderPackage = providerPackage;
             mLaunchMode = TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY;
         }
+    }
+
+    private static Integer makeSessionId(@Nullable Integer taskId) {
+        if(taskId == null) return Integer.MAX_VALUE;
+
+        Integer sessionId = mTaskIdToSessionId.get(taskId);
+        if(sessionId == null) {
+            Random random = new Random();
+            sessionId = random.nextInt(Integer.MAX_VALUE);
+            mTaskIdToSessionId.put(taskId, sessionId);
+        }
+
+        return sessionId;
     }
 
     /**
@@ -269,6 +300,11 @@ public class TwaLauncher {
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
         TrustedWebActivityIntent intent = builder.build(mSession);
+        if (mStartupUptimeMillis != 0) {
+            intent.getIntent().putExtra(EXTRA_STARTUP_UPTIME_MILLIS, mStartupUptimeMillis);
+        }
+        intent.getIntent().putExtra(
+                EXTRA_ANDROID_BROWSER_HELPER_VERSION, BuildConfig.LIBRARY_VERSION);
         FocusActivity.addToIntent(intent.getIntent(), mContext);
         intent.launchTrustedWebActivity(mContext);
 
@@ -297,6 +333,15 @@ public class TwaLauncher {
     @Nullable
     public String getProviderPackage() {
         return mProviderPackage;
+    }
+
+    /**
+     * Sets the timestamp (in SystemClock.uptimeMillis()) when the TWA launcher
+     * activity was created. This timestamp is used to report the full startup
+     * duration to the browser.
+     */
+    public void setStartupUptimeMillis(long startupUptimeMillis) {
+        mStartupUptimeMillis = startupUptimeMillis;
     }
 
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {

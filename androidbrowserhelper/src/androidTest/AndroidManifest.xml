@@ -14,10 +14,22 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android.support.customtabs">
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-sdk android:minSdkVersion="16"/>
 
     <application>
+        <activity android:name="androidx.test.core.app.InstrumentationActivityInvoker$BootstrapActivity"
+            android:exported="true"
+            tools:node="merge"
+            tools:replace="android:exported" />
+        <activity android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyActivity"
+            android:exported="true"
+            tools:node="merge"
+            tools:replace="android:exported" />
+        <activity android:name="androidx.test.core.app.InstrumentationActivityInvoker$EmptyFloatingActivity"
+            android:exported="true"
+            tools:node="merge"
+            tools:replace="android:exported" />
 
         <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
             <meta-data
@@ -26,7 +38,7 @@
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestActivity"
-                  android:enabled="false">
+                  android:enabled="false" android:exported="true">
             <!-- A browsable intent filter is required for the DelegationService. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -43,14 +55,14 @@
         </activity>
 
         <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService"
-                 android:enabled="false">
+                 android:enabled="false" android:exported="true">
             <intent-filter>
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
             </intent-filter>
         </service>
 
         <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceSupportsTwas"
-                 android:enabled="false">
+                 android:enabled="false" android:exported="true">
             <intent-filter>
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
@@ -60,7 +72,7 @@
         </service>
 
         <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceNoSplashScreens"
-                 android:enabled="false">
+                 android:enabled="false" android:exported="true">
             <intent-filter>
                 <action android:name="android.support.customtabs.action.CustomTabsService" />
                 <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
@@ -82,9 +94,10 @@
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
-                  android:label="Test Launcher Activity"
                   android:theme="@style/Theme.AppCompat.Light"
-                  android:enabled="false">
+                  android:label="Test Launcher Activity"
+                  android:enabled="false"
+                  android:exported="true">
 
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
                        android:value="https://www.test.com/default_url/" />

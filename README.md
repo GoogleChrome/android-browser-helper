@@ -1,6 +1,6 @@
 # Android Browser Helper
 
-![CI Status Badge](https://github.com/GoogleChrome/android-browser-helper/workflows/Android%20CI/badge.svg)
+![CI Status Badge](https://github.com/GoogleChrome/android-browser-helper/actions/workflows/android.yml/badge.svg?branch=main)
 
 The Android Browser Helper library helps developers use Custom Tabs and Trusted
 Web Activities on top of the AndroidX browser support library.
@@ -19,7 +19,7 @@ Android Browser helper is available on the Google Maven. To use it, modify your 
 ```gradle
 dependencies {
     //...
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.3.0'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.4.0'
 }
 
 ``` 

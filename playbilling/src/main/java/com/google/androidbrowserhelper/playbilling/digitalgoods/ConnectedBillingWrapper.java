@@ -21,7 +21,6 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.SkuDetails;
@@ -119,12 +118,5 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData data) {
         throw new IllegalStateException(
                 "EnsuredConnectionBillingWrapper doesn't handle launch Payment flow");
-    }
-
-    @Override
-    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
-            PriceChangeConfirmationListener listener) {
-        throw new IllegalStateException("EnsuredConnectionBillingWrapper doesn't handle the " +
-                "price change confirmation flow");
     }
 }

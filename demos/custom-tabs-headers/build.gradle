@@ -17,12 +17,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
+    namespace "com.google.androidbrowserhelper.demos.customtabsheaders"
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.customtabsheaders"
         minSdkVersion 25
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

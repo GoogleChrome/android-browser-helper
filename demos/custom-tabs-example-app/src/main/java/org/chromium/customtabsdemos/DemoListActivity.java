@@ -46,6 +46,11 @@ public class DemoListActivity extends AppCompatActivity {
                 SimpleCustomTabActivity.class);
         activityDescList.add(activityDesc);
 
+        activityDesc = createActivityDesc(R.string.title_activity_partial_custom_tab,
+                R.string.description_activity_partial_custom_tab,
+                PartialCustomTabActivity.class);
+        activityDescList.add(activityDesc);
+
         activityDesc = createActivityDesc(R.string.title_activity_service_connection,
                 R.string.description_activity_service_connection,
                 ServiceConnectionActivity.class);
@@ -59,6 +64,11 @@ public class DemoListActivity extends AppCompatActivity {
         activityDesc = createActivityDesc(R.string.title_activity_notification_parent,
                 R.string.title_activity_notification_parent,
                 NotificationParentActivity.class);
+        activityDescList.add(activityDesc);
+
+        activityDesc = createActivityDesc(R.string.title_activity_engagement_signals,
+                R.string.description_activity_engagement_signals,
+                EngagementSignalsActivity.class);
         activityDescList.add(activityDesc);
 
         RecyclerView recyclerView = findViewById(android.R.id.list);
@@ -125,6 +135,7 @@ public class DemoListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
+            position = viewHolder.getAdapterPosition();
             final ActivityDesc activityDesc = mActivityDescs.get(position);
             String title = activityDesc.mTitle;
             String description = activityDesc.mDescription;

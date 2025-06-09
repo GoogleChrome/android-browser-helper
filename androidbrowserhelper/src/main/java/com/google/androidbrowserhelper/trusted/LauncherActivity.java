@@ -268,7 +268,8 @@ public class LauncherActivity extends Activity {
     }
 
     protected TwaLauncher createTwaLauncher() {
-        return new TwaLauncher(this, getTaskId());
+        return new TwaLauncher(this, null, SessionStore.makeSessionId(getTaskId()),
+                new SharedPreferencesTokenStore(this));
     }
 
     private boolean splashScreenNeeded() {

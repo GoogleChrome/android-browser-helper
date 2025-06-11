@@ -108,7 +108,12 @@ public class MainActivity extends Activity {
 
     @OptIn(markerClass = ExperimentalEphemeralBrowsing.class)
     private boolean isEphemeralTabSupported() throws RemoteException {
-        return mSession.isEphemeralBrowsingSupported(Bundle.EMPTY);
+        String provider = CustomTabsClient.getPackageName(this, null);
+        if (provider == null) {
+            return false;
+        } else {
+            return CustomTabsClient.isEphemeralBrowsingSupported(this, provider);
+        }
     }
 }
 

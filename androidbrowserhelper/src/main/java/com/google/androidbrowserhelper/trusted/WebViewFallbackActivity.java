@@ -93,7 +93,10 @@ public class WebViewFallbackActivity extends Activity {
             throw new IllegalArgumentException("launchUrl scheme must be 'https'");
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        ) {
             if (getIntent().hasExtra(KEY_NAVIGATION_BAR_COLOR)) {
                 int navigationBarColor = this.getIntent().getIntExtra(KEY_NAVIGATION_BAR_COLOR, 0);
                 getWindow().setNavigationBarColor(navigationBarColor);
@@ -102,11 +105,17 @@ public class WebViewFallbackActivity extends Activity {
 
         if (getIntent().hasExtra(KEY_STATUS_BAR_COLOR)) {
             mStatusBarColor = this.getIntent().getIntExtra(KEY_STATUS_BAR_COLOR, 0);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            ) {
                 getWindow().setStatusBarColor(mStatusBarColor);
             }
         } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
+                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            ) {
                 mStatusBarColor = getWindow().getStatusBarColor();
             } else {
                 mStatusBarColor = Color.WHITE;

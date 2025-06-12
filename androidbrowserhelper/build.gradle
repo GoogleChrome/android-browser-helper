@@ -20,8 +20,8 @@ apply plugin: 'maven-publish'
 // Before 2.6.1, the version code was unused and was kept at 1.
 // This is now being used to report metrics, and should be bumped with
 // every version bump.
-def VERSION = "2.6.1";
-def VERSION_CODE = 1;
+def VERSION = "2.6.2";
+def VERSION_CODE = 2;
 
 android {
     namespace "com.google.androidbrowserhelper"

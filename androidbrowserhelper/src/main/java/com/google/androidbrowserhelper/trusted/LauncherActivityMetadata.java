@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 
 /**
@@ -162,7 +164,7 @@ public class LauncherActivityMetadata {
     private static final String LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME
             = "android.support.customtabs.trusted.LAUNCH_HANDLER_CLIENT_MODE";
     private static final Map<String, Integer> LAUNCH_HANDLER_CLIENT_MODE_MAP =
-            Map.of(
+            ImmutableMap.of(
                     "navigate-existing", LaunchHandlerClientMode.NAVIGATE_EXISTING,
                     "focus-existing", LaunchHandlerClientMode.FOCUS_EXISTING,
                     "navigate-new", LaunchHandlerClientMode.NAVIGATE_NEW,
@@ -230,7 +232,7 @@ public class LauncherActivityMetadata {
         launchHandlerClientMode = getLaunchHandlerClientMode(
                 metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME));
         startChromeBeforeAnimationComplete =
-                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, false);
+                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {

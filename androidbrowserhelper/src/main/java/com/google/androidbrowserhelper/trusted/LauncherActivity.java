@@ -243,7 +243,7 @@ public class LauncherActivity extends Activity {
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,
-                () -> mBrowserWasLaunched = true,
+                () -> {mBrowserWasLaunched = true; finish();},
                 getFallbackStrategy());
 
         if (!sChromeVersionChecked) {

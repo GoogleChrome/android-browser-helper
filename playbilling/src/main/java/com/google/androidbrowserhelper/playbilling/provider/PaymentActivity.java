@@ -23,7 +23,7 @@ import androidx.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
@@ -75,9 +75,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
          *
          * Check chromeos.dev/publish/pwa-play-billing for more info.
          */
-        Integer prorationMode = mMethodData.prorationMode;
-        if (prorationMode != null
-                && prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+        Integer replacementMode = mMethodData.replacementMode;
+        if (replacementMode != null
+                && replacementMode == ReplacementMode.WITHOUT_PRORATION) {
             fail("This proration mode is currently disabled. Check " +
                     "chromeos.dev/publish/pwa-play-billing for more info");
             return;

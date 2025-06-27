@@ -16,9 +16,7 @@ package com.google.androidbrowserhelper.playbilling.provider;
 
 import android.os.Build;
 
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.BillingFlowParams.ProrationMode;
-
+import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -94,29 +92,28 @@ public class MethodDataTest {
     }
 
     @Test
-    public void fromJson_prorationMode() {
-        prorationMode("deferred", ProrationMode.DEFERRED);
-        prorationMode("immediateAndChargeProratedPrice",
-                ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE);
-        prorationMode("immediateWithoutProration", ProrationMode.IMMEDIATE_WITHOUT_PRORATION);
-        prorationMode("immediateWithTimeProration", ProrationMode.IMMEDIATE_WITH_TIME_PRORATION);
-        prorationMode("unknownSubscriptionUpgradeDowngradePolicy",
-                ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY);
-        prorationMode("immediateAndChargeFullPrice",
-                ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE);
-        prorationMode("invalid", null);
+    public void fromJson_replacementMode() {
+        replacementMode("deferred", ReplacementMode.DEFERRED);
+        replacementMode("chargeProratedPrice",
+                ReplacementMode.CHARGE_PRORATED_PRICE);
+        replacementMode("withoutProration", ReplacementMode.WITHOUT_PRORATION);
+        replacementMode("withTimeProration", ReplacementMode.WITH_TIME_PRORATION);
+        replacementMode("unknownReplacementMode",
+            ReplacementMode.UNKNOWN_REPLACEMENT_MODE);
+        replacementMode("chargeFullPrice", ReplacementMode.CHARGE_FULL_PRICE);
+        replacementMode("invalid", null);
     }
 
     private static void assertMethodData(MethodData data, String sku, @Nullable String oldSku,
-            @Nullable String purchaseToken, @Nullable Integer prorationMode) {
+            @Nullable String purchaseToken, @Nullable Integer replacementMode) {
         assertEquals(sku, data.sku);
         assertEquals(oldSku, data.oldSku);
         assertEquals(purchaseToken, data.purchaseToken);
-        assertEquals(prorationMode, data.prorationMode);
+        assertEquals(replacementMode, data.replacementMode);
     }
 
-    private static void prorationMode(String mode, Integer expected) {
-        String json = ("{ 'sku' = 'mySku', 'prorationMode' = '" + mode + "' }")
+    private static void replacementMode(String mode, Integer expected) {
+        String json = ("{ 'sku' = 'mySku', 'replacementMode' = '" + mode + "' }")
                 .replace('\'', '\"');
         MethodData data = MethodData.fromJson(json);
 

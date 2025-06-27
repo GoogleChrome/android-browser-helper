@@ -18,9 +18,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.BillingFlowParams.ProrationMode;
-
+import android.util.Log;
+import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,21 +63,24 @@ import androidx.annotation.Nullable;
  *
  */
 public class MethodData {
+
+    private static final String TAG = "MethodData";
+
     public final String sku;
     public final boolean isPriceChangeConfirmation;
 
     // These three optional fields are to do with upgrading/downgrading subscriptions.
     @Nullable public final String oldSku;
     @Nullable public final String purchaseToken;
-    @Nullable public final Integer prorationMode;
+    @Nullable public final Integer replacementMode;
 
     private MethodData(String sku, boolean isPriceChangeConfirmation, @Nullable String oldSku,
-                       @Nullable String purchaseToken, @Nullable Integer prorationMode) {
+                       @Nullable String purchaseToken, @Nullable Integer replacementMode) {
         this.sku = sku;
         this.isPriceChangeConfirmation = isPriceChangeConfirmation;
         this.oldSku = oldSku;
         this.purchaseToken = purchaseToken;
-        this.prorationMode = prorationMode;
+        this.replacementMode = replacementMode;
     }
 
     @Nullable
@@ -102,11 +104,24 @@ public class MethodData {
 
         String oldSku = getString(dataObject, "oldSku");
         String purchaseToken = getString(dataObject, "purchaseToken");
-        Integer prorationMode = getProration(dataObject);
 
-        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, prorationMode);
+        Integer replacementMode = getReplacementMode(dataObject);
+        if (replacementMode == null) {
+            replacementMode = getProration(dataObject);
+            if (replacementMode != null) {
+                Log.w("TAG", "prorationMode is deprecated, please migrate to replacementMode!");
+            }
+        }
+
+        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, replacementMode);
     }
 
+    /**
+    * Creates the MethodData object using an Intent which contains the json-serialized object.
+    * The Intent should have a String Array Extra called 'methodNames', and the first item in that
+    * list is the key used to extract the json String from a Bundle Extra called 'methodData'.
+    * When used with Chrome, the key is always "https://play.google.com/billing".
+    */
     @Nullable
     public static MethodData fromIntent(Intent intent) {
         // TODO: This should probably be in another class.
@@ -137,17 +152,40 @@ public class MethodData {
 
         switch (proration) {
             case "deferred":
-                return ProrationMode.DEFERRED;
+                return ReplacementMode.DEFERRED;
             case "immediateAndChargeProratedPrice":
-                return ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE;
+                return ReplacementMode.CHARGE_PRORATED_PRICE;
             case "immediateWithoutProration":
-                return ProrationMode.IMMEDIATE_WITHOUT_PRORATION;
+                return ReplacementMode.WITHOUT_PRORATION;
             case "immediateWithTimeProration":
-                return ProrationMode.IMMEDIATE_WITH_TIME_PRORATION;
+                return ReplacementMode.WITH_TIME_PRORATION;
             case "unknownSubscriptionUpgradeDowngradePolicy":
-                return ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY;
+                return ReplacementMode.UNKNOWN_REPLACEMENT_MODE;
             case "immediateAndChargeFullPrice":
-                return ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE;
+                return ReplacementMode.CHARGE_FULL_PRICE;
+            default:
+                return null;
+        }
+    }
+
+    private static @Nullable Integer getReplacementMode(JSONObject object) {
+        String replacement = getString(object, "replacementMode");
+
+        if (replacement == null) return null;
+
+        switch (replacement) {
+            case "deferred":
+                return ReplacementMode.DEFERRED;
+            case "chargeProratedPrice":
+                return ReplacementMode.CHARGE_PRORATED_PRICE;
+            case "withoutProration":
+                return ReplacementMode.WITHOUT_PRORATION;
+            case "withTimeProration":
+                return ReplacementMode.WITH_TIME_PRORATION;
+            case "unknownReplacementMode":
+                return ReplacementMode.UNKNOWN_REPLACEMENT_MODE;
+            case "chargeFullPrice":
+                return ReplacementMode.CHARGE_FULL_PRICE;
             default:
                 return null;
         }

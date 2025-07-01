@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Android Browser Helper</string>
+    <string name="android_browser_helper_app_name">Android Browser Helper</string>
     <string name="update_chrome_toast">Please update to Chrome Stable 72 or later.</string>
     <string name="no_provider_toast">Please install Chrome Stable 72 or later.</string>
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>

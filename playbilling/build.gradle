@@ -17,7 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-def VERSION = "1.0.1";
+def VERSION = "1.1.0";
 
 android {
     namespace "com.google.androidbrowserhelper.playbilling"
@@ -26,7 +26,7 @@ android {
         minSdkVersion 21
         compileSdk 36
         targetSdkVersion 31
-        versionCode 1
+        versionCode 2
         versionName VERSION
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -60,7 +60,7 @@ dependencies {
     api 'androidx.browser:browser:1.4.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.billingclient:billing:6.2.1'
+    implementation 'com.android.billingclient:billing:7.1.1'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.12.2'

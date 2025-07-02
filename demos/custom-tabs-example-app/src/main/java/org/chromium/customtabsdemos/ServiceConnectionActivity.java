@@ -36,21 +36,23 @@ public class ServiceConnectionActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_serviceconnection);
 
-        customTabActivityHelper = new CustomTabActivityHelper();
-        customTabActivityHelper.setConnectionCallback(this);
-
         mUrlEditText = findViewById(R.id.url);
         mMayLaunchUrlButton = findViewById(R.id.button_may_launch_url);
         mMayLaunchUrlButton.setEnabled(false);
         mMayLaunchUrlButton.setOnClickListener(this);
 
         findViewById(R.id.start_custom_tab).setOnClickListener(this);
+
+        customTabActivityHelper = new CustomTabActivityHelper();
+        customTabActivityHelper.setConnectionCallback(this);
+        customTabActivityHelper.bindCustomTabsService(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         customTabActivityHelper.setConnectionCallback(null);
+        customTabActivityHelper.unbindCustomTabsService(this);
     }
 
     @Override
@@ -64,35 +66,17 @@ public class ServiceConnectionActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        customTabActivityHelper.bindCustomTabsService(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        customTabActivityHelper.unbindCustomTabsService(this);
-        mMayLaunchUrlButton.setEnabled(false);
-    }
-
-    @Override
     public void onClick(View view) {
         int viewId = view.getId();
         Uri uri  = Uri.parse(mUrlEditText.getText().toString());
-        switch (viewId) {
-            case R.id.button_may_launch_url:
-                customTabActivityHelper.mayLaunchUrl(uri, null, null);
-                break;
-            case R.id.start_custom_tab:
-                CustomTabsIntent customTabsIntent =
-                        new CustomTabsIntent.Builder(customTabActivityHelper.getSession())
-                        .build();
-                CustomTabActivityHelper.openCustomTab(
-                        this, customTabsIntent, uri, new WebviewFallback());
-                break;
-            default:
-                //Unkown View Clicked
+        if (viewId == R.id.button_may_launch_url) {
+            customTabActivityHelper.mayLaunchUrl(uri, null, null);
+        } else if (viewId == R.id.start_custom_tab) {
+            CustomTabsIntent customTabsIntent =
+                    new CustomTabsIntent.Builder(customTabActivityHelper.getSession())
+                            .build();
+            CustomTabActivityHelper.openCustomTab(
+                    this, customTabsIntent, uri, new WebviewFallback());
         }
     }
 }

@@ -23,7 +23,7 @@ import androidx.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
-import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.SkuDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
@@ -63,6 +63,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
             fail("Could not parse SKU.");
             return;
         }
+        if (mMethodData.isPriceChangeConfirmation) {
+            fail("Price change confirmation flow is not supported");
+        }
 
         /**
          * Note that we have temporarily disabled the IMMEDIATE_WITHOUT_PRORATION mode
@@ -72,9 +75,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
          *
          * Check chromeos.dev/publish/pwa-play-billing for more info.
          */
-        Integer prorationMode = mMethodData.prorationMode;
-        if (prorationMode != null
-                && prorationMode == BillingFlowParams.ProrationMode.IMMEDIATE_WITHOUT_PRORATION) {
+        Integer replacementMode = mMethodData.replacementMode;
+        if (replacementMode != null
+                && replacementMode == ReplacementMode.WITHOUT_PRORATION) {
             fail("This proration mode is currently disabled. Check " +
                     "chromeos.dev/publish/pwa-play-billing for more info");
             return;
@@ -114,21 +117,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
 
         SkuDetails sku = skus.get(0);
 
-        if (mMethodData.isPriceChangeConfirmation) {
-            launchPriceChangeConfirmationFlow(sku);
-        } else {
-            launchPaymentFlow(sku);
-        }
-    }
-
-    private void launchPriceChangeConfirmationFlow(SkuDetails sku) {
-        mWrapper.launchPriceChangeConfirmationFlow(this, sku, result -> {
-            if (result.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                setResultAndFinish(PaymentResult.priceChangeSuccess());
-            } else {
-                fail("Price change confirmation flow ended with result: " + result);
-            }
-        });
+        launchPaymentFlow(sku);
     }
 
     private void launchPaymentFlow(SkuDetails sku) {

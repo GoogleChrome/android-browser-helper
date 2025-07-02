@@ -14,19 +14,25 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.trusted.LaunchHandlerClientMode;
 import androidx.browser.trusted.ScreenOrientation;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableMap;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 
@@ -131,7 +137,7 @@ public class LauncherActivityMetadata {
 
     /**
      * The display mode to use when launching the Trusted Web Activity. Possible values are
-     * "default", "immersive" and "sticky-immersive".
+     * "default", "immersive", "sticky-immersive", "minimal-ui", and "browser".
      */
     private static final String METADATA_DISPLAY_MODE =
             "android.support.customtabs.trusted.DISPLAY_MODE";
@@ -144,6 +150,30 @@ public class LauncherActivityMetadata {
      */
     private static final String METADATA_SCREEN_ORIENTATION =
             "android.support.customtabs.trusted.SCREEN_ORIENTATION";
+
+    /**
+     * Url to launch in a Trusted Web Activity when handling a file
+     */
+    private static final String METADATA_FILE_HANDLING_ACTION_URL =
+            "android.support.customtabs.trusted.FILE_HANDLING_ACTION_URL";
+
+    /**
+     * Client mode of Launch Handler API. Describes how TWA will be launched. For example opening
+     * a new tasks or taking an action to an existing one.
+     */
+    private static final String LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME
+            = "android.support.customtabs.trusted.LAUNCH_HANDLER_CLIENT_MODE";
+    private static final Map<String, Integer> LAUNCH_HANDLER_CLIENT_MODE_MAP =
+            ImmutableMap.of(
+                    "navigate-existing", LaunchHandlerClientMode.NAVIGATE_EXISTING,
+                    "focus-existing", LaunchHandlerClientMode.FOCUS_EXISTING,
+                    "navigate-new", LaunchHandlerClientMode.NAVIGATE_NEW,
+                    "auto", LaunchHandlerClientMode.AUTO);
+    /**
+    * Whether to start Chrome before the enter animation is complete. Default is false.
+    */
+    private static final String METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE =
+            "android.support.customtabs.trusted.START_CHROME_BEFORE_ANIMATION_COMPLETE";
 
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
@@ -164,6 +194,9 @@ public class LauncherActivityMetadata {
     public final TrustedWebActivityDisplayMode displayMode;
     @ScreenOrientation.LockType public final int screenOrientation;
     @Nullable public final String shareTarget;
+    @Nullable public final String fileHandlingActionUrl;
+    @LaunchHandlerClientMode.ClientMode public final int launchHandlerClientMode;
+    public final boolean startChromeBeforeAnimationComplete;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -195,6 +228,11 @@ public class LauncherActivityMetadata {
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
+        fileHandlingActionUrl = metaData.getString(METADATA_FILE_HANDLING_ACTION_URL);
+        launchHandlerClientMode = getLaunchHandlerClientMode(
+                metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME));
+        startChromeBeforeAnimationComplete =
+                metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {
@@ -234,7 +272,23 @@ public class LauncherActivityMetadata {
             return new TrustedWebActivityDisplayMode.ImmersiveMode(
                     true, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
         }
+        if ("minimal-ui".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.MinimalUiMode();
+        }
+        if ("browser".equals(displayMode)) {
+            return new TrustedWebActivityDisplayMode.BrowserMode();
+        }
         return new TrustedWebActivityDisplayMode.DefaultMode();
+    }
+
+    /**
+     * Returns a Launch Handler client mode in androidx format. In case it's absent or wrong in the
+     * metadata LaunchHandlerClientMode.AUTO is returned.
+     */
+    private @LaunchHandlerClientMode.ClientMode int getLaunchHandlerClientMode(
+            String clientModeName) {
+        Integer clientMode = LAUNCH_HANDLER_CLIENT_MODE_MAP.get(clientModeName);
+        return clientMode != null ? clientMode : LaunchHandlerClientMode.AUTO;
     }
 
     /**
@@ -242,15 +296,30 @@ public class LauncherActivityMetadata {
      */
     public static LauncherActivityMetadata parse(Context context) {
         Resources resources = context.getResources();
-        Bundle metaData = null;
+        Bundle metaData = new Bundle();
         try {
-            metaData = context.getPackageManager().getActivityInfo(
-                    new ComponentName(context, context.getClass()),
-                    PackageManager.GET_META_DATA).metaData;
+            Bundle launchedComponentMetaData = context.getPackageManager().getActivityInfo(
+                new ComponentName(context, context.getClass()),
+                PackageManager.GET_META_DATA).metaData;
+            if (launchedComponentMetaData != null) {
+                metaData.putAll(launchedComponentMetaData);
+            }
+
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                ActivityInfo activityInfo = activity.getPackageManager().getActivityInfo(
+                    activity.getComponentName(),
+                    PackageManager.GET_META_DATA);
+                if (activityInfo.targetActivity != null && activityInfo.metaData != null) {
+                    // The app was launched through the activity alias -
+                    // get all the metadata from the alias too
+                    metaData.putAll(activityInfo.metaData);
+                }
+            }
         } catch (PackageManager.NameNotFoundException e) {
             // Will only happen if the package provided (the one we are running in) is not
             // installed - so should never happen.
         }
-        return new LauncherActivityMetadata(metaData == null ? new Bundle() : metaData, resources);
+        return new LauncherActivityMetadata(metaData, resources);
     }
 }

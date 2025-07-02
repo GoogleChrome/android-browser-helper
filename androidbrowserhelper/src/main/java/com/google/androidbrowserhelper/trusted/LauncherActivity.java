@@ -16,9 +16,11 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -27,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.trusted.FileHandlingData;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.browser.trusted.TrustedWebActivityService;
@@ -37,6 +40,11 @@ import androidx.core.content.ContextCompat;
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
 import org.json.JSONException;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A convenience class to make using Trusted Web Activities easier. You can extend this class for
@@ -118,10 +126,13 @@ public class LauncherActivity extends Activity {
     @Nullable
     private TwaLauncher mTwaLauncher;
 
+    private long mStartupUptimeMillis;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mStartupUptimeMillis = SystemClock.uptimeMillis();
         sLauncherActivitiesAlive++;
         boolean twaAlreadyRunning = sLauncherActivitiesAlive > 1;
         boolean intentHasData = getIntent().getData() != null;
@@ -162,7 +173,8 @@ public class LauncherActivity extends Activity {
                     getSplashImageScaleType(),
                     getSplashImageTransformationMatrix(),
                     mMetadata.splashScreenFadeOutDurationMillis,
-                    mMetadata.fileProviderAuthority);
+                    mMetadata.fileProviderAuthority,
+                    mMetadata.startChromeBeforeAnimationComplete);
         }
 
         if (shouldLaunchImmediately()) {
@@ -200,8 +212,9 @@ public class LauncherActivity extends Activity {
                         getColorCompat(mMetadata.navigationBarDividerColorDarkId))
                 .build();
 
+        Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder =
-                new TrustedWebActivityIntentBuilder(getLaunchingUrl())
+                new TrustedWebActivityIntentBuilder(launchUrl)
                         .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
                         .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
                         .setNavigationBarDividerColor(
@@ -210,15 +223,23 @@ public class LauncherActivity extends Activity {
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode())
-                        .setScreenOrientation(mMetadata.screenOrientation);
+                        .setScreenOrientation(mMetadata.screenOrientation)
+                        .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
+
+       Uri intentUrl = getIntent().getData();
+       if (!launchUrl.equals(intentUrl)) {
+            twaBuilder.setOriginalLaunchUrl(intentUrl);
+       }
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
         addShareDataIfPresent(twaBuilder);
+        addFileDataIfPresent(twaBuilder);
 
         mTwaLauncher = createTwaLauncher();
+        mTwaLauncher.setStartupUptimeMillis(mStartupUptimeMillis);
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,
@@ -247,7 +268,8 @@ public class LauncherActivity extends Activity {
     }
 
     protected TwaLauncher createTwaLauncher() {
-        return new TwaLauncher(this);
+        return new TwaLauncher(this, null, SessionStore.makeSessionId(getTaskId()),
+                new SharedPreferencesTokenStore(this));
     }
 
     private boolean splashScreenNeeded() {
@@ -276,6 +298,31 @@ public class LauncherActivity extends Activity {
         } catch (JSONException e) {
             Log.d(TAG, "Failed to parse share target json: " + e.toString());
         }
+    }
+
+    private void addFileDataIfPresent(TrustedWebActivityIntentBuilder twaBuilder) {
+        List<Uri> uris;
+
+        if (getIntent().hasExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA)) {
+            Bundle bundle = getIntent().getBundleExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA);
+            if (bundle == null) return;
+            uris = FileHandlingData.fromBundle(bundle).uris;
+        } else {
+            uris = Arrays.asList(getIntent().getData());
+        }
+
+        for (Uri uri : uris) {
+            if (uri == null || !"content".equals(uri.getScheme())) return;
+
+            int granted = checkCallingOrSelfUriPermission(uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            if (granted != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri);
+                return;
+            }
+        }
+
+        twaBuilder.setFileHandlingData(new FileHandlingData(uris));
     }
 
     /**
@@ -330,6 +377,23 @@ public class LauncherActivity extends Activity {
         outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }
 
+    /**
+     * Override this to enable Protocol Handler support.
+     * Keys of this map are data schemes, e.g. "bitcoin", "irc", "xmpp", "web+coffee", and values
+     * are templates that will be used to construct the full URL. The template must contain a "%s"
+     * token and be an absolute location with http/https scheme and the same origin as the TWA.
+     *
+     * An example valid entry in the map would be:
+     * ["web+coffee"] -> ["https://coffee.com/?type=%s"]
+     * This would result in a link "web+coffee://latte" being converted to
+     * "https://coffee.com/?type=web%2Bcoffee%3A%2F%2Flatte".
+     *
+     * {@see https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference/protocol_handlers}
+     */
+    protected Map<String, Uri> getProtocolHandlers() {
+        return Collections.emptyMap();
+    }
+
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
@@ -347,18 +411,42 @@ public class LauncherActivity extends Activity {
      * Override this for special handling (such as ignoring or sanitising data from the Intent).
      */
     protected Uri getLaunchingUrl() {
-        Uri uri = getIntent().getData();
-        if (uri != null) {
-            Log.d(TAG, "Using URL from Intent (" + uri + ").");
-            return uri;
+        Uri defaultUrl = Uri.parse(mMetadata.defaultUrl);
+
+        Uri intentUrl = getIntent().getData();
+
+        if (intentUrl != null) {
+            Map<String, Uri> protocolHandlers = getProtocolHandlers();
+            String scheme = intentUrl.getScheme();
+
+            if ("https".equals(scheme)) {
+                Log.d(TAG, "Using url from Intent: " + intentUrl);
+                return intentUrl;
+            }
+
+            if ("content".equals(scheme)) {
+                // The application was launched by opening a file - return the URL configured for
+                // this file type in the manifest
+                if (mMetadata.fileHandlingActionUrl == null) {
+                    return defaultUrl;
+                }
+                return Uri.parse(mMetadata.fileHandlingActionUrl);
+            }
+
+            Uri format = protocolHandlers.get(scheme);
+            if (format != null) {
+                String target = Uri.encode(intentUrl.toString());
+                Uri targetUrl =  Uri.parse(String.format(format.toString(), target));
+                Log.d(TAG, "Using protocol handler url: " + targetUrl);
+                return targetUrl;
+            }
+
+            Log.w(TAG, "Scheme " + scheme + " was registered in the manifest but not in " +
+                    "getProtocolHandlers()! Ignoring it and falling back to the default url.");
         }
 
-        if (mMetadata.defaultUrl != null) {
-            Log.d(TAG, "Using URL from Manifest (" + mMetadata.defaultUrl + ").");
-            return Uri.parse(mMetadata.defaultUrl);
-        }
-
-        return Uri.parse("https://www.example.com/");
+        Log.d(TAG, "Using url from Manifest: " + defaultUrl);
+        return defaultUrl;
     }
 
     /**

@@ -27,8 +27,6 @@ import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PriceChangeConfirmationListener;
-import com.android.billingclient.api.PriceChangeFlowParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
@@ -124,12 +122,12 @@ public class PlayBillingWrapper implements BillingWrapper {
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
         builder.setSkuDetails(sku);
 
-        if (methodData.prorationMode != null) {
-            subUpdateParamsBuilder.setReplaceSkusProrationMode(methodData.prorationMode);
+        if (methodData.replacementMode != null) {
+            subUpdateParamsBuilder.setSubscriptionReplacementMode(methodData.replacementMode);
         }
 
         if (methodData.purchaseToken != null) {
-            subUpdateParamsBuilder.setOldSkuPurchaseToken(methodData.purchaseToken);
+            subUpdateParamsBuilder.setOldPurchaseToken(methodData.purchaseToken);
             builder.setSubscriptionUpdateParams(subUpdateParamsBuilder.build());
         }
 
@@ -138,15 +136,5 @@ public class PlayBillingWrapper implements BillingWrapper {
         Logging.logLaunchPaymentFlow(result);
 
         return result.getResponseCode() == BillingClient.BillingResponseCode.OK;
-    }
-
-    @Override
-    public void launchPriceChangeConfirmationFlow(Activity activity, SkuDetails sku,
-            PriceChangeConfirmationListener listener) {
-        PriceChangeFlowParams params = PriceChangeFlowParams
-                .newBuilder()
-                .setSkuDetails(sku)
-                .build();
-        mClient.launchPriceChangeConfirmationFlow(activity, params, listener);
     }
 }

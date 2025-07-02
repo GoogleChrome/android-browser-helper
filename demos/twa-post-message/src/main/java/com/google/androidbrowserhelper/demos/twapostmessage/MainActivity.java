@@ -56,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
     private CustomTabsSession mSession;
     private Uri URL = Uri.parse("https://peconn.github.io/starters");
 
-    // This can be the app's package name, it has to either start with http or https.
-    private Uri SOURCE_ORIGIN = Uri.parse("https://my-app-origin-uri");
+    // This origin is going to be validated via DAL, please see
+    // (https://developer.chrome.com/docs/android/post-message-twa#add_the_app_to_web_validation),
+    // it has to either start with http or https.
+    private Uri SOURCE_ORIGIN = Uri.parse("https://sayedelabady.github.io/");
     private Uri TARGET_ORIGIN = Uri.parse("https://peconn.github.io");
     private boolean mValidated = false;
 

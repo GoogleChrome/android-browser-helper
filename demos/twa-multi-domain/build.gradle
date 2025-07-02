@@ -17,13 +17,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "30.0.3"
-
+    namespace "com.google.browser.examples.twa_multi_domain"
 
     defaultConfig {
         applicationId "com.google.browser.examples.twa_multi_domain"
         minSdkVersion 26
+        compileSdk 36
         targetSdkVersion 31
         versionCode 1
         versionName "1.0"

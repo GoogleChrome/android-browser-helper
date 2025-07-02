@@ -34,10 +34,8 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import androidx.core.content.ContextCompat;
 
-import com.google.androidbrowserhelper.trusted.ChromeOsSupport;
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+import com.google.androidbrowserhelper.BuildConfig;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -47,6 +45,12 @@ public class TwaLauncher {
     private static final String TAG = "TwaLauncher";
 
     private static final int DEFAULT_SESSION_ID = 96375;
+
+    private static final String EXTRA_STARTUP_UPTIME_MILLIS =
+            "org.chromium.chrome.browser.customtabs.trusted.STARTUP_UPTIME_MILLIS";
+
+    private static final String EXTRA_ANDROID_BROWSER_HELPER_VERSION =
+            "org.chromium.chrome.browser.ANDROID_BROWSER_HELPER_VERSION";
 
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
@@ -96,6 +100,8 @@ public class TwaLauncher {
 
     private boolean mDestroyed;
 
+    private long mStartupUptimeMillis;
+
     public interface FallbackStrategy {
         void launch(Context context,
                     TrustedWebActivityIntentBuilder twaBuilder,
@@ -108,7 +114,7 @@ public class TwaLauncher {
      * If no browser supports TWA, will launch a usual Custom Tab (see {@link TwaProviderPicker}.
      */
     public TwaLauncher(Context context) {
-        this(context, null);
+        this(context, (String) null);
     }
 
     /**
@@ -121,10 +127,29 @@ public class TwaLauncher {
     }
 
     /**
+     * @deprecated This method is no longer recommended for use since TwaLauncher is rolling back to
+     * sessionId instead of taskId.
+     */
+    @Deprecated(forRemoval = true)
+    public TwaLauncher(Context context, @Nullable Integer taskId) {
+        this(context, null, taskId);
+    }
+
+    /**
+     * @deprecated This method is no longer recommended for use since TwaLauncher is rolling back to
+     * sessionId instead of taskId.
+     */
+    @Deprecated(forRemoval = true)
+    public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer taskId) {
+        this(context, providerPackage, SessionStore.makeSessionId(taskId),
+                new SharedPreferencesTokenStore(context));
+    }
+
+    /**
      * Same as above, but also accepts a session id. This allows to launch multiple TWAs in the same
      * task.
      */
-    public TwaLauncher(Context context, @Nullable String providerPackage, int sessionId,
+    public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer sessionId,
                        TokenStore tokenStore) {
         mContext = context;
         mSessionId = sessionId;
@@ -269,6 +294,11 @@ public class TwaLauncher {
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
         TrustedWebActivityIntent intent = builder.build(mSession);
+        if (mStartupUptimeMillis != 0) {
+            intent.getIntent().putExtra(EXTRA_STARTUP_UPTIME_MILLIS, mStartupUptimeMillis);
+        }
+        intent.getIntent().putExtra(
+                EXTRA_ANDROID_BROWSER_HELPER_VERSION, BuildConfig.LIBRARY_VERSION);
         FocusActivity.addToIntent(intent.getIntent(), mContext);
         intent.launchTrustedWebActivity(mContext);
 
@@ -297,6 +327,15 @@ public class TwaLauncher {
     @Nullable
     public String getProviderPackage() {
         return mProviderPackage;
+    }
+
+    /**
+     * Sets the timestamp (in SystemClock.uptimeMillis()) when the TWA launcher
+     * activity was created. This timestamp is used to report the full startup
+     * duration to the browser.
+     */
+    public void setStartupUptimeMillis(long startupUptimeMillis) {
+        mStartupUptimeMillis = startupUptimeMillis;
     }
 
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {

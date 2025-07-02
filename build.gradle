@@ -22,7 +22,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath 'com.android.tools.build:gradle:8.9.1'
     }
 }
 
@@ -30,6 +30,14 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        // Repository for DexMaker
+        maven {
+            url = "https://linkedin.jfrog.io/artifactory/open-source/"
+            content {
+                includeGroup 'com.linkedin.dexmaker'
+            }
+        }
     }
 }
 

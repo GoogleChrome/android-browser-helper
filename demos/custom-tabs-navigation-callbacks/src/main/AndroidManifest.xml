@@ -12,8 +12,7 @@
      limitations under the License.
 -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.androidbrowserhelper.demos.customtabssession">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <queries>
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />

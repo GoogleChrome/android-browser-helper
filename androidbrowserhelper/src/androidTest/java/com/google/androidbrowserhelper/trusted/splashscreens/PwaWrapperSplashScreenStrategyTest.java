@@ -100,7 +100,7 @@ public class PwaWrapperSplashScreenStrategyTest {
         mActivity = mActivityTestRule.getActivity();
         mSession = mConnectionRule.establishSessionBlocking(mActivity);
         mStrategy = new PwaWrapperSplashScreenStrategy(mActivity, R.drawable.splash, 0,
-                ImageView.ScaleType.FIT_XY, null, 0, FILE_PROVIDER_AUTHORITY);
+                ImageView.ScaleType.FIT_XY, null, 0, FILE_PROVIDER_AUTHORITY, true);
     }
 
     @After
@@ -145,7 +145,7 @@ public class PwaWrapperSplashScreenStrategyTest {
 
         PwaWrapperSplashScreenStrategy strategy = new PwaWrapperSplashScreenStrategy(mActivity,
                 R.drawable.splash, bgColor, scaleType, matrix, fadeOutDuration,
-                FILE_PROVIDER_AUTHORITY);
+                FILE_PROVIDER_AUTHORITY, true);
         strategy.onActivityEnterAnimationComplete();
         initiateLaunch(strategy);
 
@@ -167,25 +167,6 @@ public class PwaWrapperSplashScreenStrategyTest {
         matrix.getValues(matrixValues);
         assertArrayEquals(matrixValues, bundle.getFloatArray(
                 SplashScreenParamKey.KEY_IMAGE_TRANSFORMATION_MATRIX), 1e-3f);
-    }
-
-    @Test
-    public void waitsForEnterAnimationCompletion_BeforeDeclaringReady()
-            throws InterruptedException {
-        initiateLaunch(mStrategy);
-        Runnable readyCallback = mock(Runnable.class);
-        mStrategy.configureTwaBuilder(new TrustedWebActivityIntentBuilder( Uri.EMPTY),
-                mSession, readyCallback);
-        TestCustomTabsService.getInstance().waitForSplashImageFile(3000);
-
-        CountDownLatch latch = new CountDownLatch(1);
-        runOnUiThreadBlocking(() -> {
-            verify(readyCallback, never()).run();
-            mStrategy.onActivityEnterAnimationComplete();
-            verify(readyCallback).run();
-            latch.countDown();
-        });
-        assertTrue(latch.await(3, TimeUnit.SECONDS));
     }
 
     private void initiateLaunch(PwaWrapperSplashScreenStrategy strategy) {

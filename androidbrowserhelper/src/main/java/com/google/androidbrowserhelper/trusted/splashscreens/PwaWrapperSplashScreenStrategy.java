@@ -19,6 +19,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -86,6 +87,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
     @Nullable
     private Runnable mOnEnterAnimationCompleteRunnable;
 
+    private boolean mStartChromeBeforeAnimationComplete;
+
     /**
      * @param activity {@link Activity} on top of which a TWA is going to be launched.
      * @param drawableId Resource id of the Drawable of an image (e.g. logo) displayed in the
@@ -104,7 +107,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
             ImageView.ScaleType scaleType,
             @Nullable Matrix transformationMatrix,
             int fadeOutDurationMillis,
-            String fileProviderAuthority) {
+            String fileProviderAuthority,
+            boolean startChromeBeforeAnimationComplete) {
         mDrawableId = drawableId;
         mBackgroundColor = backgroundColor;
         mScaleType = scaleType;
@@ -112,6 +116,7 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         mActivity = activity;
         mFileProviderAuthority = fileProviderAuthority;
         mFadeOutDurationMillis = fadeOutDurationMillis;
+        mStartChromeBeforeAnimationComplete = startChromeBeforeAnimationComplete;
     }
 
     @Override
@@ -192,11 +197,11 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
                 mProviderPackage);
 
         mSplashImageTransferTask.execute(
-                success -> onSplashImageTransferred(builder, success, onReadyCallback));
+                success -> onSplashImageTransferred(builder, success, onReadyCallback, session));
     }
 
     private void onSplashImageTransferred(TrustedWebActivityIntentBuilder builder, boolean success,
-            Runnable onReadyCallback) {
+            Runnable onReadyCallback, CustomTabsSession session) {
         if (!success) {
             Log.w(TAG, "Failed to transfer splash image.");
             onReadyCallback.run();
@@ -204,17 +209,26 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         }
         builder.setSplashScreenParams(makeSplashScreenParamsBundle());
 
-        runWhenEnterAnimationComplete(() -> {
-            onReadyCallback.run();
-            mActivity.overridePendingTransition(0, 0); // Avoid window animations during transition.
-        });
+        Runnable taskToRun = () -> {
+          onReadyCallback.run();
+          mActivity.overridePendingTransition(0, 0); // Avoid window animations during transition.
+        };
+
+        if (mStartChromeBeforeAnimationComplete) {
+            taskToRun.run();
+        } else {
+            runWhenEnterAnimationComplete(taskToRun, session, builder.getUri());
+        }
     }
 
-    private void runWhenEnterAnimationComplete(Runnable runnable) {
+    private void runWhenEnterAnimationComplete(Runnable runnable, CustomTabsSession session,
+            Uri uri) {
         if (mEnterAnimationComplete) {
             runnable.run();
         } else {
             mOnEnterAnimationCompleteRunnable = runnable;
+            boolean preloadResult = session.mayLaunchUrl(uri, null, null);
+            Log.i(TAG, "Enter animation not complete, try preload url. Result: " + preloadResult);
         }
     }
 

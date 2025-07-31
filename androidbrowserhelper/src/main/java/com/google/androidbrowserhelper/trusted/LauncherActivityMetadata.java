@@ -28,6 +28,7 @@ import androidx.browser.trusted.LaunchHandlerClientMode;
 import androidx.browser.trusted.ScreenOrientation;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +144,13 @@ public class LauncherActivityMetadata {
             "android.support.customtabs.trusted.DISPLAY_MODE";
 
     /**
+     * The array representing the custom display mode fallback order. Possible array values are
+     * "standalone", "minimal-ui", "fullscreen", "browser", "window-controls-overlay", and "tabbed".
+     */
+    private static final String METADATA_DISPLAY_OVERRIDE =
+            "android.support.customtabs.trusted.DISPLAY_OVERRIDE";
+
+    /**
      * The screen orientation to use when launching the Trusted Web Activity. Possible values are
      * "any", "natural", "landscape", "landscape-primary", "landscape-secondary",
      * "portrait", "portrait-primary", "portrait-secondary".
@@ -192,6 +200,7 @@ public class LauncherActivityMetadata {
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
+    public final List<String> displayOverrideList;
     @ScreenOrientation.LockType public final int screenOrientation;
     @Nullable public final String shareTarget;
     @Nullable public final String fileHandlingActionUrl;
@@ -224,7 +233,8 @@ public class LauncherActivityMetadata {
             additionalTrustedOrigins = null;
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
-        displayMode = getDisplayMode(metaData);
+        displayMode = getDisplayMode(metaData.getString(METADATA_DISPLAY_MODE), false);
+        displayOverrideList = getDisplayOverride(metaData);
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
@@ -262,8 +272,7 @@ public class LauncherActivityMetadata {
         }
     }
 
-    private static TrustedWebActivityDisplayMode getDisplayMode(@NonNull Bundle metaData) {
-        String displayMode = metaData.getString(METADATA_DISPLAY_MODE);
+    private static TrustedWebActivityDisplayMode getDisplayMode(String displayMode, boolean includeExperimental) {
         if ("immersive".equals(displayMode)) {
             return new TrustedWebActivityDisplayMode.ImmersiveMode(
                     false, LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT);
@@ -278,7 +287,28 @@ public class LauncherActivityMetadata {
         if ("browser".equals(displayMode)) {
             return new TrustedWebActivityDisplayMode.BrowserMode();
         }
+        
+        if (includeExperimental) {
+            if ("window-controls-overlay".equals(displayMode)) {
+                return new TrustedWebActivityDisplayMode.WindowControlsOverlayMode();
+            }
+            if ("tabbed".equals(displayMode)) {
+                return new TrustedWebActivityDisplayMode.TabbedMode();
+            }
+        }
+        
         return new TrustedWebActivityDisplayMode.DefaultMode();
+    }
+
+    private static List<TrustedWebActivityDisplayMode> getDisplayOverride(@NonNull Bundle metaData) {
+        List<String> displayOverrideStringList = Arrays.asList(metaData.getStringArray(METADATA_DISPLAY_OVERRIDE));
+
+        List<TrustedWebActivityDisplayMode> displayOverrideList = new ArrayList<>();
+        for (String displayOverrideString : displayOverrideStringList) {
+             displayOverrideList.add(getDisplayMode(displayOverrideString, true));
+        }
+        
+        return displayOverrideList;
     }
 
     /**

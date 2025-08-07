@@ -42,5 +42,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation libs.androidx.browser
+    implementation(platform(libs.kotlin.bom))
 }

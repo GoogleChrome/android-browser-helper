@@ -49,16 +49,16 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api libs.androidx.browser
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation libs.play.services.location
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:5.15.2'
-    testImplementation 'org.mockito:mockito-inline:5.2.0'
-    testImplementation 'org.robolectric:robolectric:4.12.2'
-    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation libs.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.inline
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
 
     debugImplementation project(path: ':androidbrowserhelper')
     releaseImplementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'

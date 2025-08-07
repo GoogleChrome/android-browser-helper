@@ -24,14 +24,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.widget.Button;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.OptIn;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
-import androidx.browser.customtabs.ExperimentalEphemeralBrowsing;
+
 
 public class MainActivity extends Activity {
     private static final String URL = "https://xchrdw.github.io/browsing-data/siteDataTester.html";
@@ -51,7 +51,8 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onServiceDisconnected(ComponentName componentName) { }
+            public void onServiceDisconnected(ComponentName componentName) {
+            }
         };
 
         String packageName = CustomTabsClient.getPackageName(this, null);
@@ -87,7 +88,6 @@ public class MainActivity extends Activity {
         mConnection = null;
     }
 
-    @OptIn(markerClass = ExperimentalEphemeralBrowsing.class)
     private void launchEphemeralTab() {
         CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                 .setEphemeralBrowsingEnabled(true)
@@ -106,7 +106,6 @@ public class MainActivity extends Activity {
         startActivity(webIntent);
     }
 
-    @OptIn(markerClass = ExperimentalEphemeralBrowsing.class)
     private boolean isEphemeralTabSupported() throws RemoteException {
         String provider = CustomTabsClient.getPackageName(this, null);
         if (provider == null) {

@@ -44,5 +44,5 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':androidbrowserhelper')
 
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation libs.androidx.browser
 }

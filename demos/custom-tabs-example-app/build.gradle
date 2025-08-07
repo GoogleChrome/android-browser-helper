@@ -44,9 +44,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':androidbrowserhelper')
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.browser:browser:1.6.0-alpha01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.core:core:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.core
+    implementation libs.androidx.recyclerview
+    implementation(platform(libs.kotlin.bom))
 }

@@ -39,7 +39,8 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api libs.androidx.browser
+    implementation(platform(libs.kotlin.bom))
     debugImplementation project(path: ':androidbrowserhelper')
     debugImplementation project(path: ':playbilling')
 

@@ -53,10 +53,10 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':androidbrowserhelper')
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation libs.androidx.browser
     // Firebase: Firebase Bill of Materials (BoM) for automatic choice version for each imported
     // library (See https://firebase.google.com/docs/android/learn-more#bom).
-    implementation platform('com.google.firebase:firebase-bom:25.12.0')
+    implementation platform(libs.firebase.bom)
     // Firebase Analytics: include Firebase Analytics for GA tracking.
-    implementation 'com.google.firebase:firebase-analytics'
+    implementation libs.firebase.analytics
 }

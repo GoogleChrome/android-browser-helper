@@ -41,11 +41,11 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api libs.androidx.browser
     implementation project(path: ':androidbrowserhelper')
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.runner
+    androidTestImplementation libs.androidx.test.espresso.core
 }

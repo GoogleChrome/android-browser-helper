@@ -14,16 +14,8 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
-
-buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.google.gms:google-services:4.3.4'
-    }
+plugins {
+    id 'com.android.application'
 }
 
 android {

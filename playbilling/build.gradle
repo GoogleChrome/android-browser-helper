@@ -14,8 +14,10 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 def VERSION = "1.1.0";
 

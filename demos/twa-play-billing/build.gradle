@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 // Switch these around for a build to upload to the Play Store.
 def appId = "com.google.androidbrowserhelper.demos.playbilling"

@@ -15,7 +15,9 @@
  */
 
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace 'com.google.androidbrowserhelper.demos.customtabsephemeral'

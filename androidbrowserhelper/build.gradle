@@ -14,8 +14,10 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 // Before 2.6.1, the version code was unused and was kept at 1.
 // This is now being used to report metrics, and should be bumped with

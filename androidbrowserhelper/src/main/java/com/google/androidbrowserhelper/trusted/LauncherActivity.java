@@ -264,7 +264,7 @@ public class LauncherActivity extends Activity {
     }
 
     protected CustomTabsCallback getCustomTabsCallback() {
-        return new QualityEnforcer();
+        return null;
     }
 
     protected TwaLauncher createTwaLauncher() {

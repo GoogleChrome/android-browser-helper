@@ -200,7 +200,7 @@ public class LauncherActivityMetadata {
     @Nullable public final List<String> additionalTrustedOrigins;
     @Nullable public final String fallbackStrategyType;
     public final TrustedWebActivityDisplayMode displayMode;
-    public final List<String> displayOverrideList;
+    public final List<TrustedWebActivityDisplayMode> displayOverrideList;
     @ScreenOrientation.LockType public final int screenOrientation;
     @Nullable public final String shareTarget;
     @Nullable public final String fileHandlingActionUrl;
@@ -290,7 +290,7 @@ public class LauncherActivityMetadata {
         
         if (includeExperimental) {
             if ("window-controls-overlay".equals(displayMode)) {
-                return new TrustedWebActivityDisplayMode.WindowControlsOverlayMode();
+                return new TrustedWebActivityDisplayMode.WindowControlsOverlay();
             }
             if ("tabbed".equals(displayMode)) {
                 return new TrustedWebActivityDisplayMode.TabbedMode();
@@ -301,10 +301,13 @@ public class LauncherActivityMetadata {
     }
 
     private static List<TrustedWebActivityDisplayMode> getDisplayOverride(@NonNull Bundle metaData) {
-        List<String> displayOverrideStringList = Arrays.asList(metaData.getStringArray(METADATA_DISPLAY_OVERRIDE));
+        String[] displayOverrideStringArray = metaData.getStringArray(METADATA_DISPLAY_OVERRIDE);
+        if (displayOverrideStringArray == null) {
+            return new ArrayList<>();
+        }
 
         List<TrustedWebActivityDisplayMode> displayOverrideList = new ArrayList<>();
-        for (String displayOverrideString : displayOverrideStringList) {
+        for (String displayOverrideString : displayOverrideStringArray) {
              displayOverrideList.add(getDisplayMode(displayOverrideString, true));
         }
         

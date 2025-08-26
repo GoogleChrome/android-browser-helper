@@ -29,7 +29,7 @@ android {
     namespace "com.google.androidbrowserhelper"
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 21
         compileSdk 36
         targetSdkVersion 31
         versionCode VERSION_CODE

@@ -1,5 +1,7 @@
 package com.google.androidbrowserhelper.demos.customtabsauthtab;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,11 +9,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.browser.auth.AuthTabIntent;
-import androidx.annotation.OptIn;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -63,9 +67,22 @@ public class AuthManager {
                 .appendQueryParameter("state", state)
                 .build();
 
-        // Open the Authorization URI in a Chrome Custom Auth Tab.
-        AuthTabIntent authTabIntent = new AuthTabIntent.Builder().build();
-        authTabIntent.launch(launcher, uri, mRedirectScheme);
+        String packageName = CustomTabsClient.getPackageName(context, null);
+        if (packageName == null) {
+            Toast.makeText(context, "Can't find a Custom Tabs provider.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Open the Authorization URI in an Auth Tab if supported by the default browser.
+        if (CustomTabsClient.isAuthTabSupported(context, packageName)) {
+            AuthTabIntent authTabIntent = new AuthTabIntent.Builder().build();
+            authTabIntent.launch(launcher, uri, mRedirectScheme);
+        } else {
+            // Fall back to a Custom Tab.
+            CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder().build();
+            customTabsIntent.intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+            customTabsIntent.launchUrl(context, uri);
+        }
     }
 
     public void continueAuthFlow(@NonNull Context context, Uri uri, @NonNull OAuthCallback callback) {

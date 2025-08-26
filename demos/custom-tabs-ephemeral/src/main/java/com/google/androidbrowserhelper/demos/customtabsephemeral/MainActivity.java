@@ -18,7 +18,6 @@ package com.google.androidbrowserhelper.demos.customtabsephemeral;
 
 import androidx.annotation.OptIn;
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.ExperimentalEphemeralBrowsing;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -40,7 +39,6 @@ public class MainActivity extends Activity {
         });
     }
 
-    @OptIn(markerClass = ExperimentalEphemeralBrowsing.class)
     private void launchTab() {
         Intent customTabsIntent = new CustomTabsIntent.Builder()
                 .setEphemeralBrowsingEnabled(true)

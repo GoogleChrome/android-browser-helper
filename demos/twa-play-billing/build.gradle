@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 // Switch these around for a build to upload to the Play Store.
 def appId = "com.google.androidbrowserhelper.demos.playbilling"
@@ -39,7 +41,8 @@ android {
 }
 
 dependencies {
-    api 'androidx.browser:browser:1.4.0'
+    api libs.androidx.browser
+    implementation(platform(libs.kotlin.bom))
     debugImplementation project(path: ':androidbrowserhelper')
     debugImplementation project(path: ':playbilling')
 

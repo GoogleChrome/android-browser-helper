@@ -233,7 +233,7 @@ public class LauncherActivityMetadata {
             additionalTrustedOrigins = null;
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
-        displayMode = getDisplayMode(metaData.getString(METADATA_DISPLAY_MODE), false);
+        displayMode = getDisplayMode(metaData.getString(METADATA_DISPLAY_MODE), /* includeExperimental= */ false);
         displayOverrideList = getDisplayOverride(metaData);
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
@@ -308,7 +308,7 @@ public class LauncherActivityMetadata {
 
         List<TrustedWebActivityDisplayMode> displayOverrideList = new ArrayList<>();
         for (String displayOverrideString : displayOverrideStringArray) {
-             displayOverrideList.add(getDisplayMode(displayOverrideString, true));
+             displayOverrideList.add(getDisplayMode(displayOverrideString, /* includeExperimental= */ true));
         }
         
         return displayOverrideList;

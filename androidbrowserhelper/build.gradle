@@ -68,7 +68,7 @@ dependencies {
     implementation(platform(libs.kotlin.bom))
     implementation(platform(libs.kotlin.coroutines.bom))
 
-    api 'androidx.browser:browser:1.10.0-alpha01'
+    api libs.androidx.browser
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

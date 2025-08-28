@@ -23,7 +23,7 @@ android {
     namespace "com.google.androidbrowserhelper.locationdelegation"
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 23
         compileSdk 36
         targetSdkVersion 31
         versionCode 1

@@ -1,0 +1,61 @@
+[versions]
+agp = "8.9.1"
+androidx-activity = "1.9.3"
+androidx-annotation = "1.9.1"
+androidx-appcompat = "1.7.0"
+androidx-browser = "1.9.0"
+androidx-constraintlayout = "2.2.0"
+androidx-core = "1.10.1"
+androidx-recyclerview = "1.1.0"
+androidx-test-espresso-core = "3.2.0"
+androidx-test-core = "1.4.0"
+androidx-ext-junit = "1.1.1"
+androidx-test-rules = "1.2.0"
+androidx-test-runner = "1.2.0"
+billing = "7.1.1"
+material = "1.12.0"
+firebase-bom = "25.12.0"
+google-services = "4.3.4"
+guava = "33.4.8-android"
+junit = "4.12"
+kotlin-bom = "1.8.22"
+kotlin-coroutines-bom = "1.7.3"
+mockito-core = "5.15.2"
+mockito-dexmaker = "2.19.0"
+mockito-inline = "5.2.0"
+play-services-location = "21.0.1"
+robolectric = "4.12.2"
+
+[libraries]
+androidx-activity = { module = "androidx.activity:activity", version.ref = "androidx-activity" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "androidx-browser" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "androidx-constraintlayout" }
+androidx-core = { module = "androidx.core:core", version.ref = "androidx-core" }
+androidx-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-ext-junit" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "androidx-recyclerview" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "androidx-test-rules" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
+androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "androidx-test-espresso-core" }
+billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
+dexmaker-mockito = { module = "com.linkedin.dexmaker:dexmaker-mockito", version.ref = "mockito-dexmaker" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin-bom" }
+kotlin-coroutines-bom = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-bom", version.ref = "kotlin-coroutines-bom" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito-core" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito-inline" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-services-location" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+maven-publish = { id = "maven-publish" }

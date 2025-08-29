@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace "com.google.androidbrowserhelper.demos.customtabsoauth"
@@ -42,5 +44,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation libs.androidx.browser
+    implementation(platform(libs.kotlin.bom))
 }

@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace "com.google.androidbrowserhelper.demos.customtabssession"
@@ -44,7 +46,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.browser:browser:1.4.0'
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.browser
+    implementation(platform(libs.kotlin.bom))
 }
 

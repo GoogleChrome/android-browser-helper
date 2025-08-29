@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
     namespace "com.google.browser.examples.twa_multi_domain"

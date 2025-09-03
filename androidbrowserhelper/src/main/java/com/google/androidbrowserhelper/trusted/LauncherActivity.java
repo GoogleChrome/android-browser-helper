@@ -227,7 +227,7 @@ public class LauncherActivity extends Activity {
                         .setScreenOrientation(mMetadata.screenOrientation)
                         .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
 
-       Uri intentUrl = getIntent().getData();
+       Uri intentUrl = getUrlForIntent(getIntent());
        if (!launchUrl.equals(intentUrl)) {
             twaBuilder.setOriginalLaunchUrl(intentUrl);
        }
@@ -244,7 +244,7 @@ public class LauncherActivity extends Activity {
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,
-                () -> mBrowserWasLaunched = true,
+                () -> { mBrowserWasLaunched = true; finish();},
                 getFallbackStrategy());
 
         if (!sChromeVersionChecked) {
@@ -395,6 +395,15 @@ public class LauncherActivity extends Activity {
         return Collections.emptyMap();
     }
 
+    /**
+     * Override this to define a custom mapping from intent to URL (e.g., based on intent action).
+     * The returned URL may be further modified by the Protocol Handler support.
+     */
+    @Nullable
+    protected Uri getUrlForIntent(Intent intent) {
+        return intent.getData();
+    }
+
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
@@ -405,8 +414,8 @@ public class LauncherActivity extends Activity {
 
     /**
      * Returns the URL that the Trusted Web Activity should be launched to. By default this
-     * implementation checks to see if the Activity was launched with an Intent with data, if so
-     * attempt to launch to that URL. If not, read the
+     * implementation checks to see if there is a URL specified for the Intent that launched the
+     * Activity, and if so attempts to launch to that URL. If not, reads the
      * "android.support.customtabs.trusted.DEFAULT_URL" metadata from the manifest.
      *
      * Override this for special handling (such as ignoring or sanitising data from the Intent).
@@ -414,7 +423,7 @@ public class LauncherActivity extends Activity {
     protected Uri getLaunchingUrl() {
         Uri defaultUrl = Uri.parse(mMetadata.defaultUrl);
 
-        Uri intentUrl = getIntent().getData();
+        Uri intentUrl = getUrlForIntent(getIntent());
 
         if (intentUrl != null) {
             Map<String, Uri> protocolHandlers = getProtocolHandlers();

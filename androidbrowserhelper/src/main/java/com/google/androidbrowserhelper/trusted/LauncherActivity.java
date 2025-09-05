@@ -223,6 +223,7 @@ public class LauncherActivity extends Activity {
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                         .setDisplayMode(getDisplayMode())
+                        .setDisplayOverrideList(mMetadata.displayOverrideList)
                         .setScreenOrientation(mMetadata.screenOrientation)
                         .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
 

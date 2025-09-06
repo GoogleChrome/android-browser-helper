@@ -265,7 +265,12 @@ public class LauncherActivity extends Activity {
     }
 
     protected CustomTabsCallback getCustomTabsCallback() {
-        return new QualityEnforcer();
+        if (mMetadata.horizonOSAppMode != null) {
+            Log.d(TAG, "Creating HorizonOSQualityEnforcer.");
+            return new HorizonOSQualityEnforcer(this);
+        } else {
+            return new QualityEnforcer();
+        }
     }
 
     protected TwaLauncher createTwaLauncher() {

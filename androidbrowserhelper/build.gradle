@@ -23,7 +23,7 @@ plugins {
 // This is now being used to report metrics, and should be bumped with
 // every version bump.
 def VERSION = "2.7.0-alpha01";
-def VERSION_CODE = 2;
+def VERSION_CODE = 3;
 
 android {
     namespace "com.google.androidbrowserhelper"

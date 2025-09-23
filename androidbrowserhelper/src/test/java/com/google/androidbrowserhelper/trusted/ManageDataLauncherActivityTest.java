@@ -20,12 +20,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 import static androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY_CATEGORY;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -133,6 +135,34 @@ public class ManageDataLauncherActivityTest {
                 .getSiteSettingsShortcutOrNull(mContext, mPackageManager));
     }
 
+    @Test
+    @Config(sdk = Build.VERSION_CODES.N_MR1)
+    public void disablesComponentWhenSiteSettingsNotSupported() {
+        String provider = TWA_PROVIDER_PACKAGE;
+        installTrustedWebActivityProvider(provider);
+
+        ManageDataLauncherActivity.addSiteSettingsShortcut(mContext, provider);
+
+        ComponentName component = new ComponentName(mContext, ManageDataLauncherActivity.class);
+        int componentState = mPackageManager.getComponentEnabledSetting(component);
+
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED, componentState);
+    }
+
+    @Test
+    @Config(sdk = Build.VERSION_CODES.N_MR1)
+    public void enablesComponentWhenSiteSettingsSupported() {
+        String provider = TWA_PROVIDER_PACKAGE;
+        installTrustedWebActivityProviderWithSiteSettingsCategory(provider);
+
+        ManageDataLauncherActivity.addSiteSettingsShortcut(mContext, provider);
+
+        ComponentName component = new ComponentName(mContext, ManageDataLauncherActivity.class);
+        int componentState = mPackageManager.getComponentEnabledSetting(component);
+
+        // The component should be enabled, which is the default state in the test manifest.
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, componentState);
+    }
     private void installBrowser(String packageName) {
         Intent intent = new Intent()
                 .setData(Uri.fromParts("http", "", null))

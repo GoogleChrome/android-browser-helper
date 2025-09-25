@@ -22,8 +22,8 @@ plugins {
 // Before 2.6.1, the version code was unused and was kept at 1.
 // This is now being used to report metrics, and should be bumped with
 // every version bump.
-def VERSION = "2.7.0-alpha01";
-def VERSION_CODE = 3;
+def VERSION = "2.7.0-alpha02";
+def VERSION_CODE = 4;
 
 android {
     namespace "com.google.androidbrowserhelper"

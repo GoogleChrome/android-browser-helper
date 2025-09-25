@@ -234,7 +234,7 @@ public class LauncherActivityMetadata {
         }
         fallbackStrategyType = metaData.getString(METADATA_FALLBACK_STRATEGY);
         displayMode = getDisplayMode(metaData.getString(METADATA_DISPLAY_MODE), /* includeExperimental= */ false);
-        displayOverrideList = getDisplayOverride(metaData);
+        displayOverrideList = getDisplayOverride(metaData, resources);
         screenOrientation = getOrientation(metaData.getString(METADATA_SCREEN_ORIENTATION));
         int shareTargetId = metaData.getInt(METADATA_SHARE_TARGET, 0);
         shareTarget = shareTargetId == 0 ? null : resources.getString(shareTargetId);
@@ -300,11 +300,13 @@ public class LauncherActivityMetadata {
         return new TrustedWebActivityDisplayMode.DefaultMode();
     }
 
-    private static List<TrustedWebActivityDisplayMode> getDisplayOverride(@NonNull Bundle metaData) {
-        String[] displayOverrideStringArray = metaData.getStringArray(METADATA_DISPLAY_OVERRIDE);
-        if (displayOverrideStringArray == null) {
+    private static List<TrustedWebActivityDisplayMode> getDisplayOverride(@NonNull Bundle metaData, @NonNull Resources resources) {
+        if (!metaData.containsKey(METADATA_DISPLAY_OVERRIDE)) {
             return new ArrayList<>();
         }
+
+        int displayOverrideResourceId = metaData.getInt(METADATA_DISPLAY_OVERRIDE);
+        String[] displayOverrideStringArray = resources.getStringArray(displayOverrideResourceId);
 
         List<TrustedWebActivityDisplayMode> displayOverrideList = new ArrayList<>();
         for (String displayOverrideString : displayOverrideStringArray) {

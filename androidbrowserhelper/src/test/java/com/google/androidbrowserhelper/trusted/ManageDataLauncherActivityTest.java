@@ -160,9 +160,31 @@ public class ManageDataLauncherActivityTest {
         ComponentName component = new ComponentName(mContext, ManageDataLauncherActivity.class);
         int componentState = mPackageManager.getComponentEnabledSetting(component);
 
-        // The component should be enabled, which is the default state in the test manifest.
-        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, componentState);
+        // The component should be enabled.
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED, componentState);
     }
+
+    @Test
+    @Config(sdk = Build.VERSION_CODES.N_MR1)
+    public void reenablesComponentWhenSiteSettingsSupported() {
+        String provider = TWA_PROVIDER_PACKAGE;
+        // Install a TWA, with no support for site settings. Component should be disabled.
+        installTrustedWebActivityProvider(provider);
+
+        ManageDataLauncherActivity.addSiteSettingsShortcut(mContext, provider);
+
+        ComponentName component = new ComponentName(mContext, ManageDataLauncherActivity.class);
+        int componentState = mPackageManager.getComponentEnabledSetting(component);
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED, componentState);
+
+        // Now with support for site settings. Component should be enabled.
+        installTrustedWebActivityProviderWithSiteSettingsCategory(provider);
+        ManageDataLauncherActivity.addSiteSettingsShortcut(mContext, provider);
+
+        componentState = mPackageManager.getComponentEnabledSetting(component);
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED, componentState);
+    }
+
     private void installBrowser(String packageName) {
         Intent intent = new Intent()
                 .setData(Uri.fromParts("http", "", null))

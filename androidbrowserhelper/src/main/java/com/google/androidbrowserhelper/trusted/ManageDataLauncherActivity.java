@@ -389,6 +389,10 @@ public class ManageDataLauncherActivity extends Activity {
             return;
         }
 
+        // Ensure the ManageDataLauncherActivity is enabled.
+        packageManager.setComponentEnabledSetting(new ComponentName(context, ManageDataLauncherActivity.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+
         ShortcutInfo shortcut = getSiteSettingsShortcutOrNull(
                 context, packageManager);
 

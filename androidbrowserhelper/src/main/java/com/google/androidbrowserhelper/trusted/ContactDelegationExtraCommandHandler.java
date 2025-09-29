@@ -16,7 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ContactDelegationExtraCommandHandler implements ExtraCommandHandler {
 
@@ -49,7 +50,13 @@ public class ContactDelegationExtraCommandHandler implements ExtraCommandHandler
                 break;
             case COMMAND_GET_CONTACT_DATA:
                 Log.d(TAG, "COMMAND_GET_CONTACT_DATA received");
-                callbackResult.putStringArrayList("contactData", getContentData(context));
+                boolean includeNames = args.getBoolean("includeNames");
+                boolean includeEmails = args.getBoolean("includeEmails");
+                boolean includeTel = args.getBoolean("includeTel");
+                boolean includeAddresses = args.getBoolean("includeAddresses");
+                callbackResult.putParcelableArrayList("contacts",
+                    getAllContacts(context, includeNames, includeEmails, includeTel,
+                        includeAddresses));
                 try {
                     callback.runExtraCallback(COMMAND_GET_CONTACT_DATA, callbackResult);
                 } catch (RemoteException e) {
@@ -79,25 +86,196 @@ public class ContactDelegationExtraCommandHandler implements ExtraCommandHandler
         return result;
     }
 
-    private ArrayList<String> getContentData(Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
-        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, PROJECTION,
-            null, null, ContactsContract.Contacts.SORT_KEY_PRIMARY + " ASC");
+    private Map<String, ArrayList<String>> getDetails(ContentResolver contentResolver,
+        Uri source, String idColumn, String dataColumn, String sortOrder) {
+        Map<String, ArrayList<String>> map = new HashMap<>();
 
-        ArrayList<String> result = new ArrayList<>();
+        Cursor cursor = contentResolver.query(source, null, null, null, sortOrder);
+        ArrayList<String> list = new ArrayList<>();
+        String key = "";
+        String value;
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String name = cursor.getString(
-                    cursor.getColumnIndexOrThrow(
-                        ContactsContract.Contacts.DISPLAY_NAME_PRIMARY));
-                result.add(name);
+        assert cursor != null;
+
+        while (cursor.moveToNext()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow(idColumn));
+            value = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
+            if (value == null) {
+                value = "";
             }
+            if (key.isEmpty()) {
+                key = id;
+                list.add(value);
+            } else {
+                if (key.equals(id)) {
+                    list.add(value);
+                } else {
+                    map.put(key, list);
+                    list = new ArrayList<>();
+                    list.add(value);
+                    key = id;
+                }
+            }
+        }
+        map.put(key, list);
+        cursor.close();
 
+        return map;
+    }
+
+    private Map<String, ArrayList<Bundle>> getAddressDetails(ContentResolver contentResolver) {
+        Map<String, ArrayList<Bundle>> map = new HashMap<>();
+
+        String addressSortOrder =
+            ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID
+                + " ASC, "
+                + ContactsContract.CommonDataKinds.StructuredPostal.DATA
+                + " ASC";
+        Cursor cursor =
+            contentResolver.query(
+                ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
+                null,
+                null,
+                null,
+                addressSortOrder);
+
+        assert cursor != null;
+
+        ArrayList<Bundle> list = new ArrayList<>();
+        String key = "";
+
+        while (cursor.moveToNext()) {
+            String id =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID));
+            String city =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal.CITY));
+            String country =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal.COUNTRY));
+            String formattedAddress =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal
+                            .FORMATTED_ADDRESS));
+            String postcode =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE));
+            String region =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.CommonDataKinds.StructuredPostal.REGION));
+            Bundle address = new Bundle();
+
+            address.putString("city", city);
+            address.putString("country", country);
+            address.putString("formattedAddress", formattedAddress);
+            address.putString("postcode", postcode);
+            address.putString("region", region);
+
+            if (key.isEmpty()) {
+                key = id;
+                list.add(address);
+            } else {
+                if (key.equals(id)) {
+                    list.add(address);
+                } else {
+                    map.put(key, list);
+                    list = new ArrayList<>();
+                    list.add(address);
+                    key = id;
+                }
+            }
+        }
+        map.put(key, list);
+        cursor.close();
+
+        return map;
+    }
+
+    public ArrayList<Bundle> getAllContacts(Context context, boolean includeNames,
+        boolean includeEmails,
+        boolean includeTel, boolean includeAddresses) {
+        ContentResolver contentResolver = context.getContentResolver();
+
+        Map<String, ArrayList<String>> emailMap =
+            includeEmails
+                ? getDetails(contentResolver,
+                ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                ContactsContract.CommonDataKinds.Email.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Email.DATA,
+                ContactsContract.CommonDataKinds.Email.CONTACT_ID
+                    + " ASC, "
+                    + ContactsContract.CommonDataKinds.Email.DATA
+                    + " ASC")
+                : null;
+
+        Map<String, ArrayList<String>> phoneMap =
+            includeTel
+                ? getDetails(contentResolver,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.DATA,
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID
+                    + " ASC, "
+                    + ContactsContract.CommonDataKinds.Phone.NUMBER
+                    + " ASC")
+                : null;
+
+        Map<String, ArrayList<Bundle>> addressMap =
+            includeAddresses ? getAddressDetails(contentResolver) : null;
+
+        Log.d(TAG, "emailMap = " + emailMap);
+        Log.d(TAG, "phoneMap = " + phoneMap);
+        Log.d(TAG, "addressMap = " + addressMap);
+
+        // A cursor containing the raw contacts data.
+        Cursor cursor =
+            contentResolver.query(
+                ContactsContract.Contacts.CONTENT_URI,
+                PROJECTION,
+                null,
+                null,
+                ContactsContract.Contacts.SORT_KEY_PRIMARY + " ASC");
+        assert cursor != null;
+        if (!cursor.moveToFirst()) {
             cursor.close();
+            return new ArrayList<>();
         }
 
-        return result;
+        ArrayList<Bundle> contacts = new ArrayList<>(cursor.getCount());
+        do {
+            String id =
+                cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID));
+            String name =
+                cursor.getString(
+                    cursor.getColumnIndexOrThrow(
+                        ContactsContract.Contacts.DISPLAY_NAME_PRIMARY));
+            ArrayList<String> email = emailMap != null ? emailMap.get(id) : null;
+            ArrayList<String> tel = phoneMap != null ? phoneMap.get(id) : null;
+            ArrayList<Bundle> address =
+                addressMap != null ? addressMap.get(id) : null;
+
+            if (includeNames || email != null || tel != null || address != null) {
+                Bundle contact = new Bundle();
+
+                contact.putString("id", id);
+                contact.putString("name", name);
+                contact.putStringArrayList("email", email);
+                contact.putStringArrayList("tel", tel);
+                contact.putParcelableArrayList("address", address);
+
+                contacts.add(contact);
+            }
+        } while (cursor.moveToNext());
+
+        cursor.close();
+        return contacts;
     }
 
     private Bitmap getIcon(Context context, String id, int iconSize) {

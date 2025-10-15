@@ -14,6 +14,8 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+import static androidx.core.view.WindowCompat.enableEdgeToEdge;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +38,7 @@ import androidx.browser.trusted.TrustedWebActivityService;
 import androidx.browser.trusted.sharing.ShareData;
 import androidx.browser.trusted.sharing.ShareTarget;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScreenStrategy;
 
@@ -131,6 +134,7 @@ public class LauncherActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        enableEdgeToEdge(getWindow());
 
         mStartupUptimeMillis = SystemClock.uptimeMillis();
         sLauncherActivitiesAlive++;

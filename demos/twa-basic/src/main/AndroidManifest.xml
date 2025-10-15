@@ -20,11 +20,18 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
         <meta-data
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
+
+        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="https://airhorner.com" />
+        </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:label="@string/app_name"

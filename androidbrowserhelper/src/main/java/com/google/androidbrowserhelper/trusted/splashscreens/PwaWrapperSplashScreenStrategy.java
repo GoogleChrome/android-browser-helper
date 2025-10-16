@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.google.androidbrowserhelper.trusted.Utils;
@@ -89,6 +90,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
 
     private boolean mStartChromeBeforeAnimationComplete;
 
+    private EdgeToEdgeController mEdgeToEdgeController;
+
     /**
      * @param activity {@link Activity} on top of which a TWA is going to be launched.
      * @param drawableId Resource id of the Drawable of an image (e.g. logo) displayed in the
@@ -130,6 +133,8 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
             return;
         }
 
+        mEdgeToEdgeController = new EdgeToEdgeController(mActivity);
+
         showSplashScreen();
         if (mSplashImage != null) {
             customizeStatusAndNavBarDuringSplashScreen(providerPackage, builder);
@@ -157,7 +162,9 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
             view.setImageMatrix(mTransformationMatrix);
         }
 
-        mActivity.setContentView(view);
+        FrameLayout rootView = mEdgeToEdgeController.getWrapperView(mBackgroundColor);
+        rootView.addView(view);
+        mActivity.setContentView(rootView);
     }
 
     /**
@@ -169,13 +176,13 @@ public class PwaWrapperSplashScreenStrategy implements SplashScreenStrategy {
         Integer navbarColor = sSystemBarColorPredictor.getExpectedNavbarColor(mActivity,
                 providerPackage, builder);
         if (navbarColor != null) {
-            Utils.setNavigationBarColor(mActivity, navbarColor);
+            mEdgeToEdgeController.setNavigationBarColor(navbarColor);
         }
 
         Integer statusBarColor = sSystemBarColorPredictor.getExpectedStatusBarColor(mActivity,
                 providerPackage, builder);
         if (statusBarColor != null) {
-            Utils.setStatusBarColor(mActivity, statusBarColor);
+            mEdgeToEdgeController.setStatusBarColor(statusBarColor);
         }
     }
 

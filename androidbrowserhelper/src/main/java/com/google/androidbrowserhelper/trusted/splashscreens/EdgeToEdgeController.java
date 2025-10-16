@@ -35,7 +35,7 @@ public class EdgeToEdgeController {
             Insets systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             mSystemBarBackgroundDrawable.setSystemBarPaddings(systemBarInsets.top, systemBarInsets.bottom);
             v.setPadding(0, systemBarInsets.top, 0, systemBarInsets.bottom);
-                        return WindowInsetsCompat.CONSUMED;
+            return WindowInsetsCompat.CONSUMED;
         });
 
         // This is required to make system bars transparent
@@ -50,9 +50,9 @@ public class EdgeToEdgeController {
             mActivity.getWindow().setStatusBarColor(color);
         }
         mSystemBarBackgroundDrawable.setStatusBarColor(color);
-            WindowInsetsControllerCompat windowInsetsController =
-                    WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
-            if (windowInsetsController != null) {
+        WindowInsetsControllerCompat windowInsetsController =
+                WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
+        if (windowInsetsController != null) {
             boolean shouldUseDarkIcons = shouldUseDarkIconsOnBackground(color);
             windowInsetsController.setAppearanceLightStatusBars(shouldUseDarkIcons);
         }
@@ -64,9 +64,9 @@ public class EdgeToEdgeController {
             mActivity.getWindow().setNavigationBarColor(color);
         }
         mSystemBarBackgroundDrawable.setNavigationBarColor(color);
-            WindowInsetsControllerCompat windowInsetsController =
-                    WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
-            if (windowInsetsController != null) {
+        WindowInsetsControllerCompat windowInsetsController =
+                WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
+        if (windowInsetsController != null) {
             boolean shouldUseDarkIcons = shouldUseDarkIconsOnBackground(color);
             windowInsetsController.setAppearanceLightNavigationBars(shouldUseDarkIcons);
         }

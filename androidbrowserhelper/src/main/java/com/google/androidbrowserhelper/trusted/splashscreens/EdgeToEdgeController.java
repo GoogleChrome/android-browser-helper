@@ -35,10 +35,10 @@ public class EdgeToEdgeController {
             Insets systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             mSystemBarBackgroundDrawable.setSystemBarPaddings(systemBarInsets.top, systemBarInsets.bottom);
             v.setPadding(0, systemBarInsets.top, 0, systemBarInsets.bottom);
-            v.invalidate();
-            return insets;
+                        return WindowInsetsCompat.CONSUMED;
         });
 
+        // This is required to make system bars transparent
         ViewCompat.setOnApplyWindowInsetsListener(mActivity.getWindow().getDecorView(), (v, insets) -> insets);
 
         return rootView;
@@ -46,43 +46,30 @@ public class EdgeToEdgeController {
 
     public void setStatusBarColor(@ColorInt int color) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // Call the old API for compatibility with older SDKs, in case edge to edge cannot be enabled
             mActivity.getWindow().setStatusBarColor(color);
         }
         mSystemBarBackgroundDrawable.setStatusBarColor(color);
-        if (shouldUseDarkIconsOnBackground(color)) {
-            addSystemUiVisibilityFlag(mActivity, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             WindowInsetsControllerCompat windowInsetsController =
                     WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
             if (windowInsetsController != null) {
-                windowInsetsController.setAppearanceLightStatusBars(true);
-            }
+            boolean shouldUseDarkIcons = shouldUseDarkIconsOnBackground(color);
+            windowInsetsController.setAppearanceLightStatusBars(shouldUseDarkIcons);
         }
     }
 
     public void setNavigationBarColor(@ColorInt int color) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // Call the old API for compatibility with older SDKs, in case edge to edge cannot be enabled
             mActivity.getWindow().setNavigationBarColor(color);
         }
         mSystemBarBackgroundDrawable.setNavigationBarColor(color);
-        if (shouldUseDarkIconsOnBackground(color)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                addSystemUiVisibilityFlag(mActivity, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            }
             WindowInsetsControllerCompat windowInsetsController =
                     WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
             if (windowInsetsController != null) {
-                windowInsetsController.setAppearanceLightNavigationBars(true);
-            }
+            boolean shouldUseDarkIcons = shouldUseDarkIconsOnBackground(color);
+            windowInsetsController.setAppearanceLightNavigationBars(shouldUseDarkIcons);
         }
-    }
-
-    private static void addSystemUiVisibilityFlag(Activity activity, int flag) {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return;
-
-        View root = activity.getWindow().getDecorView().getRootView();
-        int visibility = root.getSystemUiVisibility();
-        visibility |= flag;
-        root.setSystemUiVisibility(visibility);
     }
 
     /**

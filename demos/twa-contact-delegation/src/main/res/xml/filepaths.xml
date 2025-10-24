@@ -12,5 +12,10 @@
 -->
 
 <paths>
-    <files-path path="twa_splash/" name="twa_splash" />
+  <files-path
+      path="twa_splash/"
+      name="twa_splash" />
+  <files-path
+      path="contact_icons/"
+      name="contact_icons" />
 </paths>

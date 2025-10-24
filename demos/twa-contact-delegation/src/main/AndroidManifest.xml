@@ -32,7 +32,7 @@
         android:exported="true">
       <meta-data
           android:name="android.support.customtabs.trusted.DEFAULT_URL"
-          android:value="https://whatpwacando.today" />
+          android:value="https://whatpwacando.today/contacts" />
 
       <meta-data
           android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"

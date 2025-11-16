@@ -355,7 +355,7 @@ public class TwaLauncher {
                      // for further details.
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        TrustedWebActivityIntent intent = builder.build(mSession);
+        TrustedWebActivityIntent intent = onPrepareIntent(builder.build(mSession));
         if (mStartupUptimeMillis != 0) {
             intent.getIntent().putExtra(EXTRA_STARTUP_UPTIME_MILLIS, mStartupUptimeMillis);
         }
@@ -367,6 +367,18 @@ public class TwaLauncher {
         if (completionCallback != null) {
             completionCallback.run();
         }
+    }
+
+    /**
+     * Hook method for subclasses to customize the Trusted Web Activity Intent before launch.
+     * This method is called with the built Intent and can be overridden to add custom headers,
+     * extras, or other modifications.
+     *
+     * @param intent the built TrustedWebActivityIntent that will be launched
+     * @return the (potentially modified) TrustedWebActivityIntent to launch
+     */
+    protected TrustedWebActivityIntent onPrepareIntent(TrustedWebActivityIntent intent) {
+        return intent;
     }
 
     /**

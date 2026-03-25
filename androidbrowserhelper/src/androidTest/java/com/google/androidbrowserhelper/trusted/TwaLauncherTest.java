@@ -132,7 +132,8 @@ public class TwaLauncherTest {
         mEnableComponents.manuallyDisable(TestCustomTabsServiceSupportsTwas.class);
         TwaLauncher launcher = new TwaLauncher(mActivity);
 
-        Runnable launchRunnable = () -> launcher.launch(URL);
+        Runnable launchRunnable = () -> launcher.launch(new TrustedWebActivityIntentBuilder(URL),
+                mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY);
         Intent intent = getBrowserActivityWhenLaunched(launchRunnable).getIntent();
 
         launcher.destroy();
@@ -143,7 +144,8 @@ public class TwaLauncherTest {
     public void fallsBackToCustomTab_whenSessionCreationFails() {
         TestCustomTabsService.setCanCreateSessions(false);
 
-        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
+        Runnable launchRunnable = () -> mTwaLauncher.launch(new TrustedWebActivityIntentBuilder(URL),
+                mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY);
         TestBrowser browser = getBrowserActivityWhenLaunched(launchRunnable);
         assertFalse(browser.getIntent().getBooleanExtra(EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY,
                 false));

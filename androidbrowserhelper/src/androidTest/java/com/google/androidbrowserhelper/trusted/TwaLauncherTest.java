@@ -294,30 +294,19 @@ public class TwaLauncherTest {
         doReturn(Collections.emptyList()).when(pmSpy).queryIntentServices(any(), anyInt());
         doReturn(Collections.emptyList()).when(pmSpy).queryIntentActivities(any(), anyInt());
         doReturn(null).when(pmSpy).resolveActivity(any(), anyInt());
-
-        // Create a spy of the activity and have it return the mocked PackageManager.
         TestActivity activitySpy = spy(mActivity);
         doReturn(pmSpy).when(activitySpy).getPackageManager();
-        // Force the activity to return our spy when getApplicationContext() is called.
-        // Libraries like CustomTabsClient often call getApplicationContext().getPackageManager().
         doReturn(activitySpy).when(activitySpy).getApplicationContext();
-
-        // 1. Setup a Mock of the strategy
         TwaLauncher.BrowserUnavailableDialogStrategy mockStrategy =
                 mock(TwaLauncher.BrowserUnavailableDialogStrategy.class);
         TwaLauncher.setDialogStrategyForTesting(mockStrategy);
-
         TwaLauncher launcher = new TwaLauncher(activitySpy);
 
-        // 2. Launch the launcher
         mActivity.runOnUiThread(() -> launcher.launch(new TrustedWebActivityIntentBuilder(URL),
                 mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY));
 
-        // 3. Verify the logic triggered the strategy
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mockStrategy).show(any());
-
-        // We've verified the fallback was triggered.
         assertNotNull(launcher);
     }
 

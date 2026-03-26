@@ -67,9 +67,11 @@ public class TwaLauncher {
      */
     private static final String ACTION_SUPERVISION_SETTINGS = "android.settings.SUPERVISION_SETTINGS";
 
-    /** Strategy for showing a dialog when no browser is available. */
+    /** 
+     * Strategy for showing a dialog when no browser is available. Interface exists just to
+     * facilitate unit testing.
+     */
     public interface BrowserUnavailableDialogStrategy {
-        /** Shows the dialog. */
         void show(Activity activity);
     }
 
@@ -387,6 +389,8 @@ public class TwaLauncher {
     private static void showBrowserUnavailableDialog(Activity activity) {
         PackageManager pm = activity.getPackageManager();
 
+        // Query for all browsers that can handle a standard URL. This allows us to find the
+        // user's preferred browser to provide a helpful name in the dialog.
         Intent queryBrowsersIntent = new Intent()
                 .setAction(Intent.ACTION_VIEW)
                 .addCategory(Intent.CATEGORY_BROWSABLE)
@@ -395,17 +399,16 @@ public class TwaLauncher {
         List<ResolveInfo> allBrowsers = pm.queryIntentActivities(queryBrowsersIntent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
-        for (ResolveInfo info : allBrowsers) {}
-
-        String browserName = "Chrome";
+        String browserName = activity.getString(R.string.provider_unavailable_default_browser);
         if (!allBrowsers.isEmpty()) {
+            // The list is ordered from best to worst match, so we pick the first one.
             browserName = allBrowsers.get(0).loadLabel(pm).toString();
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.provider_unavailable_title)
                 .setMessage(activity.getString(R.string.provider_unavailable_message, browserName))
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton(R.string.provider_unavailable_button_ok, (dialog, which) -> dialog.dismiss())
                 .setCancelable(true)
                 .setNeutralButton(R.string.view_app_limits, (dialog, which) -> {
                     try {

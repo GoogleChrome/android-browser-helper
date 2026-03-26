@@ -22,8 +22,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -33,6 +35,7 @@ import static androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTE
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
@@ -57,6 +60,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -100,6 +104,7 @@ public class TwaLauncherTest {
     @After
     public void tearDown() {
         TwaProviderPicker.restrictToPackageForTesting(null);
+        TwaLauncher.setDialogStrategyForTesting(null);
         mTwaLauncher.destroy();
     }
 
@@ -143,7 +148,8 @@ public class TwaLauncherTest {
     public void fallsBackToCustomTab_whenSessionCreationFails() {
         TestCustomTabsService.setCanCreateSessions(false);
 
-        Runnable launchRunnable = () -> mTwaLauncher.launch(URL);
+        Runnable launchRunnable = () -> mTwaLauncher.launch(new TrustedWebActivityIntentBuilder(URL),
+                mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY);
         TestBrowser browser = getBrowserActivityWhenLaunched(launchRunnable);
         assertFalse(browser.getIntent().getBooleanExtra(EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY,
                 false));
@@ -274,6 +280,46 @@ public class TwaLauncherTest {
         mTwaLauncher.launch(builder, mCustomTabsCallback, strategy, null);
         assertTrue(latch.await(3, TimeUnit.SECONDS));
         verify(builder, never()).build(any());
+    }
+
+    @Test
+    public void showsBrowserUnavailableDialog() throws Exception {
+        // Disable all browsers and services in the test package.
+        mEnableComponents.manuallyDisable(TestBrowser.class);
+        mEnableComponents.manuallyDisable(TestCustomTabsServiceSupportsTwas.class);
+        mEnableComponents.manuallyDisable(TestCustomTabsService.class);
+
+        // Mock PackageManager to return no Custom Tabs providers and no browsers.
+        // This forces CustomTabsClient.getPackageName to return null.
+        PackageManager pmSpy = spy(mContext.getPackageManager());
+        doReturn(Collections.emptyList()).when(pmSpy).queryIntentServices(any(), anyInt());
+        doReturn(Collections.emptyList()).when(pmSpy).queryIntentActivities(any(), anyInt());
+        doReturn(null).when(pmSpy).resolveActivity(any(), anyInt());
+
+        // Create a spy of the activity and have it return the mocked PackageManager.
+        TestActivity activitySpy = spy(mActivity);
+        doReturn(pmSpy).when(activitySpy).getPackageManager();
+        // Force the activity to return our spy when getApplicationContext() is called.
+        // Libraries like CustomTabsClient often call getApplicationContext().getPackageManager().
+        doReturn(activitySpy).when(activitySpy).getApplicationContext();
+
+        // 1. Setup a Mock of the strategy
+        TwaLauncher.BrowserUnavailableDialogStrategy mockStrategy =
+                mock(TwaLauncher.BrowserUnavailableDialogStrategy.class);
+        TwaLauncher.setDialogStrategyForTesting(mockStrategy);
+
+        TwaLauncher launcher = new TwaLauncher(activitySpy);
+
+        // 2. Launch the launcher
+        mActivity.runOnUiThread(() -> launcher.launch(new TrustedWebActivityIntentBuilder(URL),
+                mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY));
+
+        // 3. Verify the logic triggered the strategy
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        verify(mockStrategy).show(any());
+
+        // We've verified the fallback was triggered.
+        assertNotNull(launcher);
     }
 
     private TrustedWebActivityIntentBuilder makeBuilder() {

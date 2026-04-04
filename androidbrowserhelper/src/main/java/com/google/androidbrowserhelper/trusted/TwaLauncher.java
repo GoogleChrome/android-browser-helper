@@ -61,11 +61,7 @@ public class TwaLauncher {
     private static final String EXTRA_ANDROID_BROWSER_HELPER_VERSION =
             "org.chromium.chrome.browser.ANDROID_BROWSER_HELPER_VERSION";
 
-    /**
-     * Intent action to open parental control settings. This is used when no browser is available,
-     * which often happens when a parent has blocked browser access on a child's device.
-     */
-    private static final String ACTION_SUPERVISION_SETTINGS = "android.settings.SUPERVISION_SETTINGS";
+
 
     /** 
      * Strategy for showing a dialog when no browser is available. Interface exists just to
@@ -409,16 +405,7 @@ public class TwaLauncher {
         builder.setTitle(R.string.provider_unavailable_title)
                 .setMessage(activity.getString(R.string.provider_unavailable_message, browserName))
                 .setPositiveButton(R.string.provider_unavailable_button_ok, (dialog, which) -> dialog.dismiss())
-                .setCancelable(true)
-                .setNeutralButton(R.string.view_app_limits, (dialog, which) -> {
-                    try {
-                        Intent intent = new Intent(ACTION_SUPERVISION_SETTINGS);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        activity.startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "Could not launch parental controls", e);
-                    }
-                });
+                .setCancelable(true);
         builder.setOnDismissListener(dialog -> activity.finish());
         builder.show();
     }

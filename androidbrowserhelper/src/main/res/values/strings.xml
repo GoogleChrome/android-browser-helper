@@ -8,5 +8,4 @@
     <string name="provider_unavailable_message">This app is unavailable because %1$s is blocked</string>
     <string name="provider_unavailable_button_ok">OK</string>
     <string name="provider_unavailable_default_browser">Chrome</string>
-    <string name="view_app_limits">View app limits</string>
 </resources>

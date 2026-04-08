@@ -57,7 +57,7 @@
         <service android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService"
                  android:enabled="false" android:exported="true">
             <intent-filter>
-                <category android:name="androidx.browser.trusted.category.TrustedWebActivities" />
+                <action android:name="android.support.customtabs.action.CustomTabsService" />
             </intent-filter>
         </service>
 

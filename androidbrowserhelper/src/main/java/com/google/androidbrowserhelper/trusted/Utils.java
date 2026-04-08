@@ -33,7 +33,11 @@ import androidx.core.graphics.drawable.DrawableCompat;
  */
 public class Utils {
 
-    /** Sets status bar color. Makes the icons dark if necessary. */
+    /** 
+     * Sets status bar color. Makes the icons dark if necessary. 
+     * Deprecated - use EdgeToEdgeController instead.
+    */
+    @Deprecated
     public static void setStatusBarColor(Activity activity, @ColorInt int color) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
         activity.getWindow().setStatusBarColor(color);
@@ -44,7 +48,11 @@ public class Utils {
         }
     }
 
-    /** Sets navigation bar color. Makes the icons dark if necessary */
+    /**
+     * Sets navigation bar color. Makes the icons dark if necessary.
+     * Deprecated - use EdgeToEdgeController instead.
+    */
+    @Deprecated
     public static void setNavigationBarColor(Activity activity, @ColorInt int color) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
 

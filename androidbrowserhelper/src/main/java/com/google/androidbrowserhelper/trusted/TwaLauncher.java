@@ -14,9 +14,15 @@
 
 package com.google.androidbrowserhelper.trusted;
 
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -34,8 +40,11 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+import com.google.androidbrowserhelper.R;
+import java.util.List;
 
 import com.google.androidbrowserhelper.BuildConfig;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -52,8 +61,38 @@ public class TwaLauncher {
     private static final String EXTRA_ANDROID_BROWSER_HELPER_VERSION =
             "org.chromium.chrome.browser.ANDROID_BROWSER_HELPER_VERSION";
 
+
+
+    /** 
+     * Strategy for showing a dialog when no browser is available. Interface exists just to
+     * facilitate unit testing.
+     */
+    public interface BrowserUnavailableDialogStrategy {
+        void show(Activity activity);
+    }
+
+    private static BrowserUnavailableDialogStrategy sDialogStrategy =
+            TwaLauncher::showBrowserUnavailableDialog;
+
+    /** For testing: allows mocking the dialog show. */
+    @VisibleForTesting
+    public static void setDialogStrategyForTesting(BrowserUnavailableDialogStrategy strategy) {
+        sDialogStrategy = strategy;
+    }
+
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
+        if (providerPackage == null) {
+            providerPackage = CustomTabsClient.getPackageName(context, null);
+        }
+        if (providerPackage == null) {
+            if (context instanceof Activity) {
+                sDialogStrategy.show((Activity) context);
+            } else {
+                Log.e(TAG, "Cannot show browser unavailable dialog without an Activity context.");
+            }
+            return;
+        }
         // CustomTabsIntent will fall back to launching the Browser if there are no Custom Tabs
         // providers installed.
         CustomTabsIntent intent = twaBuilder.buildCustomTabsIntent();
@@ -336,6 +375,39 @@ public class TwaLauncher {
      */
     public void setStartupUptimeMillis(long startupUptimeMillis) {
         mStartupUptimeMillis = startupUptimeMillis;
+    }
+
+    /**
+     * Shows a dialog explaining that no browser is available to open the URL.
+     *
+     * @param activity The {@link Activity} used to show the dialog.
+     */
+    private static void showBrowserUnavailableDialog(Activity activity) {
+        PackageManager pm = activity.getPackageManager();
+
+        // Query for all browsers that can handle a standard URL. This allows us to find the
+        // user's preferred browser to provide a helpful name in the dialog.
+        Intent queryBrowsersIntent = new Intent()
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("http", "", null));
+
+        List<ResolveInfo> allBrowsers = pm.queryIntentActivities(queryBrowsersIntent,
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+
+        String browserName = activity.getString(R.string.provider_unavailable_default_browser);
+        if (!allBrowsers.isEmpty()) {
+            // The list is ordered from best to worst match, so we pick the first one.
+            browserName = allBrowsers.get(0).loadLabel(pm).toString();
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(R.string.provider_unavailable_title)
+                .setMessage(activity.getString(R.string.provider_unavailable_message, browserName))
+                .setPositiveButton(R.string.provider_unavailable_button_ok, (dialog, which) -> dialog.dismiss())
+                .setCancelable(true);
+        builder.setOnDismissListener(dialog -> activity.finish());
+        builder.show();
     }
 
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {

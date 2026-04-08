@@ -25,7 +25,7 @@ android {
 
     defaultConfig {
         applicationId "com.google.androidbrowserhelper.demos.twapostmessage"
-        minSdkVersion 21
+        minSdkVersion 23
         compileSdk 36
         targetSdkVersion 33
         versionCode 1

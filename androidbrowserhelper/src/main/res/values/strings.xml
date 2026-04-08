@@ -4,4 +4,8 @@
     <string name="no_provider_toast">Please install Chrome Stable 72 or later.</string>
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>
     <string name="manage_space_no_data_toast">This app holds no browsing data.</string>
+    <string name="provider_unavailable_title">App Unavailable</string>
+    <string name="provider_unavailable_message">This app is unavailable because %1$s is blocked</string>
+    <string name="provider_unavailable_button_ok">OK</string>
+    <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

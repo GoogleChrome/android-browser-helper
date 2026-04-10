@@ -17,7 +17,6 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,9 +25,9 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.util.Log;
 
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -40,11 +39,12 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import com.google.androidbrowserhelper.R;
-import java.util.List;
 
 import com.google.androidbrowserhelper.BuildConfig;
-import androidx.annotation.VisibleForTesting;
+import com.google.androidbrowserhelper.R;
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+
+import java.util.List;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -135,7 +135,7 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
-    private TokenStore mTokenStore;
+    private final TokenStore mTokenStore;
 
     private boolean mDestroyed;
 
@@ -248,7 +248,7 @@ public class TwaLauncher {
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager()) && mProviderPackage != null) {
             // Since ChromeOS may not follow this path when launching a TWA, we set the verified
             // provider in DelegationService instead.
             mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
@@ -413,7 +413,7 @@ public class TwaLauncher {
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {
         private Runnable mOnSessionCreatedRunnable;
         private Runnable mOnSessionCreationFailedRunnable;
-        private CustomTabsCallback mCustomTabsCallback;
+        private final CustomTabsCallback mCustomTabsCallback;
 
         TwaCustomTabsServiceConnection(CustomTabsCallback callback) {
             mCustomTabsCallback = callback;
@@ -426,8 +426,8 @@ public class TwaLauncher {
         }
 
         @Override
-        public void onCustomTabsServiceConnected(ComponentName componentName,
-                CustomTabsClient client) {
+        public void onCustomTabsServiceConnected(@NonNull ComponentName componentName,
+                @NonNull CustomTabsClient client) {
             if (!ChromeLegacyUtils
                     .supportsLaunchWithoutWarmup(mContext.getPackageManager(), mProviderPackage)) {
                 client.warmup(0);

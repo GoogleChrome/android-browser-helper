@@ -183,6 +183,18 @@ public class LauncherActivityMetadata {
     private static final String METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE =
             "android.support.customtabs.trusted.START_CHROME_BEFORE_ANIMATION_COMPLETE";
 
+    /**
+     * The package name of the browser that the TWA should be launched in.
+     */
+    private static final String METADATA_LAUNCHING_BROWSER =
+            "android.support.customtabs.trusted.LAUNCHING_BROWSER";
+
+    /**
+     * The human-readable name of the browser that the TWA should be launched in.
+     */
+    private static final String METADATA_LAUNCHING_BROWSER_NAME =
+            "android.support.customtabs.trusted.LAUNCHING_BROWSER_NAME";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
@@ -206,6 +218,8 @@ public class LauncherActivityMetadata {
     @Nullable public final String fileHandlingActionUrl;
     @LaunchHandlerClientMode.ClientMode public final int launchHandlerClientMode;
     public final boolean startChromeBeforeAnimationComplete;
+    @Nullable public final String launchingBrowser;
+    @Nullable public final String launchingBrowserName;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
@@ -243,6 +257,8 @@ public class LauncherActivityMetadata {
                 metaData.getString(LAUNCH_HANDLER_CLIENT_MODE_METADATA_NAME));
         startChromeBeforeAnimationComplete =
                 metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
+        launchingBrowser = metaData.getString(METADATA_LAUNCHING_BROWSER);
+        launchingBrowserName = metaData.getString(METADATA_LAUNCHING_BROWSER_NAME);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {

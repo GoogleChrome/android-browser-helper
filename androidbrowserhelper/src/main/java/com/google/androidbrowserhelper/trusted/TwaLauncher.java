@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
@@ -68,7 +69,7 @@ public class TwaLauncher {
      * facilitate unit testing.
      */
     public interface BrowserUnavailableDialogStrategy {
-        void show(Activity activity);
+        void show(Activity activity, boolean queryInstalledBrowsers, @Nullable String browserName);
     }
 
     private static BrowserUnavailableDialogStrategy sDialogStrategy =
@@ -80,6 +81,19 @@ public class TwaLauncher {
         sDialogStrategy = strategy;
     }
 
+    /**
+     * Returns a FallbackStrategy that shows the browser unavailable dialog with the specified browser name.
+     */
+    public static FallbackStrategy getBlockedDialogFallbackStrategy(@Nullable String browserName) {
+        return (context, twaBuilder, providerPackage, completionCallback) -> {
+            if (context instanceof Activity) {
+                sDialogStrategy.show((Activity) context, false, browserName);
+            } else {
+                Log.e(TAG, "Cannot show browser unavailable dialog without an Activity context.");
+            }
+        };
+    }
+
     public static final FallbackStrategy CCT_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
         if (providerPackage == null) {
@@ -87,7 +101,7 @@ public class TwaLauncher {
         }
         if (providerPackage == null) {
             if (context instanceof Activity) {
-                sDialogStrategy.show((Activity) context);
+                sDialogStrategy.show((Activity) context, true, null);
             } else {
                 Log.e(TAG, "Cannot show browser unavailable dialog without an Activity context.");
             }
@@ -305,8 +319,11 @@ public class TwaLauncher {
 
         mServiceConnection.setSessionCreationRunnables(
                 onSessionCreatedRunnable, onSessionCreationFailedRunnable);
-        CustomTabsClient.bindCustomTabsServicePreservePriority(
+        boolean bound = CustomTabsClient.bindCustomTabsServicePreservePriority(
                 mContext, mProviderPackage, mServiceConnection);
+        if (!bound) {
+            onSessionCreationFailedRunnable.run();
+        }
     }
 
     private void launchWhenSessionEstablished(TrustedWebActivityIntentBuilder twaBuilder,
@@ -381,30 +398,40 @@ public class TwaLauncher {
      * Shows a dialog explaining that no browser is available to open the URL.
      *
      * @param activity The {@link Activity} used to show the dialog.
+     * @param queryInstalledBrowsers Whether to query the system for installed browsers to determine the browser name.
+     * @param browserName The name of the browser to display, if known.
      */
-    private static void showBrowserUnavailableDialog(Activity activity) {
-        PackageManager pm = activity.getPackageManager();
+    private static void showBrowserUnavailableDialog(Activity activity, boolean queryInstalledBrowsers, @Nullable String browserName) {
+        if (queryInstalledBrowsers) {
+            PackageManager pm = activity.getPackageManager();
 
-        // Query for all browsers that can handle a standard URL. This allows us to find the
-        // user's preferred browser to provide a helpful name in the dialog.
-        Intent queryBrowsersIntent = new Intent()
-                .setAction(Intent.ACTION_VIEW)
-                .addCategory(Intent.CATEGORY_BROWSABLE)
-                .setData(Uri.fromParts("http", "", null));
+            // Query for all browsers that can handle a standard URL. This allows us to find the
+            // user's preferred browser to provide a helpful name in the dialog.
+            Intent queryBrowsersIntent = new Intent()
+                    .setAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .setData(Uri.fromParts("http", "", null));
 
-        List<ResolveInfo> allBrowsers = pm.queryIntentActivities(queryBrowsersIntent,
-                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            List<ResolveInfo> allBrowsers = pm.queryIntentActivities(queryBrowsersIntent,
+                    PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_UNINSTALLED_PACKAGES);
 
-        String browserName = activity.getString(R.string.provider_unavailable_default_browser);
-        if (!allBrowsers.isEmpty()) {
-            // The list is ordered from best to worst match, so we pick the first one.
-            browserName = allBrowsers.get(0).loadLabel(pm).toString();
+            browserName = activity.getString(R.string.provider_unavailable_default_browser);
+            if (!allBrowsers.isEmpty()) {
+                // The list is ordered from best to worst match, so we pick the first one.
+                browserName = allBrowsers.get(0).loadLabel(pm).toString();
+            }
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(R.string.provider_unavailable_title)
-                .setMessage(activity.getString(R.string.provider_unavailable_message, browserName))
-                .setPositiveButton(R.string.provider_unavailable_button_ok, (dialog, which) -> dialog.dismiss())
+        builder.setTitle(R.string.provider_unavailable_title);
+
+        if (TextUtils.isEmpty(browserName)) {
+            builder.setMessage(activity.getString(R.string.provider_unavailable_fallback_message));
+        } else {
+            builder.setMessage(activity.getString(R.string.provider_unavailable_message, browserName));
+        }
+
+        builder.setPositiveButton(R.string.provider_unavailable_button_ok, (dialog, which) -> dialog.dismiss())
                 .setCancelable(true);
         builder.setOnDismissListener(dialog -> activity.finish());
         builder.show();

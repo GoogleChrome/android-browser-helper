@@ -389,6 +389,20 @@ public class TwaLauncher {
     }
 
     /**
+     * Returns the current CustomTabsSession, if available.
+     *
+     * This is useful for advanced use cases like PostMessage that require direct
+     * session access. The session becomes available after the service connects and
+     * may become null if the service disconnects.
+     *
+     * @return The active CustomTabsSession, or null if not yet established or disconnected
+     */
+    @Nullable
+    public CustomTabsSession getSession() {
+        return mSession;
+    }
+
+    /**
      * Sets the timestamp (in SystemClock.uptimeMillis()) when the TWA launcher
      * activity was created. This timestamp is used to report the full startup
      * duration to the browser.

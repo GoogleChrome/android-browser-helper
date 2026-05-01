@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.trusted.FileHandlingData;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
@@ -278,6 +279,19 @@ public class LauncherActivity extends Activity {
     protected TwaLauncher createTwaLauncher() {
         return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
                 new SharedPreferencesTokenStore(this));
+    }
+
+    /**
+     * Returns the current CustomTabsSession from the TwaLauncher.
+     *
+     * The session becomes available after the TWA is launched and the service connects.
+     * Can be used for advanced features like PostMessage.
+     *
+     * @return The active CustomTabsSession, or null if TWA hasn't launched yet or service disconnected
+     */
+    @Nullable
+    protected CustomTabsSession getCustomTabsSession() {
+        return mTwaLauncher != null ? mTwaLauncher.getSession() : null;
     }
 
     private boolean splashScreenNeeded() {

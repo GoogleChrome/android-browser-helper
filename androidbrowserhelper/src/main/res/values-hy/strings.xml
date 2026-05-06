@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Թարմացրեք Chrome-ը՝ տեղադրելով 72 կամ ավելի նոր տարբերակը։</string>
+  <string name="no_provider_toast">Տեղադրեք Chrome-ի կայուն վարկած 72 կամ ավելի նոր տարբերակը։</string>
+  <string name="manage_space_not_supported_toast">Այս հավելվածի տվյալները պահվում են այստեղ՝ %1$s։</string>
+  <string name="manage_space_no_data_toast">Այս հավելվածը այցելությունների պատմության տվյալներ չի պահում։</string>
+  <string name="provider_unavailable_title">Հավելվածը հասանելի չէ</string>
+  <string name="provider_unavailable_message">Այս հավելվածն անհասանելի է, քանի որ մատակարարը (%1$s) արգելափակված է</string>
+  <string name="provider_unavailable_button_ok">Եղավ</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

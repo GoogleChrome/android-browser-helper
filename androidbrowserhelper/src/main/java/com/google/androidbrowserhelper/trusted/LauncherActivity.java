@@ -188,7 +188,7 @@ public class LauncherActivity extends Activity {
 
     /**
      * Signals if {@link LauncherActivity} should automatically launch the Trusted Web Activity on
-     * {@linke #onCreate()}. Return {@code false} when a subclass needs to perform an asynchronous
+     * {@link #onCreate(Bundle)}. Return {@code false} when a subclass needs to perform an asynchronous
      * task before launching the Trusted Web Activity. The subclass will then be responsible for
      * calling {@link #launchTwa()} itself once the asynchronous task is finished.
      */
@@ -209,6 +209,11 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        CustomTabColorSchemeParams defaultColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
+                .setNavigationBarDividerColor(getColorCompat(mMetadata.navigationBarDividerColorId))
+                .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
+                .build();
         CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
                 .setToolbarColor(getColorCompat(mMetadata.statusBarColorDarkId))
                 .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorDarkId))
@@ -219,10 +224,7 @@ public class LauncherActivity extends Activity {
         Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder =
                 new TrustedWebActivityIntentBuilder(launchUrl)
-                        .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
-                        .setNavigationBarDividerColor(
-                                getColorCompat(mMetadata.navigationBarDividerColorId))
+                        .setDefaultColorSchemeParams(defaultColorScheme)
                         .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
@@ -276,7 +278,7 @@ public class LauncherActivity extends Activity {
     }
 
     protected TwaLauncher createTwaLauncher() {
-        return new TwaLauncher(this, null, SessionStore.makeSessionId(getTaskId()),
+        return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
                 new SharedPreferencesTokenStore(this));
     }
 
@@ -475,6 +477,9 @@ public class LauncherActivity extends Activity {
      * fallback implementation ot starting a native Activity.
      */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
+        if (mMetadata.launchingBrowser != null) {
+            return TwaLauncher.getBlockedDialogFallbackStrategy(mMetadata.launchingBrowserName);
+        }
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {
             return TwaLauncher.WEBVIEW_FALLBACK_STRATEGY;
         }

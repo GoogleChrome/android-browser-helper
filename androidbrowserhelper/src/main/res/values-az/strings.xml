@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Brauzer Yardımçısı</string>
+  <string name="update_chrome_toast">Chrome Stable 72 və ya daha sonrakı versiyaya güncəlləyin.</string>
+  <string name="no_provider_toast">Chrome Stable 72 və ya daha sonrakı versiyasını quraşdırın.</string>
+  <string name="manage_space_not_supported_toast">Bu tətbiqin datası %1$s daxilində saxlanılır.</string>
+  <string name="manage_space_no_data_toast">Bu tətbiqdə axtarış datası yoxdur.</string>
+  <string name="provider_unavailable_title">Tətbiq əlçatan deyil</string>
+  <string name="provider_unavailable_message">%1$s blok olunduğu üçün bu tətbiq əlçatan deyil</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

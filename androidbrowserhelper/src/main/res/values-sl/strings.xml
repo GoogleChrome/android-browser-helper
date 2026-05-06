@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Pomočnik za brskalnik Android</string>
+  <string name="update_chrome_toast">Posodobite na stabilno različico Chroma 72 ali novejšo.</string>
+  <string name="no_provider_toast">Namestite stabilno različico Chroma 72 ali novejšo.</string>
+  <string name="manage_space_not_supported_toast">Podatki te aplikacije so shranjeni v shrambi %1$s.</string>
+  <string name="manage_space_no_data_toast">Ta aplikacija ne vsebuje podatkov brskanja.</string>
+  <string name="provider_unavailable_title">Aplikacija ni na voljo</string>
+  <string name="provider_unavailable_message">Ta aplikacija ni na voljo, ker je ponudnik %1$s blokiran</string>
+  <string name="provider_unavailable_button_ok">V redu</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

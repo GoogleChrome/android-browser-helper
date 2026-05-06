@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Lütfen Chrome\'un kararlı sürümü 72 veya sonraki bir sürüme güncelleyin.</string>
+  <string name="no_provider_toast">Lütfen Chrome\'un kararlı sürümü 72 veya sonraki bir sürümü yükleyin.</string>
+  <string name="manage_space_not_supported_toast">Bu uygulamanın verileri %1$s içinde saklanır.</string>
+  <string name="manage_space_no_data_toast">Bu uygulamada tarama verisi yok.</string>
+  <string name="provider_unavailable_title">Uygulama kullanılamıyor</string>
+  <string name="provider_unavailable_message">%1$s engellendiğinden bu uygulama kullanılamıyor</string>
+  <string name="provider_unavailable_button_ok">Tamam</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">צריך לעדכן לגרסה יציבה של Chrome, מ-72 ואילך.</string>
+  <string name="no_provider_toast">צריך להתקין גרסה יציבה של Chrome, מ-72 ואילך.</string>
+  <string name="manage_space_not_supported_toast">הנתונים של האפליקציה הזו מאוחסנים ב-%1$s.</string>
+  <string name="manage_space_no_data_toast">האפליקציה הזו לא מאחסנת נתוני גלישה.</string>
+  <string name="provider_unavailable_title">האפליקציה לא זמינה</string>
+  <string name="provider_unavailable_message">אי אפשר להשתמש באפליקציה הזו כי %1$s חסום</string>
+  <string name="provider_unavailable_button_ok">אישור</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Msaidizi wa Kivinjari cha Android</string>
+  <string name="update_chrome_toast">Tafadhali sasisha utumie Chrome - toleo thabiti la 72 au toleo jipya zaidi.</string>
+  <string name="no_provider_toast">Tafadhali weka Chrome - toleo thabiti la 72 au toleo jipya zaidi.</string>
+  <string name="manage_space_not_supported_toast">Data ya programu hii imehifadhiwa katika %1$s.</string>
+  <string name="manage_space_no_data_toast">Programu hii haina data ya kuvinjari.</string>
+  <string name="provider_unavailable_title">Programu Haipatikani</string>
+  <string name="provider_unavailable_message">Programu hii haipatikani kwa sababu %1$s imezuiwa</string>
+  <string name="provider_unavailable_button_ok">Sawa</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

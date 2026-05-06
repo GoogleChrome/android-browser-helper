@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Veuillez passer à la version stable de Chrome 72 ou à une version ultérieure.</string>
+  <string name="no_provider_toast">Veuillez installer la version stable de Chrome 72 ou une version ultérieure.</string>
+  <string name="manage_space_not_supported_toast">Les données de cette appli sont stockées dans %1$s.</string>
+  <string name="manage_space_no_data_toast">Cette appli ne contient aucune donnée de navigation.</string>
+  <string name="provider_unavailable_title">Appli non disponible</string>
+  <string name="provider_unavailable_message">Cette appli n\'est pas disponible, car %1$s est bloqué</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

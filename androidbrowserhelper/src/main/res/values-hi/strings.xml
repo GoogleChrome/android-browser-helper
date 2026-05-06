@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">कृपया Chrome स्टेबल चैनल 72 या इसके बाद के वर्शन पर अपडेट करें.</string>
+  <string name="no_provider_toast">कृपया Chrome स्टेबल चैनल 72 या इसके बाद का वर्शन इंस्टॉल करें.</string>
+  <string name="manage_space_not_supported_toast">इस ऐप्लिकेशन का डेटा, %1$s में सेव किया जाता है.</string>
+  <string name="manage_space_no_data_toast">इस ऐप्लिकेशन में कोई ब्राउज़िंग डेटा नहीं है.</string>
+  <string name="provider_unavailable_title">ऐप्लिकेशन उपलब्ध नहीं है</string>
+  <string name="provider_unavailable_message">यह ऐप्लिकेशन उपलब्ध नहीं है, क्योंकि %1$s को ब्लॉक किया गया है</string>
+  <string name="provider_unavailable_button_ok">ठीक है</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

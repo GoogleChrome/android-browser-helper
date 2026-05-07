@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Chrome Тогтвортой 72 эсвэл түүнээс хойших хувилбар луу шинэчилнэ үү.</string>
+  <string name="no_provider_toast">Chrome Тогтвортой 72 эсвэл түүнээс хойших хувилбарыг суулгана уу.</string>
+  <string name="manage_space_not_supported_toast">Энэ аппын өгөгдлийг %1$s-д хадгалдаг.</string>
+  <string name="manage_space_no_data_toast">Энэ апп интернэтээр үзсэн ямар ч өгөгдлийг хадгалдаггүй.</string>
+  <string name="provider_unavailable_title">Аппыг ашиглах боломжгүй</string>
+  <string name="provider_unavailable_message">%1$s-г блоклосон тул энэ аппыг ашиглах боломжгүй байна</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

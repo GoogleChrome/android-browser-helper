@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Помошник за прелистувач на Android</string>
+  <string name="update_chrome_toast">Ажурирајте на Chrome Stable 72 или понова верзија.</string>
+  <string name="no_provider_toast">Инсталирајте Chrome Stable 72 или понова верзија.</string>
+  <string name="manage_space_not_supported_toast">Податоците на апликацијава се складирани во %1$s.</string>
+  <string name="manage_space_no_data_toast">Апликацијава не содржи податоци од прелистување.</string>
+  <string name="provider_unavailable_title">Апликацијата е недостапна</string>
+  <string name="provider_unavailable_message">Апликацијава е недостапна бидејќи %1$s е блокиран</string>
+  <string name="provider_unavailable_button_ok">Во ред</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

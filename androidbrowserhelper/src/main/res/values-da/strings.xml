@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Hjælp til Android-browser</string>
+  <string name="update_chrome_toast">Opdater til Chrome Stable 72 eller nyere.</string>
+  <string name="no_provider_toast">Installer Chrome Stable 72 eller nyere.</string>
+  <string name="manage_space_not_supported_toast">Denne apps data er gemt i %1$s.</string>
+  <string name="manage_space_no_data_toast">Denne app indeholder ingen browserdata.</string>
+  <string name="provider_unavailable_title">Appen er ikke tilgængelig</string>
+  <string name="provider_unavailable_message">Denne app er ikke tilgængelig, fordi %1$s er blokeret</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

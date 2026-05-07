@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">โปรดอัปเดตเป็น Chrome เวอร์ชันเสถียร 72 ขึ้นไป</string>
+  <string name="no_provider_toast">โปรดติดตั้ง Chrome เวอร์ชันเสถียร 72 ขึ้นไป</string>
+  <string name="manage_space_not_supported_toast">ข้อมูลของแอปนี้จัดเก็บไว้ใน %1$s</string>
+  <string name="manage_space_no_data_toast">แอปนี้ไม่มีข้อมูลการท่องเว็บ</string>
+  <string name="provider_unavailable_title">แอปไม่พร้อมใช้งาน</string>
+  <string name="provider_unavailable_message">แอปนี้ไม่พร้อมใช้งานเนื่องจาก %1$s ถูกบล็อก</string>
+  <string name="provider_unavailable_button_ok">ตกลง</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

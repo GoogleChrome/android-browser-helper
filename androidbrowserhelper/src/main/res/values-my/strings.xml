@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android ဘရောင်ဇာ အကူအညီ</string>
+  <string name="update_chrome_toast">‘အခြေကျပြီးသော Chrome’ ဗားရှင်း 72 နှင့်အထက်သို့ အပ်ဒိတ်လုပ်ပါ။</string>
+  <string name="no_provider_toast">‘အခြေကျပြီးသော Chrome’ ဗားရှင်း 72 နှင့်အထက်ကို ထည့်သွင်းပါ။</string>
+  <string name="manage_space_not_supported_toast">ဤအက်ပ်၏ ဒေတာကို %1$s တွင် သိမ်းထားသည်။</string>
+  <string name="manage_space_no_data_toast">ဤအက်ပ်တွင် ဖွင့်ကြည့်ထားသည့်မှတ်တမ်းဒေတာ မရှိပါ။</string>
+  <string name="provider_unavailable_title">အက်ပ် မရနိုင်ပါ</string>
+  <string name="provider_unavailable_message">%1$s ကို ခဏရပ်ထားသဖြင့် ဤအက်ပ်ကို မရနိုင်ပါ</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

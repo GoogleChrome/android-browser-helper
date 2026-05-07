@@ -308,8 +308,34 @@ public class TwaLauncherTest {
                 mCustomTabsCallback, null, null, TwaLauncher.CCT_FALLBACK_STRATEGY));
 
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        verify(mockStrategy).show(any());
+        verify(mockStrategy).show(any(), eq(true), any());
         assertNotNull(launcher);
+    }
+
+    @Test
+    public void blockedDialogFallbackStrategy_showsBrowserUnavailableDialog() throws Exception {
+        TwaLauncher.BrowserUnavailableDialogStrategy mockStrategy =
+                mock(TwaLauncher.BrowserUnavailableDialogStrategy.class);
+        TwaLauncher.setDialogStrategyForTesting(mockStrategy);
+
+        TwaLauncher.FallbackStrategy strategy = TwaLauncher.getBlockedDialogFallbackStrategy("MyBrowser");
+        mActivity.runOnUiThread(() -> strategy.launch(mActivity, makeBuilder(), null, null));
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        verify(mockStrategy).show(any(), eq(false), eq("MyBrowser"));
+    }
+
+    @Test
+    public void blockedDialogFallbackStrategy_showsBrowserUnavailableDialog_emptyName() throws Exception {
+        TwaLauncher.BrowserUnavailableDialogStrategy mockStrategy =
+                mock(TwaLauncher.BrowserUnavailableDialogStrategy.class);
+        TwaLauncher.setDialogStrategyForTesting(mockStrategy);
+
+        TwaLauncher.FallbackStrategy strategy = TwaLauncher.getBlockedDialogFallbackStrategy(null);
+        mActivity.runOnUiThread(() -> strategy.launch(mActivity, makeBuilder(), null, null));
+
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        verify(mockStrategy).show(any(), eq(false), eq(null));
     }
 
     private TrustedWebActivityIntentBuilder makeBuilder() {

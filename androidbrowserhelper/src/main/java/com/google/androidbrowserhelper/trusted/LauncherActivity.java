@@ -43,7 +43,6 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 
 import org.json.JSONException;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +188,7 @@ public class LauncherActivity extends Activity {
 
     /**
      * Signals if {@link LauncherActivity} should automatically launch the Trusted Web Activity on
-     * {@linke #onCreate()}. Return {@code false} when a subclass needs to perform an asynchronous
+     * {@link #onCreate(Bundle)}. Return {@code false} when a subclass needs to perform an asynchronous
      * task before launching the Trusted Web Activity. The subclass will then be responsible for
      * calling {@link #launchTwa()} itself once the asynchronous task is finished.
      */
@@ -210,6 +209,11 @@ public class LauncherActivity extends Activity {
             return;
         }
 
+        CustomTabColorSchemeParams defaultColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
+                .setNavigationBarDividerColor(getColorCompat(mMetadata.navigationBarDividerColorId))
+                .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
+                .build();
         CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
                 .setToolbarColor(getColorCompat(mMetadata.statusBarColorDarkId))
                 .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorDarkId))
@@ -220,10 +224,7 @@ public class LauncherActivity extends Activity {
         Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder =
                 new TrustedWebActivityIntentBuilder(launchUrl)
-                        .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                        .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
-                        .setNavigationBarDividerColor(
-                                getColorCompat(mMetadata.navigationBarDividerColorId))
+                        .setDefaultColorSchemeParams(defaultColorScheme)
                         .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                         .setColorSchemeParams(
                                 CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
@@ -232,10 +233,10 @@ public class LauncherActivity extends Activity {
                         .setScreenOrientation(mMetadata.screenOrientation)
                         .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
 
-       Uri intentUrl = getUrlForIntent(getIntent());
-       if (!launchUrl.equals(intentUrl)) {
+        Uri intentUrl = getUrlForIntent(getIntent());
+        if (!launchUrl.equals(intentUrl) && intentUrl != null) {
             twaBuilder.setOriginalLaunchUrl(intentUrl);
-       }
+        }
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
@@ -249,7 +250,10 @@ public class LauncherActivity extends Activity {
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,
-                () -> { mBrowserWasLaunched = true; finish();},
+                () -> {
+                    mBrowserWasLaunched = true;
+                    finish();
+                },
                 getFallbackStrategy());
 
         if (!sChromeVersionChecked) {
@@ -274,7 +278,7 @@ public class LauncherActivity extends Activity {
     }
 
     protected TwaLauncher createTwaLauncher() {
-        return new TwaLauncher(this, null, SessionStore.makeSessionId(getTaskId()),
+        return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
                 new SharedPreferencesTokenStore(this));
     }
 
@@ -302,7 +306,7 @@ public class LauncherActivity extends Activity {
             ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
             twaBuilder.setShareParams(shareTarget, shareData);
         } catch (JSONException e) {
-            Log.d(TAG, "Failed to parse share target json: " + e.toString());
+            Log.d(TAG, "Failed to parse share target json: " + e);
         }
     }
 
@@ -314,7 +318,7 @@ public class LauncherActivity extends Activity {
             if (bundle == null) return;
             uris = FileHandlingData.fromBundle(bundle).uris;
         } else {
-            uris = Arrays.asList(getIntent().getData());
+            uris = Collections.singletonList(getIntent().getData());
         }
 
         for (Uri uri : uris) {
@@ -378,7 +382,7 @@ public class LauncherActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }
@@ -451,7 +455,7 @@ public class LauncherActivity extends Activity {
             Uri format = protocolHandlers.get(scheme);
             if (format != null) {
                 String target = Uri.encode(intentUrl.toString());
-                Uri targetUrl =  Uri.parse(String.format(format.toString(), target));
+                Uri targetUrl = Uri.parse(String.format(format.toString(), target));
                 Log.d(TAG, "Using protocol handler url: " + targetUrl);
                 return targetUrl;
             }
@@ -473,6 +477,9 @@ public class LauncherActivity extends Activity {
      * fallback implementation ot starting a native Activity.
      */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
+        if (mMetadata.launchingBrowser != null) {
+            return TwaLauncher.getBlockedDialogFallbackStrategy(mMetadata.launchingBrowserName);
+        }
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {
             return TwaLauncher.WEBVIEW_FALLBACK_STRATEGY;
         }

@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android బ్రౌజర్ హెల్పర్</string>
+  <string name="update_chrome_toast">దయచేసి స్థిరమైన Chrome వెర్షన్ 72 లేదా ఆ తర్వాతి వెర్షన్‌కు అప్‌డేట్ చేయండి.</string>
+  <string name="no_provider_toast">దయచేసి స్థిరమైన Chrome వెర్షన్ 72 లేదా ఆ తర్వాత వచ్చిన వెర్షన్‌ను ఇన్‌స్టాల్ చేయండి.</string>
+  <string name="manage_space_not_supported_toast">ఈ యాప్ డేటా %1$s‌లో స్టోర్ చేయబడింది.</string>
+  <string name="manage_space_no_data_toast">ఈ యాప్‌లో బ్రౌజింగ్ డేటా ఏదీ లేదు.</string>
+  <string name="provider_unavailable_title">యాప్ అందుబాటులో లేదు</string>
+  <string name="provider_unavailable_message">%1$s బ్లాక్ అయి ఉన్నందున, ఈ యాప్ అందుబాటులో లేదు</string>
+  <string name="provider_unavailable_button_ok">సరే</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

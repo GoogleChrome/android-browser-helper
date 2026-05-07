@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android 브라우저 도우미</string>
+  <string name="update_chrome_toast">Chrome 안정화 버전 72 이상으로 업데이트하세요.</string>
+  <string name="no_provider_toast">Chrome 안정화 버전 72 이상을 설치하세요.</string>
+  <string name="manage_space_not_supported_toast">이 앱의 데이터는 %1$s에 저장되어 있습니다.</string>
+  <string name="manage_space_no_data_toast">이 앱에 저장된 인터넷 사용 기록이 없습니다.</string>
+  <string name="provider_unavailable_title">사용할 수 없는 앱</string>
+  <string name="provider_unavailable_message">%1$s이(가) 차단되어 있어 이 앱을 사용할 수 없습니다.</string>
+  <string name="provider_unavailable_button_ok">확인</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

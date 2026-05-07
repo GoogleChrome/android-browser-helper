@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Pembantu Penyemak Imbas Android</string>
+  <string name="update_chrome_toast">Sila kemas kinikan kepada Chrome Stabil 72 atau versi lebih baharu.</string>
+  <string name="no_provider_toast">Sila pasang Chrome Stabil 72 atau versi lebih baharu.</string>
+  <string name="manage_space_not_supported_toast">Data apl ini disimpan dalam %1$s.</string>
+  <string name="manage_space_no_data_toast">Apl ini tidak menyimpan data semakan imbas.</string>
+  <string name="provider_unavailable_title">Apl Tidak Tersedia</string>
+  <string name="provider_unavailable_message">Apl ini tidak tersedia kerana %1$s disekat</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

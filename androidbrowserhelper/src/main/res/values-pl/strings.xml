@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Zaktualizuj Chrome do wersji stabilnej 72 lub nowszej.</string>
+  <string name="no_provider_toast">Zainstaluj wersję stabilną Chrome 72 lub nowszą.</string>
+  <string name="manage_space_not_supported_toast">Dane tej aplikacji są przechowywane w: %1$s.</string>
+  <string name="manage_space_no_data_toast">Ta aplikacja nie przechowuje żadnych danych przeglądania.</string>
+  <string name="provider_unavailable_title">Aplikacja jest niedostępna</string>
+  <string name="provider_unavailable_message">Ta aplikacja jest niedostępna, ponieważ przeglądarka %1$s jest zablokowana</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

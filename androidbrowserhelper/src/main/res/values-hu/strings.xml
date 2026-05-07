@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Frissítsen a Stabil Chrome 72-es vagy újabb verziójára.</string>
+  <string name="no_provider_toast">Telepítse a Stabil Chrome 72-es vagy újabb verzióját.</string>
+  <string name="manage_space_not_supported_toast">Az alkalmazás adatai a következő helyen vannak tárolva: %1$s.</string>
+  <string name="manage_space_no_data_toast">Ez az alkalmazás nem tárol böngészési adatokat.</string>
+  <string name="provider_unavailable_title">Az alkalmazás nem áll rendelkezésre.</string>
+  <string name="provider_unavailable_message">Az alkalmazás nem áll rendelkezésre, mert a(z) %1$s le van tiltva.</string>
+  <string name="provider_unavailable_button_ok">OK</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

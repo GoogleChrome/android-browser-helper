@@ -15,9 +15,10 @@
 package com.google.androidbrowserhelper.trusted;
 
 
-import static androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert;
+import static android.R.style.Theme_DeviceDefault_Dialog_Alert;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,10 +29,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -440,8 +437,7 @@ public class TwaLauncher {
             }
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new ContextThemeWrapper(activity, Theme_AppCompat_DayNight_Dialog_Alert));
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, Theme_DeviceDefault_Dialog_Alert);
         builder.setTitle(R.string.provider_unavailable_title);
 
         if (TextUtils.isEmpty(browserName)) {

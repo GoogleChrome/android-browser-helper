@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Ta aplikacija ne vsebuje podatkov brskanja.</string>
   <string name="provider_unavailable_title">Aplikacija ni na voljo</string>
   <string name="provider_unavailable_message">Ta aplikacija ni na voljo, ker je ponudnik %1$s blokiran</string>
+  <string name="provider_unavailable_fallback_message">Ta aplikacija ni na voljo.</string>
   <string name="provider_unavailable_button_ok">V redu</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

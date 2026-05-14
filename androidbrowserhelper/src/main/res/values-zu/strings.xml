@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Le app ayinayo idatha yokubhrawuza.</string>
   <string name="provider_unavailable_title">I-app Ayitholakali</string>
   <string name="provider_unavailable_message">Le app ayitholakali ngoba i-%1$s ivinjiwe</string>
+  <string name="provider_unavailable_fallback_message">Le app ayitholakali.</string>
   <string name="provider_unavailable_button_ok">KULUNGILE</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Diese App enthält keine Browserdaten.</string>
   <string name="provider_unavailable_title">App nicht verfügbar</string>
   <string name="provider_unavailable_message">Diese App ist nicht verfügbar, weil %1$s blockiert ist</string>
+  <string name="provider_unavailable_fallback_message">Diese App ist nicht verfügbar.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

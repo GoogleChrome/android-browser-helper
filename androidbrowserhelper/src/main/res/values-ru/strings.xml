@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">В этом приложении нет данных о работе в браузере.</string>
   <string name="provider_unavailable_title">Приложение недоступно</string>
   <string name="provider_unavailable_message">Это приложение недоступно, поскольку сервис \"%1$s\" заблокирован.</string>
+  <string name="provider_unavailable_fallback_message">Приложение недоступно.</string>
   <string name="provider_unavailable_button_ok">ОК</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

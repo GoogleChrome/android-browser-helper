@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">此應用程式不會保留任何瀏覽資料。</string>
   <string name="provider_unavailable_title">無法啟動應用程式</string>
   <string name="provider_unavailable_message">「%1$s」已封鎖，因此無法啟動應用程式</string>
+  <string name="provider_unavailable_fallback_message">無法提供這個應用程式。</string>
   <string name="provider_unavailable_button_ok">確定</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

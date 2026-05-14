@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">האפליקציה הזו לא מאחסנת נתוני גלישה.</string>
   <string name="provider_unavailable_title">האפליקציה לא זמינה</string>
   <string name="provider_unavailable_message">אי אפשר להשתמש באפליקציה הזו כי %1$s חסום</string>
+  <string name="provider_unavailable_fallback_message">אי אפשר להשתמש באפליקציה הזו.</string>
   <string name="provider_unavailable_button_ok">אישור</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

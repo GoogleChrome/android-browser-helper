@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Cette appli ne contient aucune donnée de navigation.</string>
   <string name="provider_unavailable_title">Appli non disponible</string>
   <string name="provider_unavailable_message">Cette appli n\'est pas disponible, car %1$s est bloqué</string>
+  <string name="provider_unavailable_fallback_message">Cette appli n\'est pas disponible.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

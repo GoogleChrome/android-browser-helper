@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Den här appen innehåller ingen webbinformation.</string>
   <string name="provider_unavailable_title">Appen är inte tillgänglig</string>
   <string name="provider_unavailable_message">Den här appen är inte tillgänglig eftersom %1$s har blockerats</string>
+  <string name="provider_unavailable_fallback_message">Den här appen är inte tillgänglig.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

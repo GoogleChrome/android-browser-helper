@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Това приложение не съдържа данни за сърфирането.</string>
   <string name="provider_unavailable_title">Приложението не е налице</string>
   <string name="provider_unavailable_message">Това приложение не е налице, защото %1$s е блокирано</string>
+  <string name="provider_unavailable_fallback_message">Това приложение не е налице.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

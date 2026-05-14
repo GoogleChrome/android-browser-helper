@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">यो एपले कुनै पनि ब्राउजिङ डेटा भण्डारण गर्दैन।</string>
   <string name="provider_unavailable_title">एप उपलब्ध छैन</string>
   <string name="provider_unavailable_message">%1$s ब्लक गरिएकाले यो एप उपलब्ध छैन</string>
+  <string name="provider_unavailable_fallback_message">यो एप उपलब्ध छैन।</string>
   <string name="provider_unavailable_button_ok">ठिक छ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

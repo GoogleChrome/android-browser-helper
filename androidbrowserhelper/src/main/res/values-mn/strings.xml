@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Энэ апп интернэтээр үзсэн ямар ч өгөгдлийг хадгалдаггүй.</string>
   <string name="provider_unavailable_title">Аппыг ашиглах боломжгүй</string>
   <string name="provider_unavailable_message">%1$s-г блоклосон тул энэ аппыг ашиглах боломжгүй байна</string>
+  <string name="provider_unavailable_fallback_message">Энэ аппыг ашиглах боломжгүй байна.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

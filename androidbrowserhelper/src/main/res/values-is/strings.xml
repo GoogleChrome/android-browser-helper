@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Þetta forrit geymir engin vefskoðunargögn.</string>
   <string name="provider_unavailable_title">Forrit er ekki í boði</string>
   <string name="provider_unavailable_message">Þetta forrit er ekki í boði vegna þess að gert var hlé á %1$s</string>
+  <string name="provider_unavailable_fallback_message">Þetta forrit er ekki í boði.</string>
   <string name="provider_unavailable_button_ok">Í lagi</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">У цьому додатку немає даних вебперегляду.</string>
   <string name="provider_unavailable_title">Додаток недоступний</string>
   <string name="provider_unavailable_message">Цей додаток недоступний, оскільки %1$s заблоковано</string>
+  <string name="provider_unavailable_fallback_message">Цей додаток недоступний.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

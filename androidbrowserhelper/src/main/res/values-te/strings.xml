@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ఈ యాప్‌లో బ్రౌజింగ్ డేటా ఏదీ లేదు.</string>
   <string name="provider_unavailable_title">యాప్ అందుబాటులో లేదు</string>
   <string name="provider_unavailable_message">%1$s బ్లాక్ అయి ఉన్నందున, ఈ యాప్ అందుబాటులో లేదు</string>
+  <string name="provider_unavailable_fallback_message">ఈ యాప్ అందుబాటులో లేదు.</string>
   <string name="provider_unavailable_button_ok">సరే</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

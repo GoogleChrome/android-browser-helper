@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Бұл қолданбада браузерді пайдалану деректері жоқ.</string>
   <string name="provider_unavailable_title">Қолданба қолжетімді емес</string>
   <string name="provider_unavailable_message">Бұл қолданба қолжетімді емес, себебі %1$s блокталған.</string>
+  <string name="provider_unavailable_fallback_message">Бұл қолданба қолжетімді емес.</string>
   <string name="provider_unavailable_button_ok">Жарайды</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

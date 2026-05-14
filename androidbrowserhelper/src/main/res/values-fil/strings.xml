@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Walang data mula sa pag-browse ang app na ito.</string>
   <string name="provider_unavailable_title">Hindi Available ang App</string>
   <string name="provider_unavailable_message">Hindi available ang app na ito dahil naka-block ang %1$s</string>
+  <string name="provider_unavailable_fallback_message">Hindi available ang app na ito.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

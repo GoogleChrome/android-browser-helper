@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">इस ऐप्लिकेशन में कोई ब्राउज़िंग डेटा नहीं है.</string>
   <string name="provider_unavailable_title">ऐप्लिकेशन उपलब्ध नहीं है</string>
   <string name="provider_unavailable_message">यह ऐप्लिकेशन उपलब्ध नहीं है, क्योंकि %1$s को ब्लॉक किया गया है</string>
+  <string name="provider_unavailable_fallback_message">यह ऐप्लिकेशन उपलब्ध नहीं है.</string>
   <string name="provider_unavailable_button_ok">ठीक है</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

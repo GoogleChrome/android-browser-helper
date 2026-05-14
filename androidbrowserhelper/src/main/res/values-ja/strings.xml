@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">このアプリには閲覧データは保存されません。</string>
   <string name="provider_unavailable_title">アプリを利用できません</string>
   <string name="provider_unavailable_message">%1$s がブロックされているため、このアプリは利用できません</string>
+  <string name="provider_unavailable_fallback_message">このアプリは利用できません。</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

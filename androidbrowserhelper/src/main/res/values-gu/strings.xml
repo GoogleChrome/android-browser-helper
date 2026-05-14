@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">આ ઍપમાં કોઈ બ્રાઉઝિંગ ડેટા નથી.</string>
   <string name="provider_unavailable_title">ઍપ ઉપલબ્ધ નથી</string>
   <string name="provider_unavailable_message">%1$s બ્લૉક કરેલી હોવાથી આ ઍપ ઉપલબ્ધ નથી</string>
+  <string name="provider_unavailable_fallback_message">આ ઍપ ઉપલબ્ધ નથી.</string>
   <string name="provider_unavailable_button_ok">ઓકે</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

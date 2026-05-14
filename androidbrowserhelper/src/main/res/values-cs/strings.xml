@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Tato aplikace neuchovává žádné údaje o prohlížení.</string>
   <string name="provider_unavailable_title">Aplikace není dostupná</string>
   <string name="provider_unavailable_message">Tato aplikace není k dispozici, protože je blokován poskytovatel %1$s</string>
+  <string name="provider_unavailable_fallback_message">Tato aplikace není k dispozici.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

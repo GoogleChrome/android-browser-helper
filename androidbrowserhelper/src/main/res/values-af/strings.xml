@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Hierdie app bevat geen blaaierdata nie.</string>
   <string name="provider_unavailable_title">App is onbeskikbaar</string>
   <string name="provider_unavailable_message">Hierdie app is onbeskikbaar omdat %1$s geblokkeer is</string>
+  <string name="provider_unavailable_fallback_message">Hierdie app is onbeskikbaar.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Aplikasi ini tidak menyimpan data penjelajahan.</string>
   <string name="provider_unavailable_title">Aplikasi Tidak Tersedia</string>
   <string name="provider_unavailable_message">Aplikasi ini tidak tersedia karena %1$s diblokir</string>
+  <string name="provider_unavailable_fallback_message">Aplikasi ini tidak tersedia.</string>
   <string name="provider_unavailable_button_ok">Oke</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

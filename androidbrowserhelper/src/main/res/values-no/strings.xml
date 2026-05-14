@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Denne appen har ingen nettlesingsdata.</string>
   <string name="provider_unavailable_title">Appen er utilgjengelig</string>
   <string name="provider_unavailable_message">Denne appen er utilgjengelig fordi %1$s er blokkert</string>
+  <string name="provider_unavailable_fallback_message">Denne appen er utilgjengelig.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

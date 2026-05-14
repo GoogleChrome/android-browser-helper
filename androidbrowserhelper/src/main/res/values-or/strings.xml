@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ଏହି ଆପରେ କୌଣସି ବ୍ରାଉଜିଂ ଡାଟା ନାହିଁ।</string>
   <string name="provider_unavailable_title">ଆପ ଉପଲବ୍ଧ ନାହିଁ</string>
   <string name="provider_unavailable_message">%1$sକୁ ବ୍ଲକ କରାଯାଇଥିବା ଯୋଗୁଁ ଏହି ଆପ ଉପଲବ୍ଧ ନାହିଁ</string>
+  <string name="provider_unavailable_fallback_message">ଏହି ଆପ ଉପଲବ୍ଧ ନାହିଁ।</string>
   <string name="provider_unavailable_button_ok">ଠିକ ଅଛି</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

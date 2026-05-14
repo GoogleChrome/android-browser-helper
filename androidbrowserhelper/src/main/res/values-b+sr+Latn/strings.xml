@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Ova aplikacija ne čuva podatke pregledanja.</string>
   <string name="provider_unavailable_title">Aplikacija nije dostupna</string>
   <string name="provider_unavailable_message">Ova aplikacija nije dostupna jer je pregledač %1$s blokiran</string>
+  <string name="provider_unavailable_fallback_message">Ova aplikacija je nedostupna.</string>
   <string name="provider_unavailable_button_ok">Potvrdi</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

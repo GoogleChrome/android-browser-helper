@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">یہ ایپ براؤزنگ ڈیٹا نہیں رکھتی ہے۔</string>
   <string name="provider_unavailable_title">ایپ دستیاب نہیں ہے</string>
   <string name="provider_unavailable_message">یہ ایپ دستیاب نہیں ہے کیونکہ %1$s لاک ہے</string>
+  <string name="provider_unavailable_fallback_message">یہ ایپ دستیاب نہیں ہے۔</string>
   <string name="provider_unavailable_button_ok">ٹھیک ہے</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">این برنامه داده‌های مرور ندارد.</string>
   <string name="provider_unavailable_title">برنامه دردسترس نیست</string>
   <string name="provider_unavailable_message">این برنامه دردسترس نیست زیرا %1$s موقتاً مسدود شده است</string>
+  <string name="provider_unavailable_fallback_message">این برنامه دردسترس نیست.</string>
   <string name="provider_unavailable_button_ok">بسیارخوب</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

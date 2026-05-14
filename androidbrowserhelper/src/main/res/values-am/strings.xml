@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ይህ መተግበሪያ ምንም የአሰሳ ውሂብ አይዝም።</string>
   <string name="provider_unavailable_title">መተግበሪያ አይገኝም</string>
   <string name="provider_unavailable_message">%1$s ስለታገደ ይህ መተግበሪያ አይገኝም</string>
+  <string name="provider_unavailable_fallback_message">ይህ መተግበሪያ አይገኝም።</string>
   <string name="provider_unavailable_button_ok">እሺ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Ứng dụng này không lưu trữ dữ liệu duyệt web.</string>
   <string name="provider_unavailable_title">Ứng dụng không dùng được</string>
   <string name="provider_unavailable_message">Ứng dụng này không dùng được vì %1$s đã bị chặn</string>
+  <string name="provider_unavailable_fallback_message">Ứng dụng này không sẵn dùng.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

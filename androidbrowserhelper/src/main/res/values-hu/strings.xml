@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Ez az alkalmazás nem tárol böngészési adatokat.</string>
   <string name="provider_unavailable_title">Az alkalmazás nem áll rendelkezésre.</string>
   <string name="provider_unavailable_message">Az alkalmazás nem áll rendelkezésre, mert a(z) %1$s le van tiltva.</string>
+  <string name="provider_unavailable_fallback_message">Az alkalmazás nem áll rendelkezésre.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Гэта праграма не змяшчае даныя пра работу ў браўзеры.</string>
   <string name="provider_unavailable_title">Праграма недаступная</string>
   <string name="provider_unavailable_message">Гэта праграма недаступная, бо праца \"%1$s\" заблакіравана</string>
+  <string name="provider_unavailable_fallback_message">Гэта праграма недаступная.</string>
   <string name="provider_unavailable_button_ok">ОК</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

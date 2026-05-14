@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ಈ ಆ್ಯಪ್ ಯಾವುದೇ ಬ್ರೌಸಿಂಗ್ ಡೇಟಾವನ್ನು ಹೊಂದಿಲ್ಲ.</string>
   <string name="provider_unavailable_title">ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ</string>
   <string name="provider_unavailable_message">%1$s ಅನ್ನು ನಿರ್ಬಂಧಿಸಿರುವ ಕಾರಣ ಈ ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ</string>
+  <string name="provider_unavailable_fallback_message">ಈ ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ.</string>
   <string name="provider_unavailable_button_ok">ಸರಿ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

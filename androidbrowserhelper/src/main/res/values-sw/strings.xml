@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Programu hii haina data ya kuvinjari.</string>
   <string name="provider_unavailable_title">Programu Haipatikani</string>
   <string name="provider_unavailable_message">Programu hii haipatikani kwa sababu %1$s imezuiwa</string>
+  <string name="provider_unavailable_fallback_message">Programu hii haipatikani.</string>
   <string name="provider_unavailable_button_ok">Sawa</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

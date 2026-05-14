@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">See rakendus ei sisalda sirvimisandmeid.</string>
   <string name="provider_unavailable_title">Rakendus pole saadaval</string>
   <string name="provider_unavailable_message">See rakendus pole saadaval, kuna %1$s on blokeeritud.</string>
+  <string name="provider_unavailable_fallback_message">Rakendus ei ole saadaval.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

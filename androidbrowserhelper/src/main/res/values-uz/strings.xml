@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Bu ilovada brauzer maʼlumotlari saqlanmaydi.</string>
   <string name="provider_unavailable_title">Ilova mavjud emas</string>
   <string name="provider_unavailable_message">Bu ilova ishlamaydi, chunki %1$s bloklangan</string>
+  <string name="provider_unavailable_fallback_message">Bu ilova mavjud emas.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

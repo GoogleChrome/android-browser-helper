@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Tämä sovellus ei sisällä selausdataa.</string>
   <string name="provider_unavailable_title">Sovellus ei käytettävissä</string>
   <string name="provider_unavailable_message">Sovellus ei ole käytettävissä, koska %1$s on estetty</string>
+  <string name="provider_unavailable_fallback_message">Sovellus ei ole käytettävissä.</string>
   <string name="provider_unavailable_button_ok">OK</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

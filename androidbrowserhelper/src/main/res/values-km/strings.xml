@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">កម្មវិធីនេះ​មិនរក្សាទុក​ទិន្នន័យរុករក​ទេ។</string>
   <string name="provider_unavailable_title">មិនអាចប្រើ​កម្មវិធី​បានទេ</string>
   <string name="provider_unavailable_message">មិនអាចប្រើ​កម្មវិធីនេះ​បានទេ ដោយសារ %1$s ត្រូវបាន​ទប់ស្កាត់</string>
+  <string name="provider_unavailable_fallback_message">មិនអាចប្រើ​កម្មវិធីនេះ​បានទេ។</string>
   <string name="provider_unavailable_button_ok">យល់ព្រម</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

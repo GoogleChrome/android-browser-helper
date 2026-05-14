@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ਇਸ ਐਪ ਵਿੱਚ ਕੋਈ ਬ੍ਰਾਊਜ਼ਿੰਗ ਡਾਟਾ ਨਹੀਂ ਹੈ।</string>
   <string name="provider_unavailable_title">ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ</string>
   <string name="provider_unavailable_message">ਇਹ ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ, ਕਿਉਂਕਿ %1$s ਨੂੰ ਬਲਾਕ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ</string>
+  <string name="provider_unavailable_fallback_message">ਇਹ ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।</string>
   <string name="provider_unavailable_button_ok">ਠੀਕ ਹੈ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

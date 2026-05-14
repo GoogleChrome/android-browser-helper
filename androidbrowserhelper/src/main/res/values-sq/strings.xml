@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Ky aplikacion nuk mban të dhëna shfletimi.</string>
   <string name="provider_unavailable_title">Aplikacioni nuk ofrohet</string>
   <string name="provider_unavailable_message">Ky aplikacion nuk ofrohet sepse %1$s është bllokuar</string>
+  <string name="provider_unavailable_fallback_message">Ky aplikacion nuk është i disponueshëm.</string>
   <string name="provider_unavailable_button_ok">Në rregull</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

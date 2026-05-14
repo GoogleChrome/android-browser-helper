@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ഈ ആപ്പിൽ ബ്രൗസിംഗ് ഡാറ്റയൊന്നും നിലനിർത്തിയിട്ടില്ല.</string>
   <string name="provider_unavailable_title">ആപ്പ് ലഭ്യമല്ല</string>
   <string name="provider_unavailable_message">%1$s ബ്ലോക്ക് ചെയ്‌തതിനാൽ ഈ ആപ്പ് ലഭ്യമല്ല</string>
+  <string name="provider_unavailable_fallback_message">ഈ ആപ്പ് ലഭ്യമല്ല.</string>
   <string name="provider_unavailable_button_ok">ശരി</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Bu uygulamada tarama verisi yok.</string>
   <string name="provider_unavailable_title">Uygulama kullanılamıyor</string>
   <string name="provider_unavailable_message">%1$s engellendiğinden bu uygulama kullanılamıyor</string>
+  <string name="provider_unavailable_fallback_message">Bu uygulama kullanılamıyor.</string>
   <string name="provider_unavailable_button_ok">Tamam</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

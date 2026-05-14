@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">ແອັບນີ້ບໍ່ມີຂໍ້ມູນການທ່ອງເວັບ.</string>
   <string name="provider_unavailable_title">ແອັບບໍ່ພ້ອມນຳໃຊ້</string>
   <string name="provider_unavailable_message">ແອັບນີ້ບໍ່ພ້ອມນຳໃຊ້ເນື່ອງຈາກ %1$s ຖືກບລັອກ</string>
+  <string name="provider_unavailable_fallback_message">ແອັບນີ້ບໍ່ພ້ອມນຳໃຊ້.</string>
   <string name="provider_unavailable_button_ok">ຕົກລົງ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

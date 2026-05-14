@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Αυτή η εφαρμογή δεν διατηρεί δεδομένα περιήγησης.</string>
   <string name="provider_unavailable_title">Η εφαρμογή δεν είναι διαθέσιμη</string>
   <string name="provider_unavailable_message">Αυτή η εφαρμογή δεν είναι διαθέσιμη, επειδή ο πάροχος %1$s έχει αποκλειστεί</string>
+  <string name="provider_unavailable_fallback_message">Αυτή η εφαρμογή δεν είναι διαθέσιμη.</string>
   <string name="provider_unavailable_button_ok">ΟΚ</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

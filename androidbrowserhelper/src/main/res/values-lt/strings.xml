@@ -6,6 +6,7 @@
   <string name="manage_space_no_data_toast">Šioje programoje nėra laikomi jokie naršymo duomenys.</string>
   <string name="provider_unavailable_title">Programa nepasiekiama</string>
   <string name="provider_unavailable_message">Ši programa nepasiekiama, nes „%1$s“ užblokuota</string>
+  <string name="provider_unavailable_fallback_message">Ši programa nepasiekiama.</string>
   <string name="provider_unavailable_button_ok">Gerai</string>
   <string name="provider_unavailable_default_browser">Chrome</string>
 </resources>

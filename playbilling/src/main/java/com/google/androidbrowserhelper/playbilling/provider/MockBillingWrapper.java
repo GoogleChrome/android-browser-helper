@@ -23,8 +23,6 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchaseHistoryRecord;
-import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
@@ -54,8 +52,6 @@ public class MockBillingWrapper implements BillingWrapper {
             mQueryProductDetailsInvocation = new MultiProductTypeInvocationTracker<>();
     private MultiProductTypeInvocationTracker<Void, PurchasesResponseListener>
             mQueryPurchasesInvocation = new MultiProductTypeInvocationTracker<>();
-    private MultiProductTypeInvocationTracker<Void, PurchaseHistoryResponseListener>
-            mQueryPurchaseHistoryInvocation = new MultiProductTypeInvocationTracker<>();
 
     private Intent mPlayBillingFlowLaunchIntent;
 
@@ -77,11 +73,6 @@ public class MockBillingWrapper implements BillingWrapper {
     @Override
     public void queryPurchases(@BillingClient.ProductType String productType, PurchasesResponseListener callback) {
         mQueryPurchasesInvocation.call(productType, null, callback);
-    }
-
-    @Override
-    public void queryPurchaseHistory(@BillingClient.ProductType String productType, PurchaseHistoryResponseListener callback) {
-        mQueryPurchaseHistoryInvocation.call(productType, null, callback);
     }
 
     @Override
@@ -143,12 +134,6 @@ public class MockBillingWrapper implements BillingWrapper {
                 .onQueryPurchasesResponse(toResult(BillingClient.BillingResponseCode.OK), details);
     }
 
-    public void triggerOnPurchaseHistoryResponse(String productType,
-                                                 List<PurchaseHistoryRecord> records) {
-        mQueryPurchaseHistoryInvocation.getCallback(productType)
-                .onPurchaseHistoryResponse(toResult(BillingClient.BillingResponseCode.OK), records);
-    }
-
     public void triggerAcknowledge(int responseCode) {
         mAcknowledgeInvocation.getCallback().onAcknowledgePurchaseResponse(toResult(responseCode));
     }
@@ -175,10 +160,6 @@ public class MockBillingWrapper implements BillingWrapper {
 
     public boolean waitForQueryPurchases() throws InterruptedException {
         return mQueryPurchasesInvocation.waitUntilCalled();
-    }
-
-    public boolean waitForQueryPurchaseHistory() throws InterruptedException {
-        return mQueryPurchaseHistoryInvocation.waitUntilCalled();
     }
 
     public void setListener(Listener listener) {

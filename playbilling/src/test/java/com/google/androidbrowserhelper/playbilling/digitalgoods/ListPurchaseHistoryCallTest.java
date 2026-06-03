@@ -18,12 +18,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 import com.google.androidbrowserhelper.playbilling.provider.MockBillingWrapper;
 
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +28,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import static com.google.androidbrowserhelper.playbilling.digitalgoods.DigitalGoodsConverter.toChromiumResponseCode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -45,9 +36,6 @@ import static org.junit.Assert.assertTrue;
 @DoNotInstrument
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class ListPurchaseHistoryCallTest {
-    private final static String PURCHASE_RECORD =
-            "{ 'productId' = 'id', 'purchaseToken' = 'token' }"
-                    .replace('\'', '"');
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
@@ -66,47 +54,23 @@ public class ListPurchaseHistoryCallTest {
     }
 
     @Test
-    public void parsesResult_inApp() throws JSONException, InterruptedException {
-        PurchaseHistoryRecord record = new PurchaseHistoryRecord(PURCHASE_RECORD, "");
-
-        call(Collections.singletonList(record), Collections.emptyList());
-    }
-
-    @Test
-    public void parsesResult_subs() throws JSONException, InterruptedException {
-        PurchaseHistoryRecord record = new PurchaseHistoryRecord(PURCHASE_RECORD, "");
-
-        call(Collections.emptyList(), Collections.singletonList(record));
-    }
-
-    private void call(List<PurchaseHistoryRecord> inAppPurchaseHistory,
-                      List<PurchaseHistoryRecord> subsPurchaseHistory) throws InterruptedException {
-        CountDownLatch callbackTriggered = new CountDownLatch(1);
+    public void returnsErrorAndEmptyListImmediately() {
+        boolean[] callbackTriggered = new boolean[1];
 
         DigitalGoodsCallback callback = (name, bundle) -> {
             assertEquals(ListPurchaseHistoryCall.RESPONSE_COMMAND, name);
-            assertEquals(bundle.getInt(ListPurchaseHistoryCall.KEY_RESPONSE_CODE),
-                    toChromiumResponseCode(BillingClient.BillingResponseCode.OK));
+            assertEquals(DigitalGoodsConverter.CHROMIUM_RESULT_ERROR,
+                    bundle.getInt(ListPurchaseHistoryCall.KEY_RESPONSE_CODE));
 
             Parcelable[] array = bundle
                     .getParcelableArray(ListPurchaseHistoryCall.KEY_PURCHASE_HISTORY_LIST);
-            PurchaseDetails details = PurchaseDetails.create((Bundle) array[0]);
+            assertEquals(0, array.length);
 
-            assertEquals("id", details.id);
-            assertEquals("token", details.purchaseToken);
-
-            callbackTriggered.countDown();
+            callbackTriggered[0] = true;
         };
 
         assertTrue(mHandler.handle(ListPurchaseHistoryCall.COMMAND_NAME, new Bundle(), callback));
-        mBillingWrapper.triggerConnected();
-
-        assertTrue(mBillingWrapper.waitForQueryPurchaseHistory());
-        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.ProductType.INAPP,
-                inAppPurchaseHistory);
-        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.ProductType.SUBS,
-                subsPurchaseHistory);
-
-        assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
+        assertTrue(callbackTriggered[0]);
     }
 }
+

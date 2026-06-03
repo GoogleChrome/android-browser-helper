@@ -19,13 +19,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
-import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
-
-import java.util.List;
 
 /**
  * A class for parsing Digital Goods API calls from the browser and converting them into a format
@@ -56,29 +50,9 @@ public class ListPurchaseHistoryCall {
     public void call(BillingWrapper billing) {
         Logging.logListPurchaseHistoryCall();
 
-        BillingResultMerger<PurchaseHistoryRecord> merger = new BillingResultMerger<>(this::respond);
-
-        billing.queryPurchaseHistory(BillingClient.ProductType.INAPP, merger::setInAppResult);
-        billing.queryPurchaseHistory(BillingClient.ProductType.SUBS, merger::setSubsResult);
-    }
-
-    private void respond(BillingResult result,
-                         @Nullable List<PurchaseHistoryRecord> purchaseHistoryList) {
-        Logging.logListPurchaseHistoryResult(result);
-
-        Parcelable[] parcelables = new Parcelable[0];
-        if (purchaseHistoryList != null) {
-            parcelables = new Parcelable[purchaseHistoryList.size()];
-
-            int index = 0;
-            for (PurchaseHistoryRecord record : purchaseHistoryList) {
-                parcelables[index++] = PurchaseDetails.create(record).toBundle();
-            }
-        }
-
         Bundle args = new Bundle();
-        args.putInt(KEY_RESPONSE_CODE, DigitalGoodsConverter.toChromiumResponseCode(result));
-        args.putParcelableArray(KEY_PURCHASE_HISTORY_LIST, parcelables);
+        args.putInt(KEY_RESPONSE_CODE, DigitalGoodsConverter.CHROMIUM_RESULT_ERROR);
+        args.putParcelableArray(KEY_PURCHASE_HISTORY_LIST, new Parcelable[0]);
         mCallback.run(RESPONSE_COMMAND, args);
     }
 }

@@ -31,7 +31,6 @@ import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetails;
@@ -103,11 +102,6 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .setProductType(productType)
                 .build();
         mClient.queryPurchasesAsync(params, callback);
-    }
-
-    @Override
-    public void queryPurchaseHistory(@BillingClient.ProductType String productType, PurchaseHistoryResponseListener callback) {
-        mClient.queryPurchaseHistoryAsync(productType, callback);
     }
 
     @Override

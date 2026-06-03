@@ -21,7 +21,6 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
-import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.ProductDetailsResponseListener;
@@ -55,12 +54,6 @@ public interface BillingWrapper {
      * Returns details for currently owned items.
      */
     void queryPurchases(@BillingClient.ProductType String productType, PurchasesResponseListener callback);
-
-    /**
-     * Returns details for all previously purchased items.
-     */
-    void queryPurchaseHistory(@BillingClient.ProductType String productType,
-                              PurchaseHistoryResponseListener callback);
 
     /**
      * Acknowledges that a purchase has occured.

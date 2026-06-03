@@ -23,7 +23,6 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.ConnectedBillingWrapper;
 
 import java.util.List;
@@ -33,6 +32,13 @@ import java.util.List;
  * tests.
  */
 public interface BillingWrapper {
+    /**
+     * Callback for product details query.
+     */
+    interface ProductDetailsResponseListener {
+        void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> productDetailsList);
+    }
+
     /**
      * Callbacks for connection state and for purchase flow completion.
      */

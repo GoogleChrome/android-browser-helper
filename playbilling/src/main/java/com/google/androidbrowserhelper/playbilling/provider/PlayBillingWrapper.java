@@ -34,7 +34,7 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
+import com.android.billingclient.api.QueryProductDetailsResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class PlayBillingWrapper implements BillingWrapper {
 
     @Override
     public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
-            ProductDetailsResponseListener callback) {
+            final BillingWrapper.ProductDetailsResponseListener callback) {
         List<QueryProductDetailsParams.Product> productList = new ArrayList<>();
         for (String productId : productIds) {
             productList.add(
@@ -92,7 +92,13 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .setProductList(productList)
                 .build();
 
-        mClient.queryProductDetailsAsync(params, callback);
+        mClient.queryProductDetailsAsync(params, new com.android.billingclient.api.ProductDetailsResponseListener() {
+            @Override
+            public void onProductDetailsResponse(BillingResult billingResult, QueryProductDetailsResult queryProductDetailsResult) {
+                List<ProductDetails> productDetailsList = queryProductDetailsResult.getProductDetailsList();
+                callback.onProductDetailsResponse(billingResult, productDetailsList != null ? productDetailsList : new ArrayList<>());
+            }
+        });
     }
 
     @Override

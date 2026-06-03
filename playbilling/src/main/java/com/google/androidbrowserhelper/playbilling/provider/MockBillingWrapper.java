@@ -25,7 +25,6 @@ import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +47,7 @@ public class MockBillingWrapper implements BillingWrapper {
     private InvocationTracker<String, ConsumeResponseListener>
             mConsumeInvocation = new InvocationTracker<>();
 
-    private MultiProductTypeInvocationTracker<List<String>, ProductDetailsResponseListener>
+    private MultiProductTypeInvocationTracker<List<String>, BillingWrapper.ProductDetailsResponseListener>
             mQueryProductDetailsInvocation = new MultiProductTypeInvocationTracker<>();
     private MultiProductTypeInvocationTracker<Void, PurchasesResponseListener>
             mQueryPurchasesInvocation = new MultiProductTypeInvocationTracker<>();
@@ -66,7 +65,7 @@ public class MockBillingWrapper implements BillingWrapper {
 
     @Override
     public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
-            ProductDetailsResponseListener callback) {
+            BillingWrapper.ProductDetailsResponseListener callback) {
         mQueryProductDetailsInvocation.call(productType, productIds, callback);
     }
 

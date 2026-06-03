@@ -23,8 +23,8 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.ConnectedBillingWrapper;
 
 import java.util.List;
@@ -46,20 +46,20 @@ public interface BillingWrapper {
     void connect(BillingClientStateListener callback);
 
     /**
-     * Get {@link SkuDetails} objects for the provided SKUs.
+     * Get {@link ProductDetails} objects for the provided product IDs.
      */
-    void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
-            SkuDetailsResponseListener callback);
+    void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
+            ProductDetailsResponseListener callback);
 
     /**
      * Returns details for currently owned items.
      */
-    void queryPurchases(@BillingClient.SkuType String skuType, PurchasesResponseListener callback);
+    void queryPurchases(@BillingClient.ProductType String productType, PurchasesResponseListener callback);
 
     /**
      * Returns details for all previously purchased items.
      */
-    void queryPurchaseHistory(@BillingClient.SkuType String skuType,
+    void queryPurchaseHistory(@BillingClient.ProductType String productType,
                               PurchaseHistoryResponseListener callback);
 
     /**
@@ -76,6 +76,6 @@ public interface BillingWrapper {
      * Launches the Payment Flow. If it returns {@code true},
      * {@link Listener#onPurchaseFlowComplete} should be called.
      */
-    boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData);
+    boolean launchPaymentFlow(Activity activity, ProductDetails productDetails, MethodData methodData);
 
 }

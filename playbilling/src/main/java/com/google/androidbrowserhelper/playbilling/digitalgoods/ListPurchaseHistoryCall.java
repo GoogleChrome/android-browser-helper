@@ -58,8 +58,8 @@ public class ListPurchaseHistoryCall {
 
         BillingResultMerger<PurchaseHistoryRecord> merger = new BillingResultMerger<>(this::respond);
 
-        billing.queryPurchaseHistory(BillingClient.SkuType.INAPP, merger::setInAppResult);
-        billing.queryPurchaseHistory(BillingClient.SkuType.SUBS, merger::setSubsResult);
+        billing.queryPurchaseHistory(BillingClient.ProductType.INAPP, merger::setInAppResult);
+        billing.queryPurchaseHistory(BillingClient.ProductType.SUBS, merger::setSubsResult);
     }
 
     private void respond(BillingResult result,

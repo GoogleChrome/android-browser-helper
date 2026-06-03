@@ -60,8 +60,8 @@ public class ListPurchasesCall {
 
         BillingResultMerger<Purchase> merger = new BillingResultMerger<>(this::respond);
 
-        billing.queryPurchases(BillingClient.SkuType.INAPP, merger::setInAppResult);
-        billing.queryPurchases(BillingClient.SkuType.SUBS, merger::setSubsResult);
+        billing.queryPurchases(BillingClient.ProductType.INAPP, merger::setInAppResult);
+        billing.queryPurchases(BillingClient.ProductType.SUBS, merger::setSubsResult);
     }
 
     private void respond(BillingResult result, @Nullable List<Purchase> purchaseList) {

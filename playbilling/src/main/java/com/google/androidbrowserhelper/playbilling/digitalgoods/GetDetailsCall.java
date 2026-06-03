@@ -19,7 +19,7 @@ import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 
 import java.util.Arrays;
@@ -62,7 +62,7 @@ public class GetDetailsCall {
     }
 
     /** Calls the callback provided in the constructor with serialized forms of the parameters. */
-    private void respond(BillingResult result, @Nullable List<SkuDetails> detailsList) {
+    private void respond(BillingResult result, @Nullable List<ProductDetails> detailsList) {
         Logging.logGetDetailsResponse(result);
 
         Parcelable[] parcelables = new Parcelable[0];
@@ -70,7 +70,7 @@ public class GetDetailsCall {
             parcelables = new Parcelable[detailsList.size()];
 
             int index = 0;
-            for (SkuDetails details : detailsList) {
+            for (ProductDetails details : detailsList) {
                 parcelables[index++] = ItemDetails.create(details).toBundle();
             }
         }
@@ -86,10 +86,10 @@ public class GetDetailsCall {
     public void call(BillingWrapper billing) {
         Logging.logGetDetailsCall(mItemIds);
 
-        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::respond);
+        BillingResultMerger<ProductDetails> merger = new BillingResultMerger<>(this::respond);
 
-        billing.querySkuDetails(BillingClient.SkuType.INAPP, mItemIds, merger::setInAppResult);
-        billing.querySkuDetails(BillingClient.SkuType.SUBS, mItemIds, merger::setSubsResult);
+        billing.queryProductDetails(BillingClient.ProductType.INAPP, mItemIds, merger::setInAppResult);
+        billing.queryProductDetails(BillingClient.ProductType.SUBS, mItemIds, merger::setSubsResult);
     }
 
     /** Creates a Bundle that can be used with {@link #create}. For testing. */

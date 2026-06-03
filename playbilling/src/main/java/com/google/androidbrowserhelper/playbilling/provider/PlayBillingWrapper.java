@@ -29,14 +29,15 @@ import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
-import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -77,29 +78,36 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
-            SkuDetailsResponseListener callback) {
-        SkuDetailsParams params = SkuDetailsParams
-                .newBuilder()
-                .setSkusList(skus)
-                .setType(skuType)
+    public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
+            ProductDetailsResponseListener callback) {
+        List<QueryProductDetailsParams.Product> productList = new ArrayList<>();
+        for (String productId : productIds) {
+            productList.add(
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(productId)
+                    .setProductType(productType)
+                    .build()
+            );
+        }
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(productList)
                 .build();
 
-        mClient.querySkuDetailsAsync(params, callback);
+        mClient.queryProductDetailsAsync(params, callback);
     }
 
     @Override
-    public void queryPurchases(@BillingClient.SkuType String skuType,
+    public void queryPurchases(@BillingClient.ProductType String productType,
                                PurchasesResponseListener callback) {
         QueryPurchasesParams params = QueryPurchasesParams.newBuilder()
-                .setProductType(skuType)
+                .setProductType(productType)
                 .build();
         mClient.queryPurchasesAsync(params, callback);
     }
 
     @Override
-    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
-        mClient.queryPurchaseHistoryAsync(skuType, callback);
+    public void queryPurchaseHistory(@BillingClient.ProductType String productType, PurchaseHistoryResponseListener callback) {
+        mClient.queryPurchaseHistoryAsync(productType, callback);
     }
 
     @Override
@@ -123,11 +131,27 @@ public class PlayBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData methodData) {
+    public boolean launchPaymentFlow(Activity activity, ProductDetails productDetails, MethodData methodData) {
         BillingFlowParams.SubscriptionUpdateParams.Builder subUpdateParamsBuilder =
             BillingFlowParams.SubscriptionUpdateParams.newBuilder();
-        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder();
-        builder.setSkuDetails(sku);
+
+        BillingFlowParams.ProductDetailsParams.Builder productDetailsParamsBuilder =
+            BillingFlowParams.ProductDetailsParams.newBuilder()
+                .setProductDetails(productDetails);
+
+        if (productDetails.getProductType().equals(BillingClient.ProductType.SUBS)) {
+            List<ProductDetails.SubscriptionOfferDetails> offerDetails =
+                productDetails.getSubscriptionOfferDetails();
+            if (offerDetails != null && !offerDetails.isEmpty()) {
+                productDetailsParamsBuilder.setOfferToken(offerDetails.get(0).getOfferToken());
+            }
+        }
+
+        List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
+        productDetailsParamsList.add(productDetailsParamsBuilder.build());
+
+        BillingFlowParams.Builder builder = BillingFlowParams.newBuilder()
+            .setProductDetailsParamsList(productDetailsParamsList);
 
         if (methodData.replacementMode != null) {
             subUpdateParamsBuilder.setSubscriptionReplacementMode(methodData.replacementMode);

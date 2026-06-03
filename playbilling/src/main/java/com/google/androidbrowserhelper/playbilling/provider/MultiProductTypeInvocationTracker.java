@@ -19,31 +19,31 @@ import com.android.billingclient.api.BillingClient;
 /**
  * A helper class for {@link MockBillingWrapper} that helps keep track of which methods were called
  * and the arguments they were called with. This class keeps track of two calls - one for the inapp
- * SkuType and one for the subs SkuType.
+ * ProductType and one for the subs ProductType.
  */
-class MultiSkuTypeInvocationTracker<Argument, Callback> {
+class MultiProductTypeInvocationTracker<Argument, Callback> {
     private final InvocationTracker<Argument, Callback> mInAppInvocation =
             new InvocationTracker<>();
     private final InvocationTracker<Argument, Callback> mSubsInvocation = new InvocationTracker<>();
 
     private InvocationTracker<Argument, Callback>
-            getTracker(@BillingClient.SkuType String skuType) {
-        return BillingClient.SkuType.INAPP.equals(skuType) ? mInAppInvocation : mSubsInvocation;
+            getTracker(@BillingClient.ProductType String productType) {
+        return BillingClient.ProductType.INAPP.equals(productType) ? mInAppInvocation : mSubsInvocation;
     }
 
-    /** Pretend that the method was called with the given SKU type, argument and callback. */
-    public void call(@BillingClient.SkuType String skuType, Argument arg, Callback callback) {
-        getTracker(skuType).call(arg, callback);
+    /** Pretend that the method was called with the given product type, argument and callback. */
+    public void call(@BillingClient.ProductType String productType, Argument arg, Callback callback) {
+        getTracker(productType).call(arg, callback);
     }
 
     /** Returns the argument that the method was previously called with, if any. */
-    public Argument getArgument(@BillingClient.SkuType String skuType) {
-        return getTracker(skuType).getArgument();
+    public Argument getArgument(@BillingClient.ProductType String productType) {
+        return getTracker(productType).getArgument();
     }
 
     /** Returns the callback that the method was previously called with, if any. */
-    public Callback getCallback(@BillingClient.SkuType String skuType) {
-        return getTracker(skuType).getCallback();
+    public Callback getCallback(@BillingClient.ProductType String productType) {
+        return getTracker(productType).getCallback();
     }
 
     /** Wait until the method was called, returns {@code false} if the wait timed out. */

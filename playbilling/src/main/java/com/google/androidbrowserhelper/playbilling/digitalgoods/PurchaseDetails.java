@@ -31,7 +31,7 @@ public class PurchaseDetails {
     static final String KEY_PURCHASE_TOKEN = "purchaseDetails.purchaseToken";
 
     /**
-     * This is the id according to Chromium, which corresponds to {@link Purchase#getSku}, not to
+     * This is the id according to Chromium, which corresponds to {@link Purchase#getProducts}, not to
      * {@link Purchase#getOrderId}.
      */
     public final String id;
@@ -46,14 +46,14 @@ public class PurchaseDetails {
      * Creates this class from a Play Billing {@link Purchase}.
      */
     public static PurchaseDetails create(Purchase purchase) {
-        return new PurchaseDetails(purchase.getSkus().get(0), purchase.getPurchaseToken());
+        return new PurchaseDetails(purchase.getProducts().get(0), purchase.getPurchaseToken());
     }
 
     /**
      * Creates this class from a Play Billing {@link PurchaseHistoryRecord}.
      */
     public static PurchaseDetails create(PurchaseHistoryRecord record) {
-        return new PurchaseDetails(record.getSkus().get(0), record.getPurchaseToken());
+        return new PurchaseDetails(record.getProducts().get(0), record.getPurchaseToken());
     }
 
     /**

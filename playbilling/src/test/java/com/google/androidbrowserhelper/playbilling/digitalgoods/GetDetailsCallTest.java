@@ -19,7 +19,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 
 import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapperFactory;
 import com.google.androidbrowserhelper.playbilling.provider.MockBillingWrapper;
 
@@ -31,6 +31,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -49,7 +50,6 @@ import static org.junit.Assert.assertTrue;
 @Config(sdk = {Build.VERSION_CODES.O_MR1})
 public class GetDetailsCallTest {
     private final static DigitalGoodsCallback EMPTY_CALLBACK = (name, args) -> {};
-    private final static String SKU_DETAILS = ItemDetailsTest.createTestJsonSkuDetails();
 
     private final MockBillingWrapper mBillingWrapper = new MockBillingWrapper();
     private DigitalGoodsRequestHandler mHandler;
@@ -87,29 +87,40 @@ public class GetDetailsCallTest {
         assertTrue(mHandler.handle( GetDetailsCall.COMMAND_NAME, args, callback));
         mBillingWrapper.triggerConnected();
 
-        assertTrue(mBillingWrapper.waitForQuerySkuDetails());
-        mBillingWrapper.triggerOnGotInAppSkuDetails(Collections.emptyList());
-        mBillingWrapper.triggerOnGotSubsSkuDetails(Collections.emptyList());
+        assertTrue(mBillingWrapper.waitForQueryProductDetails());
+        mBillingWrapper.triggerOnGotInAppProductDetails(Collections.emptyList());
+        mBillingWrapper.triggerOnGotSubsProductDetails(Collections.emptyList());
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }
 
     @Test
     public void parsesResult_inApp() throws InterruptedException, JSONException {
+        ProductDetails productDetails = ItemDetailsTest.mockInAppProductDetails(
+                "id", "title", "desc", "GBP", 123_000_000);
         checkParsesResult(
-                Collections.singletonList(new SkuDetails(SKU_DETAILS)),
-                Collections.emptyList());
+                Collections.singletonList(productDetails),
+                Collections.emptyList(),
+                true);
     }
 
     @Test
     public void parsesResult_subs() throws InterruptedException, JSONException {
+        List<ProductDetails.PricingPhase> phases = new ArrayList<>();
+        phases.add(ItemDetailsTest.mockPricingPhase("week", "GBP", 0, 1));
+        phases.add(ItemDetailsTest.mockPricingPhase("day", "GBP", 45_000_000, 3));
+        phases.add(ItemDetailsTest.mockPricingPhase("month", "GBP", 123_000_000, 1));
+
+        ProductDetails productDetails = ItemDetailsTest.mockSubscriptionProductDetails(
+                "id", "title", "desc", "base_plan", "offer_id", phases);
         checkParsesResult(
                 Collections.emptyList(),
-                Collections.singletonList(new SkuDetails(SKU_DETAILS)));
+                Collections.singletonList(productDetails),
+                false);
     }
 
-    private void checkParsesResult(List<SkuDetails> inAppSkuDetails,
-            List<SkuDetails> subsSkuDetails) throws InterruptedException {
+    private void checkParsesResult(List<ProductDetails> inAppProductDetails,
+            List<ProductDetails> subsProductDetails, boolean isInApp) throws InterruptedException {
         Bundle args = GetDetailsCall.createBundleForTesting("id1");
         CountDownLatch callbackTriggered = new CountDownLatch(1);
 
@@ -121,7 +132,11 @@ public class GetDetailsCallTest {
             Parcelable[] array = bundle.getParcelableArray(RESPONSE_GET_DETAILS_DETAILS_LIST);
             ItemDetails details = ItemDetails.create((Bundle) array[0]);
 
-            ItemDetailsTest.assertTestItemDetails(details);
+            if (isInApp) {
+                ItemDetailsTest.assertTestItemDetails_inApp(details);
+            } else {
+                ItemDetailsTest.assertTestItemDetails(details);
+            }
 
             callbackTriggered.countDown();
         };
@@ -129,9 +144,9 @@ public class GetDetailsCallTest {
         assertTrue(mHandler.handle(GetDetailsCall.COMMAND_NAME, args, callback));
         mBillingWrapper.triggerConnected();
 
-        assertTrue(mBillingWrapper.waitForQuerySkuDetails());
-        mBillingWrapper.triggerOnGotInAppSkuDetails(inAppSkuDetails);
-        mBillingWrapper.triggerOnGotSubsSkuDetails(subsSkuDetails);
+        assertTrue(mBillingWrapper.waitForQueryProductDetails());
+        mBillingWrapper.triggerOnGotInAppProductDetails(inAppProductDetails);
+        mBillingWrapper.triggerOnGotSubsProductDetails(subsProductDetails);
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));
     }

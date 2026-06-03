@@ -17,7 +17,13 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 import android.os.Build;
 
 import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.json.JSONException;
 import org.junit.Test;
@@ -60,58 +66,90 @@ public class ItemDetailsTest {
     private static final String INTRO_VALUE_STR = "45.000000";
 
     @Test
-    public void create() throws JSONException {
-        String json = createTestJsonSkuDetails();
-        ItemDetails item = ItemDetails.create(new SkuDetails(json));
+    public void create_inApp() {
+        ProductDetails productDetails = mockInAppProductDetails(ID, TITLE, DESC, CURRENCY, VALUE);
+        ItemDetails item = ItemDetails.create(productDetails);
+        assertTestItemDetails_inApp(item);
+    }
 
+    @Test
+    public void create_subscription() {
+        List<ProductDetails.PricingPhase> phases = new ArrayList<>();
+        phases.add(mockPricingPhase(FREE_PERIOD, CURRENCY, 0, 1));
+        phases.add(mockPricingPhase(INTRO_PERIOD, CURRENCY, INTRO_VALUE, INTRO_CYCLES));
+        phases.add(mockPricingPhase(SUBS_PERIOD, CURRENCY, VALUE, 1));
+
+        ProductDetails productDetails = mockSubscriptionProductDetails(ID, TITLE, DESC,
+                "base_plan", "offer_id", phases);
+
+        ItemDetails item = ItemDetails.create(productDetails);
         assertTestItemDetails(item);
     }
 
     @Test
-    public void create_mandatoryOnly() throws JSONException {
-        String json = createTestJsonSkuDetails_mandatoryOnly();
-
-        ItemDetails item = ItemDetails.create(new SkuDetails(json));
-        assertTestItemDetails_mandatoryOnly(item);
+    public void create_mandatoryOnly() {
+        ProductDetails productDetails = mockInAppProductDetails(ID, TITLE, DESC, CURRENCY, VALUE);
+        ItemDetails item = ItemDetails.create(productDetails);
+        assertTestItemDetails_inApp(item);
     }
 
     @Test
-    public void bundleConversion() throws JSONException {
-        String json = createTestJsonSkuDetails();
+    public void bundleConversion_inApp() {
+        ProductDetails productDetails = mockInAppProductDetails(ID, TITLE, DESC, CURRENCY, VALUE);
+        ItemDetails item = ItemDetails.create(ItemDetails.create(productDetails).toBundle());
+        assertTestItemDetails_inApp(item);
+    }
 
-        ItemDetails item =
-                ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
+    @Test
+    public void bundleConversion_subscription() {
+        List<ProductDetails.PricingPhase> phases = new ArrayList<>();
+        phases.add(mockPricingPhase(FREE_PERIOD, CURRENCY, 0, 1));
+        phases.add(mockPricingPhase(INTRO_PERIOD, CURRENCY, INTRO_VALUE, INTRO_CYCLES));
+        phases.add(mockPricingPhase(SUBS_PERIOD, CURRENCY, VALUE, 1));
+
+        ProductDetails productDetails = mockSubscriptionProductDetails(ID, TITLE, DESC,
+                "base_plan", "offer_id", phases);
+
+        ItemDetails item = ItemDetails.create(ItemDetails.create(productDetails).toBundle());
         assertTestItemDetails(item);
     }
 
     @Test
-    public void bundleConversion_mandatoryOnly() throws JSONException {
-        String json = createTestJsonSkuDetails_mandatoryOnly();
+    public void create_subscription_no_offers() {
+        List<ProductDetails.PricingPhase> phases = new ArrayList<>();
+        phases.add(mockPricingPhase(SUBS_PERIOD, CURRENCY, VALUE, 1));
 
-        ItemDetails item =
-                ItemDetails.create(ItemDetails.create(new SkuDetails((json))).toBundle());
-        assertTestItemDetails_mandatoryOnly(item);
+        ProductDetails productDetails = mockSubscriptionProductDetails(ID, TITLE, DESC,
+                "base_plan", null, phases);
+
+        ItemDetails item = ItemDetails.create(productDetails);
+        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, "subs", "",
+                SUBS_PERIOD, "", "", CURRENCY, "0.000000", 0);
     }
 
-    public static String createTestJsonSkuDetails() {
-        return createSkuDetailsJson(ID, TITLE, DESC, CURRENCY, VALUE, TYPE,
-                ICON_URL, SUBS_PERIOD, FREE_PERIOD, INTRO_PERIOD, INTRO_VALUE, INTRO_CYCLES);
+    @Test
+    public void create_subscription_no_base_plans() {
+        ProductDetails productDetails = mock(ProductDetails.class);
+        when(productDetails.getProductId()).thenReturn(ID);
+        when(productDetails.getTitle()).thenReturn(TITLE);
+        when(productDetails.getDescription()).thenReturn(DESC);
+        when(productDetails.getProductType()).thenReturn(BillingClient.ProductType.SUBS);
+        when(productDetails.getSubscriptionOfferDetails()).thenReturn(null);
+
+        ItemDetails item = ItemDetails.create(productDetails);
+        assertItemDetails(item, ID, TITLE, DESC, "", "0.000000", "subs", "",
+                "", "", "", "", "0.000000", 0);
     }
 
     public static void assertTestItemDetails(ItemDetails item) {
-        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, TYPE, ICON_URL,
+        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, "subs", "",
                 SUBS_PERIOD, FREE_PERIOD, INTRO_PERIOD, INTRO_CURRENCY, INTRO_VALUE_STR,
                 INTRO_CYCLES);
     }
 
-    private static String createTestJsonSkuDetails_mandatoryOnly() {
-        return createSkuDetailsJson(ID, TITLE, DESC, CURRENCY, VALUE, TYPE,
-                null, null, null, null, null, 0);
-    }
-
-    private static void assertTestItemDetails_mandatoryOnly(ItemDetails item) {
-        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, TYPE, "",
-                "", "", "", INTRO_CURRENCY, "0.000000", 0);
+    public static void assertTestItemDetails_inApp(ItemDetails item) {
+        assertItemDetails(item, ID, TITLE, DESC, CURRENCY, VALUE_STR, "inapp", "",
+                "", "", "", CURRENCY, "0.000000", 0);
     }
 
     static void assertItemDetails(ItemDetails item, String id, String title,
@@ -135,34 +173,55 @@ public class ItemDetailsTest {
         assertEquals(item.introductoryPriceCycles, introductoryPriceCycles);
     }
 
-    static String createSkuDetailsJson(String id, String title, String description,
-            String currency, long value, String type, @Nullable String iconUrl,
-            @Nullable String subscriptionPeriod, @Nullable String freeTrialPeriod,
-            @Nullable String introductoryPricePeriod, @Nullable Long introductoryPriceValue,
-            int introductoryPriceCycles) {
-        StringBuilder b = new StringBuilder();
+    public static ProductDetails mockInAppProductDetails(String id, String title, String description,
+            String currency, long priceAmountMicros) {
+        ProductDetails productDetails = mock(ProductDetails.class);
+        when(productDetails.getProductId()).thenReturn(id);
+        when(productDetails.getTitle()).thenReturn(title);
+        when(productDetails.getDescription()).thenReturn(description);
+        when(productDetails.getProductType()).thenReturn(BillingClient.ProductType.INAPP);
 
-        b.append("{");
+        ProductDetails.OneTimePurchaseOfferDetails oneTimeDetails = mock(ProductDetails.OneTimePurchaseOfferDetails.class);
+        when(oneTimeDetails.getPriceCurrencyCode()).thenReturn(currency);
+        when(oneTimeDetails.getPriceAmountMicros()).thenReturn(priceAmountMicros);
+        when(productDetails.getOneTimePurchaseOfferDetails()).thenReturn(oneTimeDetails);
 
-        addFieldWithoutLeadingComma(b, "productId", id);
-        addField(b, "title", title);
-        addField(b, "description", description);
-        addField(b, "price_amount_micros", value);
-        addField(b, "price_currency_code", currency);
-        addField(b, "type", type);
-        addOptionalField(b, "iconUrl", iconUrl);
+        return productDetails;
+    }
 
-        addOptionalField(b, "subscriptionPeriod", subscriptionPeriod);
-        addOptionalField(b, "freeTrialPeriod", freeTrialPeriod);
-        addOptionalField(b, "introductoryPricePeriod", introductoryPricePeriod);
-        addOptionalField(b, "introductoryPriceAmountMicros", introductoryPriceValue);
-        addField(b, "introductoryPriceCycles", introductoryPriceCycles);
+    public static ProductDetails mockSubscriptionProductDetails(String id, String title, String description,
+            String basePlanId, @Nullable String offerId, List<ProductDetails.PricingPhase> phases) {
+        ProductDetails productDetails = mock(ProductDetails.class);
+        when(productDetails.getProductId()).thenReturn(id);
+        when(productDetails.getTitle()).thenReturn(title);
+        when(productDetails.getDescription()).thenReturn(description);
+        when(productDetails.getProductType()).thenReturn(BillingClient.ProductType.SUBS);
 
-        // The Play Billing library requires that all SkuDetails have a type, but we don't use it
-        // in our testing, so just set it to an arbitrary type.
-        addField(b, "type", BillingClient.SkuType.INAPP);
+        ProductDetails.SubscriptionOfferDetails offerDetails = mock(ProductDetails.SubscriptionOfferDetails.class);
+        when(offerDetails.getBasePlanId()).thenReturn(basePlanId);
+        when(offerDetails.getOfferId()).thenReturn(offerId);
+        if (offerId != null && !offerId.isEmpty()) {
+            when(offerDetails.getOfferToken()).thenReturn("offer_token_for_" + offerId);
+        }
 
-        b.append("}");
-        return b.toString();
+        ProductDetails.PricingPhases pricingPhases = mock(ProductDetails.PricingPhases.class);
+        when(pricingPhases.getPricingPhaseList()).thenReturn(phases);
+        when(offerDetails.getPricingPhases()).thenReturn(pricingPhases);
+
+        List<ProductDetails.SubscriptionOfferDetails> offerDetailsList = new ArrayList<>();
+        offerDetailsList.add(offerDetails);
+        when(productDetails.getSubscriptionOfferDetails()).thenReturn(offerDetailsList);
+
+        return productDetails;
+    }
+
+    public static ProductDetails.PricingPhase mockPricingPhase(String billingPeriod, String priceCurrencyCode,
+            long priceAmountMicros, int billingCycleCount) {
+        ProductDetails.PricingPhase phase = mock(ProductDetails.PricingPhase.class);
+        when(phase.getBillingPeriod()).thenReturn(billingPeriod);
+        when(phase.getPriceCurrencyCode()).thenReturn(priceCurrencyCode);
+        when(phase.getPriceAmountMicros()).thenReturn(priceAmountMicros);
+        when(phase.getBillingCycleCount()).thenReturn(billingCycleCount);
+        return phase;
     }
 }

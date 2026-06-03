@@ -23,7 +23,6 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 import com.google.androidbrowserhelper.playbilling.provider.MethodData;
 
@@ -89,7 +88,7 @@ public class ConnectedBillingWrapper implements BillingWrapper {
 
     @Override
     public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
-            ProductDetailsResponseListener callback) {
+            BillingWrapper.ProductDetailsResponseListener callback) {
         execute(() -> mInner.queryProductDetails(productType, productIds, callback));
     }
 

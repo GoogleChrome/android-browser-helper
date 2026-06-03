@@ -25,7 +25,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams.SubscriptionUpdateParams.ReplacementMode;
 import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.playbilling.digitalgoods.BillingResultMerger;
 
 import java.util.Collections;
@@ -60,7 +60,7 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
 
         mMethodData = MethodData.fromIntent(getIntent());
         if (mMethodData == null) {
-            fail("Could not parse SKU.");
+            fail("Could not parse product ID.");
             return;
         }
         if (mMethodData.isPriceChangeConfirmation) {
@@ -102,26 +102,26 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
     }
 
     public void onConnected() {
-        BillingResultMerger<SkuDetails> merger = new BillingResultMerger<>(this::onSkusQueried);
+        BillingResultMerger<ProductDetails> merger = new BillingResultMerger<>(this::onProductDetailsQueried);
 
         List<String> ids = Collections.singletonList(mMethodData.sku);
-        mWrapper.querySkuDetails(BillingClient.SkuType.INAPP, ids, merger::setInAppResult);
-        mWrapper.querySkuDetails(BillingClient.SkuType.SUBS, ids, merger::setSubsResult);
+        mWrapper.queryProductDetails(BillingClient.ProductType.INAPP, ids, merger::setInAppResult);
+        mWrapper.queryProductDetails(BillingClient.ProductType.SUBS, ids, merger::setSubsResult);
     }
 
-    private void onSkusQueried(BillingResult result, List<SkuDetails> skus) {
-        if (skus == null || skus.isEmpty()) {
-            fail("Play Billing returned did not find SKU.");
+    private void onProductDetailsQueried(BillingResult result, List<ProductDetails> productDetailsList) {
+        if (productDetailsList == null || productDetailsList.isEmpty()) {
+            fail("Play Billing did not find product.");
             return;
         }
 
-        SkuDetails sku = skus.get(0);
+        ProductDetails productDetails = productDetailsList.get(0);
 
-        launchPaymentFlow(sku);
+        launchPaymentFlow(productDetails);
     }
 
-    private void launchPaymentFlow(SkuDetails sku) {
-        if (mWrapper.launchPaymentFlow(this, sku, mMethodData))
+    private void launchPaymentFlow(ProductDetails productDetails) {
+        if (mWrapper.launchPaymentFlow(this, productDetails, mMethodData))
             return;
 
         fail("Payment attempt failed (have you already bought the item?).");

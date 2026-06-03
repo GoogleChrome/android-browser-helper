@@ -23,8 +23,8 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesResponseListener;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.google.androidbrowserhelper.playbilling.provider.BillingWrapper;
 import com.google.androidbrowserhelper.playbilling.provider.MethodData;
 
@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * A wrapper around {@link BillingWrapper} that ensures it is connected before calling
- * {@link #querySkuDetails}, {@link #acknowledge} or {@link #consume}.
+ * {@link #queryProductDetails}, {@link #acknowledge} or {@link #consume}.
  */
 public class ConnectedBillingWrapper implements BillingWrapper {
     private final BillingWrapper mInner;
@@ -89,19 +89,19 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public void querySkuDetails(@BillingClient.SkuType String skuType, List<String> skus,
-            SkuDetailsResponseListener callback) {
-        execute(() -> mInner.querySkuDetails(skuType, skus, callback));
+    public void queryProductDetails(@BillingClient.ProductType String productType, List<String> productIds,
+            ProductDetailsResponseListener callback) {
+        execute(() -> mInner.queryProductDetails(productType, productIds, callback));
     }
 
     @Override
-    public void queryPurchases(String skuType, PurchasesResponseListener callback) {
-        execute(() -> mInner.queryPurchases(skuType, callback));
+    public void queryPurchases(String productType, PurchasesResponseListener callback) {
+        execute(() -> mInner.queryPurchases(productType, callback));
     }
 
     @Override
-    public void queryPurchaseHistory(String skuType, PurchaseHistoryResponseListener callback) {
-        execute(() -> mInner.queryPurchaseHistory(skuType, callback));
+    public void queryPurchaseHistory(String productType, PurchaseHistoryResponseListener callback) {
+        execute(() -> mInner.queryPurchaseHistory(productType, callback));
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ConnectedBillingWrapper implements BillingWrapper {
     }
 
     @Override
-    public boolean launchPaymentFlow(Activity activity, SkuDetails sku, MethodData data) {
+    public boolean launchPaymentFlow(Activity activity, ProductDetails productDetails, MethodData data) {
         throw new IllegalStateException(
                 "EnsuredConnectionBillingWrapper doesn't handle launch Payment flow");
     }

@@ -16,12 +16,15 @@ package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import android.os.Bundle;
 
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.ProductDetails;
+
+import java.util.List;
 
 /**
- * A data class representing an item (or SKU) from the Play Store.
+ * A data class representing an item (or product) from the Play Store.
  *
- * Its main purpose is to serialize {@link SkuDetails} into {@link Bundle}s in such a way that
+ * Its main purpose is to serialize {@link ProductDetails} into {@link Bundle}s in such a way that
  * Chromium can read it for the Digital Goods API. See:
  * https://source.chromium.org/chromium/chromium/src/+/master:chrome/android/java/src/org/chromium/chrome/browser/browserservices/digitalgoods/GetDetailsConverter.java;drc=a04f522e96fc0eaa0bbcb6eafa96d02aabe5452a
  */
@@ -77,21 +80,120 @@ public class ItemDetails {
     }
 
     /**
-     * Creates this class from a Play Billing {@link SkuDetails}.
+     * Creates this class from a Play Billing {@link ProductDetails}.
      */
-    public static ItemDetails create(SkuDetails skuDetails) {
+    public static ItemDetails create(ProductDetails productDetails) {
+        if (productDetails.getProductType().equals(BillingClient.ProductType.INAPP)) {
+            ProductDetails.OneTimePurchaseOfferDetails oneTimeDetails =
+                    productDetails.getOneTimePurchaseOfferDetails();
+            if (oneTimeDetails == null) {
+                return createEmpty(productDetails);
+            }
+            return new ItemDetails(
+                    productDetails.getProductId(),
+                    productDetails.getTitle(),
+                    productDetails.getDescription(),
+                    oneTimeDetails.getPriceCurrencyCode(),
+                    toPrice(oneTimeDetails.getPriceAmountMicros()),
+                    productDetails.getProductType(),
+                    "", // iconUrl
+                    "", // subscriptionPeriod
+                    "", // freeTrialPeriod
+                    "", // introductoryPricePeriod
+                    oneTimeDetails.getPriceCurrencyCode(),
+                    toPrice(0),
+                    0);
+        } else {
+            List<ProductDetails.SubscriptionOfferDetails> offerDetailsList =
+                    productDetails.getSubscriptionOfferDetails();
+            if (offerDetailsList == null || offerDetailsList.isEmpty()) {
+                return createEmpty(productDetails);
+            }
+
+            ProductDetails.SubscriptionOfferDetails selectedOffer = null;
+            String targetBasePlanId = offerDetailsList.get(0).getBasePlanId();
+            for (ProductDetails.SubscriptionOfferDetails offer : offerDetailsList) {
+                if (targetBasePlanId.equals(offer.getBasePlanId())
+                        && offer.getOfferId() != null && !offer.getOfferId().isEmpty()) {
+                    selectedOffer = offer;
+                    break;
+                }
+            }
+            if (selectedOffer == null) {
+                selectedOffer = offerDetailsList.get(0);
+            }
+
+            List<ProductDetails.PricingPhase> phases =
+                    selectedOffer.getPricingPhases().getPricingPhaseList();
+            if (phases == null || phases.isEmpty()) {
+                return createEmpty(productDetails);
+            }
+
+            ProductDetails.PricingPhase recurringPhase = phases.get(phases.size() - 1);
+            String subscriptionPeriod = recurringPhase.getBillingPeriod();
+            String currency = recurringPhase.getPriceCurrencyCode();
+            String value = toPrice(recurringPhase.getPriceAmountMicros());
+
+            String freeTrialPeriod = "";
+            String introductoryPricePeriod = "";
+            String introductoryPriceCurrency = recurringPhase.getPriceCurrencyCode();
+            String introductoryPriceValue = toPrice(0);
+            int introductoryPriceCycles = 0;
+
+            if (phases.size() == 2) {
+                ProductDetails.PricingPhase firstPhase = phases.get(0);
+                if (firstPhase.getPriceAmountMicros() == 0) {
+                    freeTrialPeriod = firstPhase.getBillingPeriod();
+                } else {
+                    introductoryPricePeriod = firstPhase.getBillingPeriod();
+                    introductoryPriceCurrency = firstPhase.getPriceCurrencyCode();
+                    introductoryPriceValue = toPrice(firstPhase.getPriceAmountMicros());
+                    introductoryPriceCycles = firstPhase.getBillingCycleCount();
+                }
+            } else if (phases.size() >= 3) {
+                ProductDetails.PricingPhase firstPhase = phases.get(0);
+                freeTrialPeriod = firstPhase.getBillingPeriod();
+
+                ProductDetails.PricingPhase secondPhase = phases.get(1);
+                introductoryPricePeriod = secondPhase.getBillingPeriod();
+                introductoryPriceCurrency = secondPhase.getPriceCurrencyCode();
+                introductoryPriceValue = toPrice(secondPhase.getPriceAmountMicros());
+                introductoryPriceCycles = secondPhase.getBillingCycleCount();
+            }
+
+            return new ItemDetails(
+                    productDetails.getProductId(),
+                    productDetails.getTitle(),
+                    productDetails.getDescription(),
+                    currency,
+                    value,
+                    productDetails.getProductType(),
+                    "", // iconUrl
+                    subscriptionPeriod,
+                    freeTrialPeriod,
+                    introductoryPricePeriod,
+                    introductoryPriceCurrency,
+                    introductoryPriceValue,
+                    introductoryPriceCycles);
+        }
+    }
+
+    private static ItemDetails createEmpty(ProductDetails productDetails) {
         return new ItemDetails(
-                skuDetails.getSku(),
-                skuDetails.getTitle(),
-                skuDetails.getDescription(),
-                skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getPriceAmountMicros()),
-                skuDetails.getType(), skuDetails.getIconUrl(), skuDetails.getSubscriptionPeriod(),
-                skuDetails.getFreeTrialPeriod(),
-                skuDetails.getIntroductoryPricePeriod(),
-                skuDetails.getPriceCurrencyCode(),
-                toPrice(skuDetails.getIntroductoryPriceAmountMicros()),
-                skuDetails.getIntroductoryPriceCycles());
+                productDetails.getProductId(),
+                productDetails.getTitle(),
+                productDetails.getDescription(),
+                "", // currency
+                toPrice(0), // value
+                productDetails.getProductType(),
+                "", // iconUrl
+                "", // subscriptionPeriod
+                "", // freeTrialPeriod
+                "", // introductoryPricePeriod
+                "", // introductoryPriceCurrency
+                toPrice(0), // introductoryPriceValue
+                0 // introductoryPriceCycles
+        );
     }
 
     /**
@@ -147,7 +249,7 @@ public class ItemDetails {
      * Takes a price amount in micro units (1,000,000 micro units = 1 unit) and converts it to a
      * String representing the price amount in units.
      *
-     * The reason we need this method is because {@link SkuDetails} provides either a price amount
+     * The reason we need this method is because {@link ProductDetails} provides either a price amount
      * in units *with* the currency symbol, or a price amount in micro units (without the currency
      * symbol) while we need a price without the currency symbol.
      *

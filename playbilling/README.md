@@ -4,7 +4,7 @@ The Play Billing module provides capabilities for your TWA app to connect with [
 
 * Query purchase history
 * Initialize a payment
-* Query SKU details
+* Query product details
 
 The module uses [Version 7.1.1](https://developer.android.com/google/play/billing/release-notes#7-1-1) of the Google Play Billing library.
 
@@ -13,13 +13,13 @@ The module uses [Version 7.1.1](https://developer.android.com/google/play/billin
 To use this API from your website you can do it as follows:
 ```js
 const PAYMENT_METHOD = 'https://play.google.com/billing'; 
-const SKUS = [  
+const ITEM_IDS = [  
      'android.test.purchased',  
      'android.test.canceled', 
 ] 
 
 const service = await window.getDigitalGoodsService(PAYMENT_METHOD); 
-const details = await service.getDetails(SKUS);
+const details = await service.getDetails(ITEM_IDS);
 console.log(details);
 ```
 

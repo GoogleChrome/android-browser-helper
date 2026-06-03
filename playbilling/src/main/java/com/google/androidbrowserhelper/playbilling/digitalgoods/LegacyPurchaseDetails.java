@@ -53,7 +53,7 @@ public class LegacyPurchaseDetails extends PurchaseDetails {
      */
     public static LegacyPurchaseDetails create(Purchase purchase) {
         return new LegacyPurchaseDetails(
-                purchase.getSkus().get(0),
+                purchase.getProducts().get(0),
                 purchase.getPurchaseToken(),
                 purchase.isAcknowledged(),
                 toChromiumPurchaseState(purchase.getPurchaseState()),

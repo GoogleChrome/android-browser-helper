@@ -19,8 +19,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.ProductDetails;
 import com.google.androidbrowserhelper.trusted.SharedPreferencesTokenStore;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.json.JSONException;
 import org.junit.After;
@@ -81,8 +85,8 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForConnect());
         mWrapper.triggerConnected();
 
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
+        assertTrue(mWrapper.waitForQueryProductDetails());
+        mWrapper.triggerOnGotProductDetails(getProductDetailsList());
 
         assertTrue(mWrapper.waitForLaunchPaymentFlow());
         mWrapper.triggerOnPurchasesUpdated();
@@ -99,8 +103,8 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForConnect());
         mWrapper.triggerConnected();
 
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
+        assertTrue(mWrapper.waitForQueryProductDetails());
+        mWrapper.triggerOnGotProductDetails(getProductDetailsList());
 
         assertTrue(mWrapper.waitForLaunchPaymentFlow());
         mWrapper.triggerOnPurchasesUpdated();
@@ -120,8 +124,8 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForConnect());
         mWrapper.triggerConnected();
 
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.triggerOnGotSkuDetails(getSkuDetailsList());
+        assertTrue(mWrapper.waitForQueryProductDetails());
+        mWrapper.triggerOnGotProductDetails(getProductDetailsList());
 
         assertTrue(mWrapper.waitForLaunchPaymentFlow());
 
@@ -164,8 +168,8 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForConnect());
         mWrapper.triggerConnected();
 
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        mWrapper.triggerOnGotSkuDetails(Collections.emptyList());
+        assertTrue(mWrapper.waitForQueryProductDetails());
+        mWrapper.triggerOnGotProductDetails(Collections.emptyList());
 
         assertActivityResult(Activity.RESULT_CANCELED);
     }
@@ -177,16 +181,22 @@ public class PaymentActivityTest {
         assertTrue(mWrapper.waitForConnect());
         mWrapper.triggerConnected();
 
-        assertTrue(mWrapper.waitForQuerySkuDetails());
-        List<String> queriedSkuDetails = mWrapper.getQueriedSkuDetails();
+        assertTrue(mWrapper.waitForQueryProductDetails());
+        List<String> queriedProductDetails = mWrapper.getQueriedProductDetails();
 
-        assertEquals(2, queriedSkuDetails.size());
-        assertTrue(queriedSkuDetails.contains(SKU));
+        assertEquals(2, queriedProductDetails.size());
+        assertTrue(queriedProductDetails.contains(SKU));
     }
 
-    private List<SkuDetails> getSkuDetailsList() throws JSONException {
-        String json = "{ 'productId' = 'mySku', 'type' = 'inapp' }".replace('\'', '\"');
-        return Arrays.asList(new SkuDetails(json));
+    private List<ProductDetails> getProductDetailsList() {
+        return Arrays.asList(mockProductDetails("mySku"));
+    }
+
+    private ProductDetails mockProductDetails(String id) {
+        ProductDetails productDetails = mock(ProductDetails.class);
+        when(productDetails.getProductId()).thenReturn(id);
+        when(productDetails.getProductType()).thenReturn(BillingClient.ProductType.INAPP);
+        return productDetails;
     }
 
     private Intent getIntent(@Nullable String sku) {

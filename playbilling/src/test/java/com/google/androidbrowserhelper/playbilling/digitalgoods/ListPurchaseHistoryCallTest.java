@@ -102,9 +102,9 @@ public class ListPurchaseHistoryCallTest {
         mBillingWrapper.triggerConnected();
 
         assertTrue(mBillingWrapper.waitForQueryPurchaseHistory());
-        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.SkuType.INAPP,
+        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.ProductType.INAPP,
                 inAppPurchaseHistory);
-        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.SkuType.SUBS,
+        mBillingWrapper.triggerOnPurchaseHistoryResponse(BillingClient.ProductType.SUBS,
                 subsPurchaseHistory);
 
         assertTrue(callbackTriggered.await(5, TimeUnit.SECONDS));

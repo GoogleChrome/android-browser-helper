@@ -15,7 +15,7 @@
 package com.google.androidbrowserhelper.playbilling.digitalgoods;
 
 import com.android.billingclient.api.BillingClient;
-import com.android.billingclient.api.BillingClient.SkuType;
+import com.android.billingclient.api.BillingClient.ProductType;
 import com.android.billingclient.api.BillingResult;
 
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ import java.util.List;
 import androidx.annotation.Nullable;
 
 /**
- * Play Billing SKUs are split into purchases and subscriptions. This isn't a distinction that
- * exists in the Digital Goods API, but since SKU ids are unique across both product types, we can
- * just call methods that take a skuType twice, once with {@link SkuType#INAPP} and once with
- * {@link SkuType#SUBS}. This class exists to combine the results of those calls.
+ * Play Billing products are split into purchases (INAPP) and subscriptions (SUBS). This isn't a distinction that
+ * exists in the Digital Goods API, but since product ids are unique across both product types, we can
+ * just call methods that take a productType twice, once with {@link ProductType#INAPP} and once with
+ * {@link ProductType#SUBS}. This class exists to combine the results of those calls.
  *
  * Although the Play Billing methods are asynchronous, their callbacks (which will call
  * {@link #setInAppResult} and {@link #setSubsResult}) should both take place on the UI thread, so

@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android 浏览器帮助工具</string>
+  <string name="update_chrome_toast">请更新到 Chrome 稳定版 72 或更高版本。</string>
+  <string name="no_provider_toast">请安装 Chrome 稳定版 72 或更高版本。</string>
+  <string name="manage_space_not_supported_toast">此应用的数据存储在“%1$s”中。</string>
+  <string name="manage_space_no_data_toast">此应用没保留任何浏览数据。</string>
+  <string name="provider_unavailable_title">无法使用此应用</string>
+  <string name="provider_unavailable_message">无法使用此应用，因为“%1$s”被屏蔽了</string>
+  <string name="provider_unavailable_button_ok">知道了</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

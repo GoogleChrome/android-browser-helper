@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android ബ്രൗസർ സഹായി</string>
+  <string name="update_chrome_toast">Chrome Stable 72 അല്ലെങ്കിൽ അതിന് ശേഷമുള്ള പതിപ്പിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുക.</string>
+  <string name="no_provider_toast">Chrome Stable 72 അല്ലെങ്കിൽ അതിന് ശേഷമുള്ള പതിപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക.</string>
+  <string name="manage_space_not_supported_toast">ഈ ആപ്പിന്റെ ഡാറ്റ %1$s എന്നതിൽ സംഭരിച്ചിരിക്കുന്നു.</string>
+  <string name="manage_space_no_data_toast">ഈ ആപ്പിൽ ബ്രൗസിംഗ് ഡാറ്റയൊന്നും നിലനിർത്തിയിട്ടില്ല.</string>
+  <string name="provider_unavailable_title">ആപ്പ് ലഭ്യമല്ല</string>
+  <string name="provider_unavailable_message">%1$s ബ്ലോക്ക് ചെയ്‌തതിനാൽ ഈ ആപ്പ് ലഭ്യമല്ല</string>
+  <string name="provider_unavailable_button_ok">ശരി</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

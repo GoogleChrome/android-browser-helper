@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android ব্ৰাউজাৰৰ সহায়ক</string>
+  <string name="update_chrome_toast">অনুগ্ৰহ কৰি Chrome Stable 72 বা তাৰ পাছৰ সংস্কৰণলৈ আপডে’ট কৰক।</string>
+  <string name="no_provider_toast">অনুগ্ৰহ কৰি Chrome Stable 72 বা তাৰ পাছৰ সংস্কৰণ ইনষ্টল কৰক।</string>
+  <string name="manage_space_not_supported_toast">এই এপ্‌টোৰ ডেটা %1$sত ষ্ট’ৰ কৰা হৈছে।</string>
+  <string name="manage_space_no_data_toast">এই এপ্‌টোৱে কোনো ব্ৰাউজিঙৰ ডেটা ধৰি নাৰাখে।</string>
+  <string name="provider_unavailable_title">এপ্‌ উপলব্ধ নহয়</string>
+  <string name="provider_unavailable_message">%1$s অৱৰোধ কৰাৰ বাবে এই এপ্‌টো উপলব্ধ নহয়</string>
+  <string name="provider_unavailable_button_ok">ঠিক আছে</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

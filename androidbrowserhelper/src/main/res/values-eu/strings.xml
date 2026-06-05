@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android-eko arakatzailearen laguntzailea</string>
+  <string name="update_chrome_toast">Eguneratu Chrome-ren 72. bertsio egonkorrera edo berriago batera.</string>
+  <string name="no_provider_toast">Instalatu Chrome-ren 72. bertsio egonkorra edo berriago bat.</string>
+  <string name="manage_space_not_supported_toast">Aplikazio honetako datuak %1$s karpetan gordetzen dira.</string>
+  <string name="manage_space_no_data_toast">Aplikazio honek ez du arakatze-daturik.</string>
+  <string name="provider_unavailable_title">Aplikazioa ez dago erabilgarri</string>
+  <string name="provider_unavailable_message">Aplikazioa ez dago erabilgarri %1$s blokeatuta dagoelako</string>
+  <string name="provider_unavailable_button_ok">Ados</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

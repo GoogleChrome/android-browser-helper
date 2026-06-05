@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">የAndroid አሳሽ አጋዥ</string>
+  <string name="update_chrome_toast">እባክዎ ወደ የረጋ Chrome 72 ወይም ከዚያ በኋላ ያዘምኑ።</string>
+  <string name="no_provider_toast">እባክዎ Chrome Stable 72 ወይም ከዚያ በኋላ ይጫኑ።</string>
+  <string name="manage_space_not_supported_toast">የዚህ መተግበሪያ ውሂብ በ%1$s ውስጥ ይከማቻል።</string>
+  <string name="manage_space_no_data_toast">ይህ መተግበሪያ ምንም የአሰሳ ውሂብ አይዝም።</string>
+  <string name="provider_unavailable_title">መተግበሪያ አይገኝም</string>
+  <string name="provider_unavailable_message">%1$s ስለታገደ ይህ መተግበሪያ አይገኝም</string>
+  <string name="provider_unavailable_button_ok">እሺ</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

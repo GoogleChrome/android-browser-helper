@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android Browser Helper</string>
+  <string name="update_chrome_toast">Chrome Stable 72 বা তার পরবর্তী যেকোনও ভার্সনে আপডেট করুন।</string>
+  <string name="no_provider_toast">Chrome Stable 72 বা তার পরবর্তী যেকোনও ভার্সন ইনস্টল করুন।</string>
+  <string name="manage_space_not_supported_toast">এই অ্যাপের ডেটা %1$s-এ স্টোর করা আছে।</string>
+  <string name="manage_space_no_data_toast">এই অ্যাপে কোনও ব্রাউজ করা ডেটা নেই।</string>
+  <string name="provider_unavailable_title">অ্যাপ উপলভ্য নেই</string>
+  <string name="provider_unavailable_message">%1$s ব্লক করা রয়েছে বলে এই অ্যাপ উপলভ্য নেই</string>
+  <string name="provider_unavailable_button_ok">ঠিক আছে</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android බ්‍රව්සර සහායක</string>
+  <string name="update_chrome_toast">Chrome Stable 72 හෝ ඊට පසු අනුවාදයට යාවත්කාලීන කරන්න.</string>
+  <string name="no_provider_toast">Chrome Stable 72 හෝ පසුව ස්ථාපනය කරන්න.</string>
+  <string name="manage_space_not_supported_toast">මෙම යෙදුමේ දත්ත %1$s හි ගබඩා කර ඇත.</string>
+  <string name="manage_space_no_data_toast">මෙම යෙදුම බ්‍රවුස් කිරීමේ දත්ත කිසිවක් රඳවා නොගනී.</string>
+  <string name="provider_unavailable_title">යෙදුම නොමැත</string>
+  <string name="provider_unavailable_message">%1$s විරාම කර ඇති නිසා මෙම යෙදුම නොමැත</string>
+  <string name="provider_unavailable_button_ok">හරි</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

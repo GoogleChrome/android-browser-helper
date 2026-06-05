@@ -44,7 +44,6 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 
 import org.json.JSONException;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -235,10 +234,10 @@ public class LauncherActivity extends Activity {
                         .setScreenOrientation(mMetadata.screenOrientation)
                         .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
 
-       Uri intentUrl = getUrlForIntent(getIntent());
-       if (!launchUrl.equals(intentUrl)) {
+        Uri intentUrl = getUrlForIntent(getIntent());
+        if (!launchUrl.equals(intentUrl) && intentUrl != null) {
             twaBuilder.setOriginalLaunchUrl(intentUrl);
-       }
+        }
 
         if (mMetadata.additionalTrustedOrigins != null) {
             twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
@@ -252,7 +251,10 @@ public class LauncherActivity extends Activity {
         mTwaLauncher.launch(twaBuilder,
                 getCustomTabsCallback(),
                 mSplashScreenStrategy,
-                () -> { mBrowserWasLaunched = true; finish();},
+                () -> {
+                    mBrowserWasLaunched = true;
+                    finish();
+                },
                 getFallbackStrategy());
 
         if (!sChromeVersionChecked) {
@@ -318,7 +320,7 @@ public class LauncherActivity extends Activity {
             ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
             twaBuilder.setShareParams(shareTarget, shareData);
         } catch (JSONException e) {
-            Log.d(TAG, "Failed to parse share target json: " + e.toString());
+            Log.d(TAG, "Failed to parse share target json: " + e);
         }
     }
 
@@ -330,7 +332,7 @@ public class LauncherActivity extends Activity {
             if (bundle == null) return;
             uris = FileHandlingData.fromBundle(bundle).uris;
         } else {
-            uris = Arrays.asList(getIntent().getData());
+            uris = Collections.singletonList(getIntent().getData());
         }
 
         for (Uri uri : uris) {
@@ -394,7 +396,7 @@ public class LauncherActivity extends Activity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(BROWSER_WAS_LAUNCHED_KEY, mBrowserWasLaunched);
     }
@@ -467,7 +469,7 @@ public class LauncherActivity extends Activity {
             Uri format = protocolHandlers.get(scheme);
             if (format != null) {
                 String target = Uri.encode(intentUrl.toString());
-                Uri targetUrl =  Uri.parse(String.format(format.toString(), target));
+                Uri targetUrl = Uri.parse(String.format(format.toString(), target));
                 Log.d(TAG, "Using protocol handler url: " + targetUrl);
                 return targetUrl;
             }

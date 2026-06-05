@@ -15,9 +15,10 @@
 package com.google.androidbrowserhelper.trusted;
 
 
-import static androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert;
+import static android.R.style.Theme_DeviceDefault_Dialog_Alert;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,11 +29,9 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -44,11 +43,12 @@ import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-import com.google.androidbrowserhelper.R;
-import java.util.List;
 
 import com.google.androidbrowserhelper.BuildConfig;
-import androidx.annotation.VisibleForTesting;
+import com.google.androidbrowserhelper.R;
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
+
+import java.util.List;
 
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
@@ -152,7 +152,7 @@ public class TwaLauncher {
     @Nullable
     private CustomTabsSession mSession;
 
-    private TokenStore mTokenStore;
+    private final TokenStore mTokenStore;
 
     private boolean mDestroyed;
 
@@ -265,7 +265,7 @@ public class TwaLauncher {
 
         // Remember who we connect to as the package that is allowed to delegate notifications
         // to us.
-        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager())) {
+        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager()) && mProviderPackage != null) {
             // Since ChromeOS may not follow this path when launching a TWA, we set the verified
             // provider in DelegationService instead.
             mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
@@ -352,7 +352,7 @@ public class TwaLauncher {
                      // for further details.
         }
         Log.d(TAG, "Launching Trusted Web Activity.");
-        TrustedWebActivityIntent intent = builder.build(mSession);
+        TrustedWebActivityIntent intent = onPrepareIntent(builder.build(mSession));
         if (mStartupUptimeMillis != 0) {
             intent.getIntent().putExtra(EXTRA_STARTUP_UPTIME_MILLIS, mStartupUptimeMillis);
         }
@@ -364,6 +364,18 @@ public class TwaLauncher {
         if (completionCallback != null) {
             completionCallback.run();
         }
+    }
+
+    /**
+     * Hook method for subclasses to customize the Trusted Web Activity Intent before launch.
+     * This method is called with the built Intent and can be overridden to add custom headers,
+     * extras, or other modifications.
+     *
+     * @param intent the built TrustedWebActivityIntent that will be launched
+     * @return the (potentially modified) TrustedWebActivityIntent to launch
+     */
+    protected TrustedWebActivityIntent onPrepareIntent(TrustedWebActivityIntent intent) {
+        return intent;
     }
 
     /**
@@ -439,8 +451,7 @@ public class TwaLauncher {
             }
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                new ContextThemeWrapper(activity, Theme_AppCompat_DayNight_Dialog_Alert));
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, Theme_DeviceDefault_Dialog_Alert);
         builder.setTitle(R.string.provider_unavailable_title);
 
         if (TextUtils.isEmpty(browserName)) {
@@ -458,7 +469,7 @@ public class TwaLauncher {
     private class TwaCustomTabsServiceConnection extends CustomTabsServiceConnection {
         private Runnable mOnSessionCreatedRunnable;
         private Runnable mOnSessionCreationFailedRunnable;
-        private CustomTabsCallback mCustomTabsCallback;
+        private final CustomTabsCallback mCustomTabsCallback;
 
         TwaCustomTabsServiceConnection(CustomTabsCallback callback) {
             mCustomTabsCallback = callback;
@@ -471,8 +482,8 @@ public class TwaLauncher {
         }
 
         @Override
-        public void onCustomTabsServiceConnected(ComponentName componentName,
-                CustomTabsClient client) {
+        public void onCustomTabsServiceConnected(@NonNull ComponentName componentName,
+                @NonNull CustomTabsClient client) {
             if (!ChromeLegacyUtils
                     .supportsLaunchWithoutWarmup(mContext.getPackageManager(), mProviderPackage)) {
                 client.warmup(0);

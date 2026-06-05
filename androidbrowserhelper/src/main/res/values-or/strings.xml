@@ -1,0 +1,11 @@
+<resources>
+  <string name="android_browser_helper_app_name">Android ବ୍ରାଉଜର ସହାୟକ</string>
+  <string name="update_chrome_toast">ଦୟାକରି Chrome Stable 72 କିମ୍ବା ତା\'ପରର ଭର୍ସନକୁ ଅପଡେଟ କରନ୍ତୁ।</string>
+  <string name="no_provider_toast">ଦୟାକରି Chrome Stable 72 କିମ୍ବା ପରବର୍ତ୍ତୀ ଭର୍ସନ ଇନଷ୍ଟଲ କରନ୍ତୁ।</string>
+  <string name="manage_space_not_supported_toast">ଏହି ଆପର ଡାଟା %1$sରେ ଷ୍ଟୋର ହୋଇଛି।</string>
+  <string name="manage_space_no_data_toast">ଏହି ଆପରେ କୌଣସି ବ୍ରାଉଜିଂ ଡାଟା ନାହିଁ।</string>
+  <string name="provider_unavailable_title">ଆପ ଉପଲବ୍ଧ ନାହିଁ</string>
+  <string name="provider_unavailable_message">%1$sକୁ ବ୍ଲକ କରାଯାଇଥିବା ଯୋଗୁଁ ଏହି ଆପ ଉପଲବ୍ଧ ନାହିଁ</string>
+  <string name="provider_unavailable_button_ok">ଠିକ ଅଛି</string>
+  <string name="provider_unavailable_default_browser">Chrome</string>
+</resources>

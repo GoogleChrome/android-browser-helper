@@ -69,7 +69,7 @@ import androidx.browser.customtabs.CustomTabsSession;
  * <ul>
  *   <li> Background app is interactable by default. </li>
  *   <li> Interaction can be disabled from M109 with an intent extra flag
- *     "androix.browser.customtabs.extra.ENABLE_BACKGROUND_INTERACTION" </li>
+ *     "androidx.browser.customtabs.extra.ENABLE_BACKGROUND_INTERACTION" </li>
  *   <li> Builder API will be provided in the future. </li>
  * </ul>
  */
@@ -169,9 +169,9 @@ public class PartialCustomTabActivity extends AppCompatActivity implements View.
             customTabsIntent.intent.putExtra(
                     CustomTabsIntent.EXTRA_ACTIVITY_HEIGHT_RESIZE_BEHAVIOR, resizeBehavior);
         }
-        if (!mBackgroundAppCheckbox.isChecked()) {
+        if (mBackgroundAppCheckbox.isChecked()) {
             customTabsIntent.intent.putExtra(
-                    "androix.browser.customtabs.extra.ENABLE_BACKGROUND_INTERACTION",
+                    "androidx.browser.customtabs.extra.ENABLE_BACKGROUND_INTERACTION",
                     BACKGROUND_INTERACT_OFF_VALUE);
         }
 

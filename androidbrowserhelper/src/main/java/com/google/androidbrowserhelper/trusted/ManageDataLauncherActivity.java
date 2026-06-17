@@ -356,7 +356,7 @@ public class ManageDataLauncherActivity extends Activity {
         int shortcutIconId = context.getResources().getIdentifier(
                 OVERRIDE_IC_SITE_SETTINGS_ID, "drawable", context.getPackageName());
         return new ShortcutInfo.Builder(context, SITE_SETTINGS_SHORTCUT_ID)
-                .setShortLabel("Site Settings")
+                .setShortLabel("Site settings")
                 .setLongLabel("Manage website notifications, permissions, etc.")
                 .setIcon(Icon.createWithResource(context,
                         shortcutIconId != 0 ? shortcutIconId : R.drawable.ic_site_settings))

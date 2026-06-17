@@ -1,11 +1,14 @@
 package com.google.androidbrowserhelper.trusted;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -17,8 +20,14 @@ import androidx.annotation.Nullable;
  * the browser can launch that PendingIntent bringing this Activity to the foreground. This Activity
  * then finishes itself, revealing the other Activities in the app's Task. Hopefully the topmost
  * Activity will be the web browsing Activity.
+ *
+ * <p>Note: For this Activity to successfully function, the client application must declare the
+ * {@code android.permission.REORDER_TASKS} permission in its {@code AndroidManifest.xml}. The
+ * client app must also declare this Activity in its manifest, specifying {@code android:exported="true"}
+ * to allow the browser to launch it.
  */
 public class FocusActivity extends Activity {
+    private static final String TAG = "FocusActivity";
     // This value should be moved into androidx.browser.
     private static final String EXTRA_FOCUS_INTENT =
             "androidx.browser.customtabs.extra.FOCUS_INTENT";
@@ -49,8 +58,17 @@ public class FocusActivity extends Activity {
     }
 
     @Override
+    @SuppressLint("MissingPermission")
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            try {
+                manager.moveTaskToFront(getTaskId(), 0);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to move task to front", e);
+            }
+        }
         finish();
     }
 }

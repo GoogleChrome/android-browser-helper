@@ -19,7 +19,7 @@ plugins {
     id 'maven-publish'
 }
 
-def VERSION = "1.1.0";
+def VERSION = "1.2.0";
 
 android {
     namespace "com.google.androidbrowserhelper.playbilling"
@@ -28,7 +28,7 @@ android {
         minSdkVersion 23
         compileSdk 36
         targetSdkVersion 31
-        versionCode 2
+        versionCode 3
         versionName VERSION
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

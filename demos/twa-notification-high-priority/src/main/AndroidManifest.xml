@@ -24,7 +24,7 @@
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
         <meta-data
-            android:name="androidx.browser.trusted.USE_HIGH_PRI_NOTIFICATIONS"
+            android:name="android.support.customtabs.trusted.USE_HIGH_PRI_NOTIFICATIONS"
             android:value="true" />
 
         <meta-data
@@ -34,14 +34,14 @@
         <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
             <meta-data
                 android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
-                android:value="https://googlechrome.github.io/samples/pwa-testing/notificationsapi/" />
+                android:value="https://dp-goog.github.io/notifications-api-testing/" />
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
             android:label="@string/app_name"
             android:exported="true">
             <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                android:value="https://googlechrome.github.io/samples/pwa-testing/notificationsapi/" />
+                android:value="https://dp-goog.github.io/notifications-api-testing/" />
 
             <meta-data
                 android:name="android.support.customtabs.trusted.STATUS_BAR_COLOR"
@@ -81,7 +81,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                    android:host="googlechrome.github.io"/>
+                    android:host="dp-goog.github.io"/>
             </intent-filter>
 
         </activity>

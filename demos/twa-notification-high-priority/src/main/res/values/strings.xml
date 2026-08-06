@@ -17,7 +17,7 @@
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
             \"target\": {
                 \"namespace\": \"web\",
-                \"site\": \"https://googlechrome.github.io/\"}
+                \"site\": \"https://dp-goog.github.io/\"}
         }]
     </string>
     <string name="provider_authority">com.google.browser.examples.twa_notification_high_priority.fileprovider</string>

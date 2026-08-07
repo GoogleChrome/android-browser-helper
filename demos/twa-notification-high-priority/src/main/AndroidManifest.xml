@@ -23,9 +23,6 @@
         android:supportsRtl="true"
         android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:theme="@android:style/Theme.Translucent.NoTitleBar">
-        <meta-data
-            android:name="android.support.customtabs.trusted.USE_HIGH_PRI_NOTIFICATIONS"
-            android:value="true" />
 
         <meta-data
             android:name="asset_statements"
@@ -80,8 +77,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"
-                    android:host="dp-goog.github.io"/>
+                <data android:scheme="https" android:host="dp-goog.github.io" android:pathPrefix="/notifications-api-testing"/>
             </intent-filter>
 
         </activity>
@@ -107,6 +103,10 @@
 
             <meta-data android:name="android.support.customtabs.trusted.SMALL_ICON"
                 android:resource="@drawable/ic_notification_icon" />
+
+            <meta-data
+                android:name="androidx.browser.trusted.USE_HIGH_PRI_NOTIFICATIONS"
+                android:value="true" />
 
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE"/>

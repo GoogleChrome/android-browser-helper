@@ -71,22 +71,25 @@ public class NotificationDelegationService extends DelegationService {
             Notification.Builder builder =
                     Notification.Builder.recoverBuilder(this, notification);
 
-            // From Android O and above, the sound is set on the Channel instead of the notification.
+            // Ensure high priority is set on the builder for heads-up presentation
+            builder.setPriority(Notification.PRIORITY_HIGH);
+
+            // From Android O and above, importance and sound are set on the Channel.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String channelId = NotificationUtils.channelNameToId(channelName);
                 builder.setChannelId(channelId);
 
-                // Creates or ensures the notification channel exists with configured importance
-                NotificationUtils.createNotificationChannel(this, channelName);
+                // Creates or updates the notification channel with configured importance, sound, and vibration
+                NotificationChannel channel = new NotificationChannel(
+                        channelId, channelName, importance);
+                AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .build();
+                channel.setSound(airhornUri, audioAttributes);
+                channel.enableVibration(true);
 
-                NotificationChannel channel = mNotificationManager.getNotificationChannel(channelId);
-                if (channel != null) {
-                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .build();
-                    channel.setSound(airhornUri, audioAttributes);
-                }
+                mNotificationManager.createNotificationChannel(channel);
             }
 
             builder.setSound(airhornUri);

@@ -16,8 +16,13 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
+import android.os.Bundle;
 import androidx.core.app.NotificationManagerCompat;
 import java.util.Locale;
 
@@ -25,6 +30,12 @@ import java.util.Locale;
  * Helper for interacting with the notification manager and channels.
  */
 public class NotificationUtils {
+    /**
+     * Metadata key to specify whether notification channels should be created with high importance.
+     */
+    public static final String METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX =
+            "androidx.browser.trusted.USE_HIGH_PRI_NOTIFICATIONS";
+
     private NotificationUtils() {}
 
     /**
@@ -41,13 +52,74 @@ public class NotificationUtils {
     }
 
     /**
-     * Creates a notification channel using the given channel name.
+     * Checks if high-priority notifications are configured in the manifest metadata.
+     */
+    public static boolean shouldUseHighPriorityNotifications(Context context) {
+        if (!(context instanceof Service)) return false;
+        try {
+            Service service = (Service) context;
+            ServiceInfo serviceInfo = service.getPackageManager().getServiceInfo(
+                    new ComponentName(service, service.getClass()), PackageManager.GET_META_DATA);
+            if (serviceInfo != null && serviceInfo.metaData != null
+                    && isHighPriorityInBundle(serviceInfo.metaData)) {
+                return true;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // Service not found; fallback to default.
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the given metadata bundle contains the high-priority notification configuration
+     * and evaluates to true.
+     */
+    private static boolean isHighPriorityInBundle(Bundle metaData) {
+        if (metaData.containsKey(METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX)) {
+            Object val = metaData.get(METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX);
+            if (parseBooleanValue(val)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Parses an object value from metadata into a boolean, handling both Boolean and String representations.
+     */
+    private static boolean parseBooleanValue(Object value) {
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        if (value instanceof String) {
+            return Boolean.parseBoolean((String) value);
+        }
+        return false;
+    }
+
+    /**
+     * Returns the notification importance level resolved from the application manifest metadata.
+     */
+    public static int getNotificationImportance(Context context) {
+        return shouldUseHighPriorityNotifications(context)
+                ? NotificationManager.IMPORTANCE_HIGH
+                : NotificationManager.IMPORTANCE_DEFAULT;
+    }
+
+    /**
+     * Creates a notification channel using the given channel name and the importance level resolved
+     * from manifest metadata.
      */
     public static void createNotificationChannel(Context context, String channelName) {
+        createNotificationChannel(context, channelName, getNotificationImportance(context));
+    }
+
+    /**
+     * Creates a notification channel using the given channel name and explicit importance level.
+     */
+    public static void createNotificationChannel(Context context, String channelName, int importance) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
         NotificationChannel channel = new NotificationChannel(channelNameToId(channelName),
-                channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                channelName, importance);
         NotificationManagerCompat.from(context).createNotificationChannel(channel);
     }
 
@@ -55,7 +127,7 @@ public class NotificationUtils {
      * Generates a notification channel id from a channel name.
      * TODO: Remove this when we can use the method defined in AndroidX instead.
      */
-    private static String channelNameToId(String name) {
+    public static String channelNameToId(String name) {
         return name.toLowerCase(Locale.ROOT).replace(' ', '_') + "_channel_id";
     }
 }

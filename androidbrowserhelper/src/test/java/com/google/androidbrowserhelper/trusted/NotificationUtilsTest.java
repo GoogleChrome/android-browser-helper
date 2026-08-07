@@ -98,27 +98,6 @@ public class NotificationUtilsTest {
                         false
                 },
                 {
-                        "customtabs_boolean_true",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
-                        true,
-                        NotificationManager.IMPORTANCE_HIGH,
-                        true
-                },
-                {
-                        "customtabs_string_true",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
-                        "true",
-                        NotificationManager.IMPORTANCE_HIGH,
-                        true
-                },
-                {
-                        "customtabs_string_true_uppercase",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
-                        "TRUE",
-                        NotificationManager.IMPORTANCE_HIGH,
-                        true
-                },
-                {
                         "androidx_boolean_true",
                         NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX,
                         true,
@@ -133,22 +112,29 @@ public class NotificationUtilsTest {
                         true
                 },
                 {
-                        "customtabs_boolean_false",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
+                        "androidx_string_true_uppercase",
+                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX,
+                        "TRUE",
+                        NotificationManager.IMPORTANCE_HIGH,
+                        true
+                },
+                {
+                        "androidx_boolean_false",
+                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX,
                         false,
                         NotificationManager.IMPORTANCE_DEFAULT,
                         false
                 },
                 {
-                        "customtabs_string_false",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
+                        "androidx_string_false",
+                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX,
                         "false",
                         NotificationManager.IMPORTANCE_DEFAULT,
                         false
                 },
                 {
-                        "customtabs_string_invalid",
-                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS,
+                        "androidx_string_invalid",
+                        NotificationUtils.METADATA_USE_HIGH_PRI_NOTIFICATIONS_ANDROIDX,
                         "invalid_string",
                         NotificationManager.IMPORTANCE_DEFAULT,
                         false
@@ -156,16 +142,24 @@ public class NotificationUtilsTest {
         });
     }
 
+    public static class TestService extends Service {
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+
     @Before
     public void setUp() {
-        mContext = RuntimeEnvironment.application;
+        mContext = Robolectric.setupService(TestService.class);
         mPackageManager = mContext.getPackageManager();
         mShadowPackageManager = shadowOf(mPackageManager);
         mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mShadowNotificationManager = shadowOf(mNotificationManager);
 
         if (mMetadataKey != null && mMetadataValue != null) {
-            setAppMetadata(mMetadataKey, mMetadataValue);
+            setServiceMetadata(mMetadataKey, mMetadataValue);
         }
     }
 
@@ -240,24 +234,27 @@ public class NotificationUtilsTest {
         assertFalse(NotificationUtils.shouldUseHighPriorityNotifications(null));
     }
 
-    private void setAppMetadata(String key, Object value) {
-        PackageInfo packageInfo = mShadowPackageManager.getInternalMutablePackageInfo(mContext.getPackageName());
-        if (packageInfo == null) {
-            packageInfo = new PackageInfo();
-            packageInfo.packageName = mContext.getPackageName();
-            packageInfo.applicationInfo = new ApplicationInfo();
-            packageInfo.applicationInfo.packageName = mContext.getPackageName();
-            mShadowPackageManager.addPackage(packageInfo);
-        }
-        if (packageInfo.applicationInfo.metaData == null) {
-            packageInfo.applicationInfo.metaData = new Bundle();
-        }
+    @Test
+    public void getNotificationImportance_withNonServiceContext() {
+        Context appContext = RuntimeEnvironment.application;
+        assertEquals(NotificationManager.IMPORTANCE_DEFAULT,
+                NotificationUtils.getNotificationImportance(appContext));
+        assertFalse(NotificationUtils.shouldUseHighPriorityNotifications(appContext));
+    }
+
+    private void setServiceMetadata(String key, Object value) {
+        ComponentName componentName = new ComponentName(mContext, mContext.getClass());
+        ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = mContext.getPackageName();
+        serviceInfo.name = componentName.getClassName();
+        serviceInfo.metaData = new Bundle();
         if (value instanceof Boolean) {
-            packageInfo.applicationInfo.metaData.putBoolean(key, (Boolean) value);
+            serviceInfo.metaData.putBoolean(key, (Boolean) value);
         } else if (value instanceof String) {
-            packageInfo.applicationInfo.metaData.putString(key, (String) value);
+            serviceInfo.metaData.putString(key, (String) value);
         } else if (value instanceof Integer) {
-            packageInfo.applicationInfo.metaData.putInt(key, (Integer) value);
+            serviceInfo.metaData.putInt(key, (Integer) value);
         }
+        mShadowPackageManager.addOrUpdateService(serviceInfo);
     }
 }

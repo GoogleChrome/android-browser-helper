@@ -47,8 +47,7 @@ public class NotificationDelegationService extends DelegationService {
             @NonNull Notification notification,
             @NonNull String channelName) {
         Log.i(TAG, "Notification triggered for channel: " + channelName
-                + " (ID: " + NotificationUtils.channelNameToId(channelName)
-                + ") with importance: "
+                + " with importance: "
                 + NotificationUtils.getNotificationImportance(this));
         return true;
     }

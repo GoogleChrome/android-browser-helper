@@ -1,19 +1,19 @@
 {
   "entries": [
     {
-      "path": "agents/skills/doc-writer",
+      "path": "_agents/skills/doc-writer",
       "description": "GAN-based workflow for authoring Technical Design Documents and Execution Plans."
     },
     {
-      "path": "agents/skills/review",
+      "path": "_agents/skills/review",
       "description": "Spawns a specialized adversarial-reviewer subagent to perform a skeptical, rigorous Adversarial Design Review."
     },
     {
-      "path": "agents/skills/code-review",
+      "path": "_agents/skills/code-review",
       "description": "Spawns a specialized reviewer subagent to perform a rigorous Senior Staff SWE Code Review."
     },
     {
-      "path": "agents/skills/harness",
+      "path": "_agents/skills/harness",
       "description": "Skill for loading context from the harness and managing rules."
     }
   ]

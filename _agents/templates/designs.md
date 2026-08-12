@@ -2,7 +2,7 @@
 
 **Agent Preamble:**
 
-> **CRITICAL:** Before reading this document or authoring a design, you MUST read the project's `AGENTS.md` file to understand the architecture, style, and boundaries. Also review the style guide at `agents/rules/STYLE.md` and general coding workflow at `agents/prompts/common.md`.
+> **CRITICAL:** Before reading this document or authoring a design, you MUST read the project's `AGENTS.md` file to understand the architecture, style, and boundaries. Also review the style guide at `_agents/rules/STYLE.md` and general coding workflow at `_agents/prompts/common.md`.
 
 This document describes the requirements for authoring a Technical Design Document for the Android Browser Helper project.
 
@@ -26,9 +26,9 @@ When asked to author or propose a technical design, conduct thorough research of
 
 ### File Naming and Location
 
-All new design documents must be placed in the `agents/designs/` subdirectory. They must be explicitly numbered, use lowercase letters, and use hyphens for separation. They must follow the naming convention: `0001-feature-design.md`.
+All new design documents must be placed in the `_agents/designs/` subdirectory. They must be explicitly numbered, use lowercase letters, and use hyphens for separation. They must follow the naming convention: `0001-feature-design.md`.
 
-**Registration Requirement:** Before creating a new design document, you **must** register it in the index file (`agents/designs/index.md`) to prevent ID conflicts.
+**Registration Requirement:** Before creating a new design document, you **must** register it in the index file (`_agents/designs/index.md`) to prevent ID conflicts.
 
 ### Required Structure
 
@@ -126,4 +126,4 @@ Detailed architectural breakdown. Enumerate primary classes modified or created.
 
 ## Review and Approval
 
-Once the Design is authored, it must be reviewed and approved by the user. Only after architectural consensus is reached via the Design document should an Execution Plan (see `agents/templates/plans.md`) be authored.
+Once the Design is authored, it must be reviewed and approved by the user. Only after architectural consensus is reached via the Design document should an Execution Plan (see `_agents/templates/plans.md`) be authored.

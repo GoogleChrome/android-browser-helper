@@ -29,7 +29,7 @@ prompt_section_customization:
         content: |
           # Review Guidelines & Instructions
           1. **Load Rules First**: Your very first step MUST be to read the standard Adversarial Design Review guidelines and checklists from the local rulebook:
-             `agents/rules/REVIEWS.md`
+             `_agents/rules/REVIEWS.md`
              using the `view_file` tool.
           2. **Strict Compliance**: You MUST strictly follow the critique criteria, evaluation checklists, and required output formatting defined in `REVIEWS.md` for your review findings and final verdict.
       insert_after_section: "Role: The Skeptical Architect"

@@ -21,9 +21,9 @@ An Execution Plan is a **living, persistent markdown artifact** that tracks mult
 
 ### File Naming and Location
 
-All execution plans must be placed in the `agents/plans/` subdirectory. They must be explicitly numbered and follow the naming convention: `0001-feature-plan.md`.
+All execution plans must be placed in the `_agents/plans/` subdirectory. They must be explicitly numbered and follow the naming convention: `0001-feature-plan.md`.
 
-**Registration Requirement:** Before creating a new plan, you **must** register it in the index file (`agents/plans/index.md`) and link it back to its parent Design Document.
+**Registration Requirement:** Before creating a new plan, you **must** register it in the index file (`_agents/plans/index.md`) and link it back to its parent Design Document.
 
 ### Required Structure
 

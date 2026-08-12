@@ -5,7 +5,7 @@ This page defines the rules, skills, and prompts for AI agents working on this p
 ## Rule Inheritance
 
 This harness inherits from:
-- [common.md](agents/prompts/common.md)
+- [common.md](_agents/prompts/common.md)
 
 ## Common Directives
 
@@ -52,9 +52,9 @@ Instructions that are useful for Android Browser Helper development.
 
 ## Project Rules
 
-Refer to the specific rules in `agents/rules/`:
-- [CODE_STRUCTURE.md](agents/rules/CODE_STRUCTURE.md)
-- [DEPENDENCIES.md](agents/rules/DEPENDENCIES.md)
-- [STYLE.md](agents/rules/STYLE.md)
-- [TESTING.md](agents/rules/TESTING.md)
-- [REVIEWS.md](agents/rules/REVIEWS.md)
+Refer to the specific rules in `_agents/rules/`:
+- [CODE_STRUCTURE.md](_agents/rules/CODE_STRUCTURE.md)
+- [DEPENDENCIES.md](_agents/rules/DEPENDENCIES.md)
+- [STYLE.md](_agents/rules/STYLE.md)
+- [TESTING.md](_agents/rules/TESTING.md)
+- [REVIEWS.md](_agents/rules/REVIEWS.md)

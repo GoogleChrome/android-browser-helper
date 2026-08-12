@@ -13,16 +13,16 @@ The following parameters are used to configure the document writer. They can usu
 - `projectName`: Name of the project (default: `android-browser-helper`)
 - `documentName`: The name of the document being created (Design or Execution Plan)
 - `agentRulesDoc`: Path to the project's `AGENTS.md` (default: `AGENTS.md`)
-- `agentHarnessDirectory`: Path to the agent folder (default: `agents/`)
-- `designDirectory`: Directory where new designs are saved (default: `agents/designs/`)
-- `executionPlanDirectory`: Directory where new execution plans are saved (default: `agents/plans/`)
+- `agentHarnessDirectory`: Path to the agent folder (default: `_agents/`)
+- `designDirectory`: Directory where new designs are saved (default: `_agents/designs/`)
+- `executionPlanDirectory`: Directory where new execution plans are saved (default: `_agents/plans/`)
 
 Default Parameters:
 
 - `designNamingConvention`: `0001-feature-design.md`
 - `executionPlanNamingConvention`: `0001-feature-plan.md`
-- `designTemplate`: `agents/templates/designs.md`
-- `executionPlanTemplate`: `agents/templates/plans.md`
+- `designTemplate`: `_agents/templates/designs.md`
+- `executionPlanTemplate`: `_agents/templates/plans.md`
 
 ## Overview
 
@@ -44,10 +44,10 @@ You are the **Orchestrator**. Coordinate between two specialized subagents:
 ### Phase 1: Initialization
 
 1.  **Identify The Flow**: Determine if the user wants to write a **Design Document** or an **Execution Plan**.
-    - If **Design Document**: Use `designTemplate` (`agents/templates/designs.md`).
-    - If **Execution Plan**: Use `executionPlanTemplate` (`agents/templates/plans.md`).
+    - If **Design Document**: Use `designTemplate` (`_agents/templates/designs.md`).
+    - If **Execution Plan**: Use `executionPlanTemplate` (`_agents/templates/plans.md`).
 2.  **Dynamic Parameter Inference**: If the calling agent or user did not specify directories, use defaults.
-3.  **Initialize State Tracking**: Create a Markdown file `agents/gan_iteration_status.md` to track progress throughout the GAN loop.
+3.  **Initialize State Tracking**: Create a Markdown file `_agents/gan_iteration_status.md` to track progress throughout the GAN loop.
 4.  **Invoke Planner (Generator)**: Spawn a Planner subagent with `Model="heavy"` and `Workspace="inherit"` using the appropriate prompt template below.
 5.  **Invoke Evaluator (Discriminator)**: Spawn an Evaluator subagent (e.g., using `adversarial_reviewer` persona if defined, or a self-configured evaluator) to critique the draft.
 

@@ -14,7 +14,7 @@ Use this skill to perform high-precision code reviews of changes in the project 
 2.  **Launch Subagent**: Invoke the specialized `reviewer` subagent using the `invoke_subagent` tool.
     *   Specify `TypeName: "reviewer"`
     *   Specify `Role: "Senior Staff Reviewer"`
-    *   Provide a clear prompt instructing it to review the target diff or file against [`agents/RULES.md`](../../RULES.md) and project coding standards.
+    *   Provide a clear prompt instructing it to review the target diff or file against [`_agents/RULES.md`](../../RULES.md) and project coding standards.
 3.  **Collect and Format Report**: Once the subagent returns its Dashboard-First report, present it directly to the user.
 
 </instructions>
@@ -23,4 +23,4 @@ Use this skill to perform high-precision code reviews of changes in the project 
 
 This skill references the following agent definition:
 
-*   [`agents/agents/reviewer/agent.json`](../../agents/reviewer/agent.json)
+*   [`_agents/agents/reviewer/agent.json`](../../agents/reviewer/agent.json)

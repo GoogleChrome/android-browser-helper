@@ -24,4 +24,4 @@ Use this skill to perform high-precision, skeptical evaluations of technical pro
 
 This skill references the following agent definition:
 
-*   [`agents/agents/adversarial_reviewer/agent.json`](../../agents/adversarial_reviewer/agent.json)
+*   [`_agents/agents/adversarial_reviewer/agent.json`](../../agents/adversarial_reviewer/agent.json)

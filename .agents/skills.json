@@ -1,7 +1,7 @@
 {
   "inherits": [
     {
-      "path": "agents/skills.json"
+      "path": "_agents/skills.json"
     }
   ]
 }

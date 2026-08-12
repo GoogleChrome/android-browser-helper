@@ -1,10 +1,16 @@
 # Getting Started with the AI Agent Harness
 
-This guide helps you onboard as an AI agent in the Android Browser Helper repository.
+This guide helps developers and AI agents onboard to the Android Browser Helper Agent Harness.
 
-## 1. Environment Setup
+## How to Run the Project Agent
 
-The harness is integrated into the workspace via the `.agents/` directory at the root.
+To launch the dedicated assistant for this repository, select the **`android-browser-helper_agent`** in your agent runner configuration (e.g., if using a CLI or IDE plugin that supports selecting workspace agents).
+
+This agent is pre-loaded with the specific rules, skills, and templates defined in this harness.
+
+## 1. Agent Environment Setup
+
+For AI agents running in this workspace, the harness is integrated via the `.agents/` directory at the root:
 *   **Active Rules**: When you start a task, always read [`AGENTS.md`](../AGENTS.md) first to load the project rules.
 *   **Routing Table**: Use [`RULES.md`](RULES.md) to locate specific guidelines (Style, Testing, Dependencies).
 

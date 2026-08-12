@@ -1,7 +1,0 @@
-{
-  "inherits": [
-    {
-      "path": "_agents/agents.json"
-    }
-  ]
-}

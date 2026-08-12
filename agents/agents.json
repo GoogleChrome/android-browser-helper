@@ -1,0 +1,10 @@
+{
+  "entries": [
+    {
+      "path": "agents/agents/adversarial_reviewer"
+    },
+    {
+      "path": "agents/agents/reviewer"
+    }
+  ]
+}

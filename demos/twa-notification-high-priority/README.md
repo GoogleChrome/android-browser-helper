@@ -3,6 +3,6 @@
 This demo application shows how a developer can override notification channels and high-priority notification behaviors using native code and `androidx.browser.trusted.USE_HIGH_PRI_NOTIFICATIONS` metadata.
 
 The demo launches the Notification API sample page at:
-`https://googlechrome.github.io/samples/pwa-testing/notificationsapi/`
+`https://dp-goog.github.io/samples/pwa-testing/notificationsapi/`
 
-The relevant code lives inside `NotificationDelegationService`.
+The relevant debug code lives inside `NotificationDelegationService`.

@@ -23,4 +23,6 @@
         ]
     </string>
     <string name="provider_authority">com.google.browser.examples.twa_basic.fileprovider</string>
+    <string name="shortcut_label">TWA Shortcut</string>
+    <string name="shortcut_label_long">Open TWA via Shortcut</string>
 </resources>

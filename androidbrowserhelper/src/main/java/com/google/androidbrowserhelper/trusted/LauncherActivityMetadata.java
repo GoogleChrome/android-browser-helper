@@ -371,6 +371,25 @@ public class LauncherActivityMetadata {
             // Will only happen if the package provided (the one we are running in) is not
             // installed - so should never happen.
         }
+
+        if (!metaData.containsKey(METADATA_DEFAULT_URL)) {
+            try {
+                PackageManager pm = context.getPackageManager();
+                android.content.pm.PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(),
+                        PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
+                if (packageInfo.activities != null) {
+                    for (ActivityInfo activityInfo : packageInfo.activities) {
+                        if (activityInfo.metaData != null && activityInfo.metaData.containsKey(METADATA_DEFAULT_URL)) {
+                            metaData.putAll(activityInfo.metaData);
+                            break;
+                        }
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // Ignore
+            }
+        }
+
         return new LauncherActivityMetadata(metaData, resources);
     }
 }

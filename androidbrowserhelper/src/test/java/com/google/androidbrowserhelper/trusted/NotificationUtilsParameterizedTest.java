@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.NotificationChannel;
@@ -163,10 +164,21 @@ public class NotificationUtilsParameterizedTest {
     public void createNotificationChannel_resolvesImportanceCorrectly() {
         NotificationUtils.createNotificationChannel(mContext, CHANNEL_NAME);
 
-        NotificationChannel channel = mNotificationManager.getNotificationChannel(EXPECTED_CHANNEL_ID);
+        String expectedChannelId = mExpectedShouldUseHighPriority
+                ? "general_notifications_channel_id_high_pri"
+                : "general_notifications_channel_id";
+
+        NotificationChannel channel = mNotificationManager.getNotificationChannel(expectedChannelId);
         assertNotNull(channel);
         assertEquals(CHANNEL_NAME, channel.getName().toString());
         assertEquals(mExpectedImportance, channel.getImportance());
+
+        String obsoleteChannelId = mExpectedShouldUseHighPriority
+                ? "general_notifications_channel_id"
+                : "general_notifications_channel_id_high_pri";
+
+        NotificationChannel obsoleteChannel = mNotificationManager.getNotificationChannel(obsoleteChannelId);
+        assertNull(obsoleteChannel);
     }
 
     private void setServiceMetadata(String key, Object value) {

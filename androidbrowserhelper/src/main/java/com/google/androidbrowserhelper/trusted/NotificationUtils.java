@@ -48,7 +48,7 @@ public class NotificationUtils {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true;
 
         NotificationChannel channel =
-                    NotificationManagerCompat.from(context).getNotificationChannel(channelNameToId(channelName));
+                    NotificationManagerCompat.from(context).getNotificationChannel(channelNameToId(context, channelName));
         return channel == null || channel.getImportance() != NotificationManager.IMPORTANCE_NONE;
     }
 
@@ -111,18 +111,26 @@ public class NotificationUtils {
      * from manifest metadata.
      */
     public static void createNotificationChannel(Context context, String channelName) {
-        createNotificationChannel(context, channelName, getNotificationImportance(context));
+        createNotificationChannelAndMaybeDeleteOldOne(context, channelName, getNotificationImportance(context));
     }
 
     /**
-     * Creates a notification channel using the given channel name and explicit importance level.
+     * Creates a notification channel and cleans up the obsolete one.
      */
-    public static void createNotificationChannel(Context context, String channelName, int importance) {
+    static void createNotificationChannelAndMaybeDeleteOldOne(Context context, String channelName, int importance) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
-        NotificationChannel channel = new NotificationChannel(channelNameToId(channelName),
+        NotificationChannel channel = new NotificationChannel(channelNameToId(context, channelName),
                 channelName, importance);
         NotificationManagerCompat.from(context).createNotificationChannel(channel);
+
+        // Clean up the obsolete channel to prevent duplicates in system settings.
+        String baseId = channelName.toLowerCase(Locale.ROOT).replace(' ', '_');
+        String obsoleteChannelId = shouldUseHighPriorityNotifications(context)
+                ? baseId + "_channel_id"
+                : baseId + "_channel_id_high_pri";
+
+        NotificationManagerCompat.from(context).deleteNotificationChannel(obsoleteChannelId);
     }
 
     /**
@@ -130,7 +138,10 @@ public class NotificationUtils {
      * TODO: Remove this when we can use the method defined in AndroidX instead.
      */
     @VisibleForTesting
-    static String channelNameToId(String name) {
-        return name.toLowerCase(Locale.ROOT).replace(' ', '_') + "_channel_id";
+    static String channelNameToId(Context context, String name) {
+        String baseId = name.toLowerCase(Locale.ROOT).replace(' ', '_');
+        return shouldUseHighPriorityNotifications(context)
+                ? baseId + "_channel_id_high_pri"
+                : baseId + "_channel_id";
     }
 }

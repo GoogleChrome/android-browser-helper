@@ -15,7 +15,12 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -31,7 +36,8 @@ import java.util.List;
 /**
  * An extension of {@link TrustedWebActivityService} that implements
  * {@link TrustedWebActivityService#getTokenStore()} using a
- * {@link SharedPreferencesTokenStore}.
+ * {@link SharedPreferencesTokenStore}, as well as creation of high
+ * priority notifications if the metadata is set correctly.
  */
 public class DelegationService extends TrustedWebActivityService {
     private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
@@ -77,5 +83,38 @@ public class DelegationService extends TrustedWebActivityService {
 
     public void registerExtraCommandHandler(ExtraCommandHandler handler) {
         mExtraCommandHandlers.add(handler);
+    }
+
+    @Override
+    public boolean onNotifyNotificationWithChannel(
+            @NonNull String platformTag,
+            int platformId,
+            @NonNull Notification notification,
+            @NonNull String channelName) {
+        if (NotificationUtils.shouldUseHighPriorityNotifications(this)) {
+            NotificationUtils.createNotificationChannel(this, channelName);
+            String channelId = NotificationUtils.channelNameToId(this, channelName);
+
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
+                if (channel != null && channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                    return false;
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    Notification.Builder builder =
+                            Notification.Builder.recoverBuilder(this, notification);
+                    builder.setChannelId(channelId);
+                    notification = builder.build();
+                }
+            }
+            notificationManager.notify(platformTag, platformId, notification);
+            return true;
+        }
+
+        return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
     }
 }

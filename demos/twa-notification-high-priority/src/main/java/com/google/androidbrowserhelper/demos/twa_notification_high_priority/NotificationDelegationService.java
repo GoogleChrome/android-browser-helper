@@ -49,6 +49,13 @@ public class NotificationDelegationService extends DelegationService {
         Log.i(TAG, "Notification triggered for channel: " + channelName
                 + " with importance: "
                 + NotificationUtils.getNotificationImportance(this));
-        return true;
+        return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
+    }
+
+    @Override
+    public boolean onAreNotificationsEnabled(@NonNull String channelName) {
+        boolean enabled = super.onAreNotificationsEnabled(channelName);
+        Log.i(TAG, "onAreNotificationsEnabled() called for channel: " + channelName + " -> " + enabled);
+        return enabled;
     }
 }

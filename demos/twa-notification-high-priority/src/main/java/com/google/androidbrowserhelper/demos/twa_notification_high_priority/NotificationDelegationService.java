@@ -18,6 +18,7 @@ import android.app.Notification;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 
 import com.google.androidbrowserhelper.trusted.DelegationService;
 import com.google.androidbrowserhelper.trusted.NotificationUtils;
@@ -41,6 +42,7 @@ public class NotificationDelegationService extends DelegationService {
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
     public boolean onNotifyNotificationWithChannel(
             @NonNull String platformTag,
             int platformId,

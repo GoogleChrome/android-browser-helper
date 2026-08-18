@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import java.util.Locale;
@@ -32,8 +31,6 @@ import java.util.Locale;
  * Helper for interacting with the notification manager and channels.
  */
 public class NotificationUtils {
-    private static final String TAG = "NotificationUtils";
-
     /**
      * Metadata key to specify whether notification channels should be created with high importance.
      */
@@ -60,7 +57,6 @@ public class NotificationUtils {
      */
     @VisibleForTesting
     static boolean shouldUseHighPriorityNotifications(Context context) {
-        Log.i(TAG, "Notification context importance check");
         if (!(context instanceof Service)) return false;
         try {
             Service service = (Service) context;
@@ -68,13 +64,11 @@ public class NotificationUtils {
                     new ComponentName(service, service.getClass()), PackageManager.GET_META_DATA);
             if (serviceInfo != null && serviceInfo.metaData != null
                     && isHighPriorityInBundle(serviceInfo.metaData)) {
-                Log.i(TAG, "High importance check passed");
                 return true;
             }
         } catch (PackageManager.NameNotFoundException e) {
             // Service not found; fallback to default.
         }
-        Log.i(TAG, "Fallback");
         return false;
     }
 
@@ -124,7 +118,6 @@ public class NotificationUtils {
      * Creates a notification channel and cleans up the obsolete one.
      */
     static void createNotificationChannelAndMaybeDeleteOldOne(Context context, String channelName, int importance) {
-        Log.i(TAG, "Notification triggered for channel: " + channelName + " with importance: " +importance);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
         NotificationChannel channel = new NotificationChannel(channelNameToId(context, channelName),
@@ -138,7 +131,6 @@ public class NotificationUtils {
                 : baseId + "_channel_id_high_pri";
 
         NotificationManagerCompat.from(context).deleteNotificationChannel(obsoleteChannelId);
-        Log.i(TAG, "Deleted notification channel ID " +obsoleteChannelId);
     }
 
     /**

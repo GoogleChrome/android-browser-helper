@@ -69,6 +69,8 @@ It will now always return an empty list (`[]`).
 
 ### `getDetails()` for subscriptions
 
-Google Play's subscription model is hierarchical (Subscriptions > Base Plans > Offers), but the DGAPI specification expects a single flat structure (`ItemDetails`). Previously, users could mark a certain plan or offer as "backwards compatible" in the Play Console, and the legacy `querySkuDetailsAsync()` API would respect that. This is no longer the case, and Android Browser Helper now performs a **lossy conversion** for subscriptions, returning the **first eligible element** it can find.
+Google Play's subscription model is hierarchical (Subscriptions > Base Plans > Offers), but the DGAPI specification expects a single flat structure (`ItemDetails`). Because of this mismatch, Android Browser Helper now performs a **lossy conversion** for subscriptions and returns the **first eligible element**. 
+
+*Note: Previously, developers could mark a specific base plan or offer as **backward-compatible**, and the legacy `querySkuDetailsAsync()` API would respect that designation. This is no longer the case: the library now returns the first eligible base plan or offer it finds.*
 
 **Action required:** Because DGAPI can represent only one flat subscription configuration per product, ABH exposes only one of the eligible Play subscription plans/offers returned for that product. Other base plans and offers aren't represented through `getDetails()`. If you use multiple base plans or offers per subscription, be aware that you **cannot currently inspect all of them** via DGAPI.

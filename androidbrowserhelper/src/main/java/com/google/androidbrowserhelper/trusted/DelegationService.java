@@ -25,6 +25,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TokenStore;
 import androidx.browser.trusted.TrustedWebActivityCallbackRemote;
@@ -86,6 +87,7 @@ public class DelegationService extends TrustedWebActivityService {
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
     public boolean onNotifyNotificationWithChannel(
             @NonNull String platformTag,
             int platformId,

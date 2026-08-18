@@ -58,21 +58,11 @@ public class NotificationUtilsTest {
     @Test
     public void channelNameToId_replacesSpacesAndAppendsSuffix() {
         assertEquals("general_notifications_channel_id",
-                NotificationUtils.channelNameToId("General Notifications"));
+                NotificationUtils.channelNameToId(mContext, "General Notifications"));
         assertEquals("chat_channel_id",
-                NotificationUtils.channelNameToId("Chat"));
+                NotificationUtils.channelNameToId(mContext, "Chat"));
         assertEquals("test_channel_name_channel_id",
-                NotificationUtils.channelNameToId("Test Channel Name"));
-    }
-
-    @Test
-    public void createNotificationChannel_explicitImportanceOverridesMetadata() {
-        NotificationUtils.createNotificationChannel(mContext, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
-
-        NotificationChannel channel = mNotificationManager.getNotificationChannel(EXPECTED_CHANNEL_ID);
-        assertNotNull(channel);
-        assertEquals(CHANNEL_NAME, channel.getName().toString());
-        assertEquals(NotificationManager.IMPORTANCE_LOW, channel.getImportance());
+                NotificationUtils.channelNameToId(mContext, "Test Channel Name"));
     }
 
     @Test

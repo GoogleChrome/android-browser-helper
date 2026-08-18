@@ -11,7 +11,7 @@ The Play Billing module provides capabilities for your TWA app to connect with [
 * Initialize a payment
 * Query product details
 
-The module uses [Version 8.3.0](https://developer.android.com/google/play/billing/release-notes#8-0) of the Google Play Billing library.
+The module uses [Version 8.3.0](https://developer.android.com/google/play/billing/release-notes#8-0-0) of the Google Play Billing library.
 
 
 ## How to use it? (Website)

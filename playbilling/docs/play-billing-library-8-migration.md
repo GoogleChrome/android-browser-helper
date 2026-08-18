@@ -63,22 +63,12 @@ When your JavaScript calls:
 const history = await service.listPurchaseHistory();
 console.log(history); // []
 ```
-It will now always successfully return an empty list (`[]`).
+It will now always return an empty list (`[]`).
 
 **Action required:** If your app relies on purchase history, you must [track historical purchases on your own backend server](https://developer.android.com/google/play/billing/query-purchase-history#track_historical_purchases), as recommended in the official Google Play Billing documentation.
 
 ### `getDetails()` for subscriptions
 
-Google Play's subscription model is hierarchical (Subscriptions > Base Plans > Offers). PBL 8 removed the legacy `querySkuDetailsAsync()` API that Android Browser Helper previously used to view subscriptions as a flat list. ABH now uses the newer `ProductDetails` API.
+Google Play's subscription model is hierarchical (Subscriptions > Base Plans > Offers), but the DGAPI specification expects a single flat structure (`ItemDetails`). Because of this, Android Browser Helper now performs a **lossy conversion** for subscriptions and returns the **first eligible element**.
 
-Because the DGAPI specification still expects a flat structure (`ItemDetails`), Android Browser Helper now performs a "lossy conversion" for subscriptions:
-- It uses the base-plan ID associated with the first eligible subscription offer returned by Play.
-- It prefers an offer within that base plan when one exists.
-- It flattens that specific offer's pricing phases into DGAPI's legacy `ItemDetails` fields (`price`, `subscriptionPeriod`, `freeTrialPeriod`, etc.).
-
-**Action required:** Because DGAPI can represent only one flat subscription configuration per product, ABH exposes only one of the eligible Play subscription plans/offers returned for that product. Other base plans and offers aren't represented through `getDetails()`. If you use multiple base plans or offers per subscription, be aware that you cannot currently inspect all of them via DGAPI.
-
-## Additional resources
-
-* [Google Play Billing Library 8 release notes](https://developer.android.com/google/play/billing/release-notes#8-0)
-* [Digital Goods API specification](https://github.com/WICG/digital-goods)
+**Action required:** Because DGAPI can represent only one flat subscription configuration per product, ABH exposes only one of the eligible Play subscription plans/offers returned for that product. Other base plans and offers aren't represented through `getDetails()`. If you use multiple base plans or offers per subscription, be aware that you **cannot currently inspect all of them** via DGAPI.

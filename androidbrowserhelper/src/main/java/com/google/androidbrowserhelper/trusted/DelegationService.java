@@ -93,30 +93,27 @@ public class DelegationService extends TrustedWebActivityService {
             int platformId,
             @NonNull Notification notification,
             @NonNull String channelName) {
-        if (NotificationUtils.shouldUseHighPriorityNotifications(this)) {
-            NotificationUtils.createNotificationChannel(this, channelName);
-            String channelId = NotificationUtils.channelNameToId(this, channelName);
-
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
-                if (channel != null && channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
-                    return false;
-                }
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    Notification.Builder builder =
-                            Notification.Builder.recoverBuilder(this, notification);
-                    builder.setChannelId(channelId);
-                    notification = builder.build();
-                }
-            }
-            notificationManager.notify(platformTag, platformId, notification);
-            return true;
+        if (!NotificationUtils.shouldUseHighPriorityNotifications(this)) {
+            return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
         }
 
-        return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
+        NotificationUtils.createNotificationChannel(this, channelName);
+        String channelId = NotificationUtils.channelNameToId(this, channelName);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
+            if (channel != null && channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                return false;
+            }
+
+            Notification.Builder builder = Notification.Builder.recoverBuilder(this, notification);
+            builder.setChannelId(channelId);
+            notification = builder.build();
+        }
+        notificationManager.notify(platformTag, platformId, notification);
+        return true;
     }
 }

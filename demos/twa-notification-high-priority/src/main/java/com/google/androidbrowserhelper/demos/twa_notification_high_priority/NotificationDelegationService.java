@@ -55,6 +55,7 @@ public class NotificationDelegationService extends DelegationService {
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
     public boolean onAreNotificationsEnabled(@NonNull String channelName) {
         boolean enabled = super.onAreNotificationsEnabled(channelName);
         Log.i(TAG, "onAreNotificationsEnabled() called for channel: " + channelName + " -> " + enabled);

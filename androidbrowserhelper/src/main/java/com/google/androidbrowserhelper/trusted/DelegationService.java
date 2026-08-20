@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,6 +42,7 @@ import java.util.List;
  * priority notifications if the metadata is set correctly.
  */
 public class DelegationService extends TrustedWebActivityService {
+    private static final String TAG = "DelegationService";
     private final List<ExtraCommandHandler> mExtraCommandHandlers = new ArrayList<>();
     private SharedPreferencesTokenStore mTokenStore;
 
@@ -93,19 +95,31 @@ public class DelegationService extends TrustedWebActivityService {
             int platformId,
             @NonNull Notification notification,
             @NonNull String channelName) {
+        Log.i(TAG, "onNotifyNotificationWithChannel called. tag=" + platformTag + ", id=" + platformId + ", channelName=" + channelName);
         if (!NotificationUtils.shouldUseHighPriorityNotifications(this)) {
+            Log.i(TAG, "shouldUseHighPriorityNotifications returned false. Delegating to super.");
             return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
         }
 
         NotificationUtils.createNotificationChannel(this, channelName);
         String channelId = NotificationUtils.channelNameToId(this, channelName);
+        Log.i(TAG, "High priority channel created. channelId=" + channelId);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
+            Log.i(TAG, "Channel retrieved. exists=" + (channel != null) + ", importance=" + (channel != null ? channel.getImportance() : "N/A"));
             if (channel != null && channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+                Log.i(TAG, "Channel " + channelId + " is muted. Ignoring notification.");
+                return false;
+            }
+
+            boolean enabled = NotificationUtils.areNotificationsEnabled(this, channelName);
+            Log.i(TAG, "areNotificationsEnabled returned: " + enabled);
+            if(!enabled) {
+                Log.i(TAG, "Notifications are disabled (globally or for channel). Ignoring notification.");
                 return false;
             }
 
@@ -113,7 +127,14 @@ public class DelegationService extends TrustedWebActivityService {
             builder.setChannelId(channelId);
             notification = builder.build();
         }
+        Log.i(TAG, "Posting notification to NotificationManager.");
         notificationManager.notify(platformTag, platformId, notification);
         return true;
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+    public boolean onAreNotificationsEnabled(@NonNull String channelName) {
+        return NotificationUtils.areNotificationsEnabled(this, channelName);
     }
 }

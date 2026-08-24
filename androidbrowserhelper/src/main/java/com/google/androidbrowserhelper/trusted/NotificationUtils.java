@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import java.util.Locale;
 

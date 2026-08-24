@@ -18,6 +18,7 @@ import android.app.Notification;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 
 import com.google.androidbrowserhelper.trusted.DelegationService;
 import com.google.androidbrowserhelper.trusted.NotificationUtils;
@@ -41,6 +42,7 @@ public class NotificationDelegationService extends DelegationService {
     }
 
     @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
     public boolean onNotifyNotificationWithChannel(
             @NonNull String platformTag,
             int platformId,
@@ -49,6 +51,14 @@ public class NotificationDelegationService extends DelegationService {
         Log.i(TAG, "Notification triggered for channel: " + channelName
                 + " with importance: "
                 + NotificationUtils.getNotificationImportance(this));
-        return true;
+        return super.onNotifyNotificationWithChannel(platformTag, platformId, notification, channelName);
+    }
+
+    @Override
+    @RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+    public boolean onAreNotificationsEnabled(@NonNull String channelName) {
+        boolean enabled = super.onAreNotificationsEnabled(channelName);
+        Log.i(TAG, "onAreNotificationsEnabled() called for channel: " + channelName + " -> " + enabled);
+        return enabled;
     }
 }

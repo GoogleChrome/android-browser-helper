@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationManagerCompat;
 import java.util.Locale;
 
@@ -55,7 +54,6 @@ public class NotificationUtils {
     /**
      * Checks if high-priority notifications are configured in the manifest metadata.
      */
-    @VisibleForTesting
     static boolean shouldUseHighPriorityNotifications(Context context) {
         if (!(context instanceof Service)) return false;
         try {
@@ -137,7 +135,6 @@ public class NotificationUtils {
      * Generates a notification channel id from a channel name.
      * TODO: Remove this when we can use the method defined in AndroidX instead.
      */
-    @VisibleForTesting
     static String channelNameToId(Context context, String name) {
         String baseId = name.toLowerCase(Locale.ROOT).replace(' ', '_');
         return shouldUseHighPriorityNotifications(context)

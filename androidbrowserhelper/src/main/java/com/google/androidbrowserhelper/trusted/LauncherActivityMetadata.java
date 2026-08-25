@@ -17,16 +17,23 @@ package com.google.androidbrowserhelper.trusted;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.LaunchHandlerClientMode;
 import androidx.browser.trusted.ScreenOrientation;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
+import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,6 +350,44 @@ public class LauncherActivityMetadata {
     }
 
     /**
+     * Configures the TrustedWebActivityIntentBuilder with TWA metadata parameters.
+     */
+    public void configureIntentBuilder(TrustedWebActivityIntentBuilder builder, Context context) {
+        CustomTabColorSchemeParams defaultColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setNavigationBarColor(ContextCompat.getColor(context, navigationBarColorId))
+                .setNavigationBarDividerColor(ContextCompat.getColor(context, navigationBarDividerColorId))
+                .setToolbarColor(ContextCompat.getColor(context, statusBarColorId))
+                .build();
+        CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
+                .setToolbarColor(ContextCompat.getColor(context, statusBarColorDarkId))
+                .setNavigationBarColor(ContextCompat.getColor(context, navigationBarColorDarkId))
+                .setNavigationBarDividerColor(
+                        ContextCompat.getColor(context, navigationBarDividerColorDarkId))
+                .build();
+
+        builder.setDefaultColorSchemeParams(defaultColorScheme)
+                .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
+                .setDisplayMode(displayMode)
+                .setDisplayOverrideList(displayOverrideList)
+                .setScreenOrientation(screenOrientation)
+                .setLaunchHandlerClientMode(launchHandlerClientMode);
+
+        if (additionalTrustedOrigins != null) {
+            builder.setAdditionalTrustedOrigins(additionalTrustedOrigins);
+        }
+    }
+
+    private static boolean tryMergeMetadata(Bundle target, @Nullable ActivityInfo activityInfo) {
+        if (activityInfo != null && activityInfo.metaData != null
+                && activityInfo.metaData.containsKey(METADATA_DEFAULT_URL)) {
+            target.putAll(activityInfo.metaData);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Creates LauncherActivityMetadata instance based on metadata of the passed Activity.
      */
     public static LauncherActivityMetadata parse(Context context) {
@@ -375,18 +420,33 @@ public class LauncherActivityMetadata {
         if (!metaData.containsKey(METADATA_DEFAULT_URL)) {
             try {
                 PackageManager pm = context.getPackageManager();
-                android.content.pm.PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(),
+
+                // 1. Query launcher activities/aliases (handles metadata on alias itself)
+                Intent queryIntent = new Intent(Intent.ACTION_MAIN);
+                queryIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                queryIntent.setPackage(context.getPackageName());
+                List<ResolveInfo> resolveInfos = pm.queryIntentActivities(
+                        queryIntent, PackageManager.GET_META_DATA);
+                for (ResolveInfo resolveInfo : resolveInfos) {
+                    if (tryMergeMetadata(metaData, resolveInfo.activityInfo)) {
+                        return new LauncherActivityMetadata(metaData, resources);
+                    }
+                }
+
+                // 2. Fall back to scanning all package activities if METADATA_DEFAULT_URL is
+                // not inside the metadata.
+                // (handles metadata on target activity when launcher filter is on an alias)
+                PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(),
                         PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
                 if (packageInfo.activities != null) {
                     for (ActivityInfo activityInfo : packageInfo.activities) {
-                        if (activityInfo.metaData != null && activityInfo.metaData.containsKey(METADATA_DEFAULT_URL)) {
-                            metaData.putAll(activityInfo.metaData);
-                            break;
+                        if (tryMergeMetadata(metaData, activityInfo)) {
+                            return new LauncherActivityMetadata(metaData, resources);
                         }
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                // Ignore
+                // Ignore.
             }
         }
 

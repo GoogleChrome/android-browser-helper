@@ -209,37 +209,14 @@ public class LauncherActivity extends Activity {
             return;
         }
 
-        CustomTabColorSchemeParams defaultColorScheme = new CustomTabColorSchemeParams.Builder()
-                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorId))
-                .setNavigationBarDividerColor(getColorCompat(mMetadata.navigationBarDividerColorId))
-                .setToolbarColor(getColorCompat(mMetadata.statusBarColorId))
-                .build();
-        CustomTabColorSchemeParams darkModeColorScheme = new CustomTabColorSchemeParams.Builder()
-                .setToolbarColor(getColorCompat(mMetadata.statusBarColorDarkId))
-                .setNavigationBarColor(getColorCompat(mMetadata.navigationBarColorDarkId))
-                .setNavigationBarDividerColor(
-                        getColorCompat(mMetadata.navigationBarDividerColorDarkId))
-                .build();
-
         Uri launchUrl = getLaunchingUrl();
-        TrustedWebActivityIntentBuilder twaBuilder =
-                new TrustedWebActivityIntentBuilder(launchUrl)
-                        .setDefaultColorSchemeParams(defaultColorScheme)
-                        .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-                        .setColorSchemeParams(
-                                CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
-                        .setDisplayMode(getDisplayMode())
-                        .setDisplayOverrideList(mMetadata.displayOverrideList)
-                        .setScreenOrientation(mMetadata.screenOrientation)
-                        .setLaunchHandlerClientMode(mMetadata.launchHandlerClientMode);
+        TrustedWebActivityIntentBuilder twaBuilder = new TrustedWebActivityIntentBuilder(launchUrl);
+        mMetadata.configureIntentBuilder(twaBuilder, this);
+        twaBuilder.setDisplayMode(getDisplayMode());
 
         Uri intentUrl = getUrlForIntent(getIntent());
         if (!launchUrl.equals(intentUrl) && intentUrl != null) {
             twaBuilder.setOriginalLaunchUrl(intentUrl);
-        }
-
-        if (mMetadata.additionalTrustedOrigins != null) {
-            twaBuilder.setAdditionalTrustedOrigins(mMetadata.additionalTrustedOrigins);
         }
 
         addShareDataIfPresent(twaBuilder);

@@ -15,17 +15,21 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.Nullable;
 import androidx.browser.trusted.TrustedWebActivityIntent;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.TrustedWebUtils;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
-
-import java.util.Objects;
 
 /**
  * A trampoline activity that handles Trusted Web Activity shortcuts.
@@ -49,6 +53,8 @@ public class ShortcutTrampolineActivity extends Activity {
             if (uri == null) {
                 return;
             }
+            // Re-parse URI to prevent custom Parcelable Uri spoofing.
+            uri = Uri.parse(uri.toString());
 
             LauncherActivityMetadata metadata = LauncherActivityMetadata.parse(this);
             if (!isTrusted(uri, metadata)) {
@@ -69,30 +75,56 @@ public class ShortcutTrampolineActivity extends Activity {
             };
 
             TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(uri);
+            metadata.configureIntentBuilder(builder, appContext);
+
             twaLauncher.launch(
                     builder,
                     new QualityEnforcer(),
                     null /* splashScreenStrategy */,
-                    () -> new android.os.Handler(android.os.Looper.getMainLooper()).post(twaLauncher::destroy),
+                    () -> new Handler(Looper.getMainLooper()).post(twaLauncher::destroy),
                     new TwaLauncher.FallbackStrategy() {
                         @Override
                         public void launch(Context context, TrustedWebActivityIntentBuilder twaBuilder,
                                            @Nullable String providerPackage, @Nullable Runnable completionCallback) {
-                            // Fallback strategy for shortcuts using Application Context.
-                            // Ensure FLAG_ACTIVITY_NEW_TASK is present to avoid crashes.
-                            if (providerPackage == null) {
-                                providerPackage = androidx.browser.customtabs.CustomTabsClient.getPackageName(context, null);
+                            // Respect the metadata specified in the manifest instead of fallback.
+                            if (metadata.launchingBrowser != null) {
+                                Log.w(TAG, "Launching browser " + metadata.launchingBrowser + " is not available.");
+                                if(completionCallback != null) {
+                                    completionCallback.run();
+                                }
+                                return;
                             }
-                            // CustomTabs fallback
-                            androidx.browser.customtabs.CustomTabsIntent customTabsIntent = twaBuilder.buildCustomTabsIntent();
-                            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            if (providerPackage != null) {
-                                customTabsIntent.intent.setPackage(providerPackage);
+
+                            if ("webview".equalsIgnoreCase(metadata.fallbackStrategyType)) {
+                                Intent fallbackIntent = WebViewFallbackActivity.createLaunchIntent(context,
+                                        twaBuilder.getUri(), metadata);
+                                fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                try {
+                                    context.startActivity(fallbackIntent);
+                                } catch (ActivityNotFoundException e) {
+                                    Log.e(TAG, "Failed to launch webview fallback: ", e);
+                                }
+                            } else {
+                                // CustomTabs fallback
+                                if (providerPackage == null) {
+                                    providerPackage = CustomTabsClient.getPackageName(context, null);
+                                }
+                                CustomTabsIntent customTabsIntent = twaBuilder.buildCustomTabsIntent();
+                                customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                if (providerPackage != null) {
+                                    customTabsIntent.intent.setPackage(providerPackage);
+                                }
+                                if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())) {
+                                    customTabsIntent.intent.putExtra(TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
+                                }
+                                // Verify there is an app available to handle the intent before launching
+                                customTabsIntent.intent.setData(twaBuilder.getUri());
+                                if (customTabsIntent.intent.resolveActivity(context.getPackageManager()) != null) {
+                                    context.startActivity(customTabsIntent.intent);
+                                } else {
+                                    Log.e(TAG, "No browser installed to handle Custom Tabs/Browser fallback.");
+                                }
                             }
-                            if (ChromeOsSupport.isRunningOnArc(context.getPackageManager())) {
-                                customTabsIntent.intent.putExtra(androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY, true);
-                            }
-                            customTabsIntent.launchUrl(context, twaBuilder.getUri());
                             if (completionCallback != null) {
                                 completionCallback.run();
                             }

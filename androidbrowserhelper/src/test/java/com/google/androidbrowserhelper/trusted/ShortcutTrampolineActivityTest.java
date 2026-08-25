@@ -25,9 +25,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +71,15 @@ public class ShortcutTrampolineActivityTest {
         trampolineActivity.packageName = mContext.getPackageName();
         trampolineActivity.name = ShortcutTrampolineActivity.class.getName();
 
+        // Register a fake browser that can handle HTTP/HTTPS intents
+        // so that resolveActivity() succeeds in the fallback strategy.
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com/twa/shortcut"));
+        ResolveInfo resolveInfo = new ResolveInfo();
+        resolveInfo.activityInfo = new ActivityInfo();
+        resolveInfo.activityInfo.packageName = "com.android.chrome";
+        resolveInfo.activityInfo.name = "com.android.chrome.ChromeTabbedActivity";
+        mShadowPackageManager.addResolveInfoForIntent(browserIntent, resolveInfo);
+
         packageInfo.activities = new ActivityInfo[]{dummyLauncherActivity, trampolineActivity};
         mShadowPackageManager.addPackage(packageInfo);
     }
@@ -95,6 +106,7 @@ public class ShortcutTrampolineActivityTest {
                 Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
 
         controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
 
         // The activity should finish immediately.
         assertTrue(controller.get().isFinishing());

@@ -158,6 +158,8 @@ public class TwaLauncher {
 
     private long mStartupUptimeMillis;
 
+    private boolean mServiceBound;
+
     public interface FallbackStrategy {
         void launch(Context context,
                     TrustedWebActivityIntentBuilder twaBuilder,
@@ -322,9 +324,9 @@ public class TwaLauncher {
 
         mServiceConnection.setSessionCreationRunnables(
                 onSessionCreatedRunnable, onSessionCreationFailedRunnable);
-        boolean bound = CustomTabsClient.bindCustomTabsServicePreservePriority(
+        mServiceBound = CustomTabsClient.bindCustomTabsServicePreservePriority(
                 mContext, mProviderPackage, mServiceConnection);
-        if (!bound) {
+        if (!mServiceBound) {
             onSessionCreationFailedRunnable.run();
         }
     }
@@ -385,8 +387,9 @@ public class TwaLauncher {
         if (mDestroyed) {
             return;
         }
-        if (mServiceConnection != null) {
+        if (mServiceBound && mServiceConnection != null) {
             mContext.unbindService(mServiceConnection);
+            mServiceBound = false;
         }
         mContext = null;
         mDestroyed = true;

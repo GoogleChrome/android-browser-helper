@@ -23,4 +23,11 @@
             <data android:scheme="https" />
         </intent>
     </queries>
+
+    <application>
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.ShortcutTrampolineActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:exported="true"/>
+    </application>
 </manifest>

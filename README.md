@@ -52,6 +52,47 @@ This SDK does not transfer any information over the network. Web browsing inform
 stored if the WebView fallback is enabled. The permission to read the location can be managed
 via the usual Android settings.
   
+## Using Shortcuts in Trusted Web Activities
+
+When implementing shortcuts (e.g. from `shortcuts.xml`) in a Trusted Web Activity (TWA) application, launching the TWA through `LauncherActivity` on Android Desktop (such as ChromeOS) can result in unresponsive windows due to window manager interactions with translucent activities.
+
+To prevent this issue, you should use the dedicated `ShortcutTrampolineActivity` for all your app's shortcut intents.
+
+### 1. Create a `shortcuts.xml` resource
+
+Create `res/xml/shortcuts.xml` and target `ShortcutTrampolineActivity` as the `targetClass`, passing the shortcut target URL in the `android:data` field:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="twa_shortcut"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_label">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="YOUR_PACKAGE_NAME"
+            android:targetClass="com.google.androidbrowserhelper.trusted.ShortcutTrampolineActivity"
+            android:data="https://your-twa-domain.com/shortcut-target-url" />
+    </shortcut>
+</shortcuts>
+```
+
+### 2. Reference the shortcuts in your Launcher Activity
+
+In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>` tag of your main launcher activity:
+
+```xml
+        <activity android:name=".MyLauncherActivity" ...>
+            <meta-data android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            ...
+        </activity>
+```
+
+`ShortcutTrampolineActivity` runs with `Theme.NoDisplay` and will process the shortcut launch securely by validating the URL against your configured TWA domains, routing the launch asynchronously using the application context, and closing itself instantly before any window transitions are impacted.
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

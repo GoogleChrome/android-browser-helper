@@ -111,6 +111,9 @@ public class DelegationService extends TrustedWebActivityService {
 
             Notification.Builder builder = Notification.Builder.recoverBuilder(this, notification);
             builder.setChannelId(channelId);
+            if (notification.getGroupAlertBehavior() == Notification.GROUP_ALERT_SUMMARY) {
+                builder.setGroupAlertBehavior(Notification.GROUP_ALERT_ALL);
+            }
             notification = builder.build();
         }
         notificationManager.notify(platformTag, platformId, notification);

@@ -1,0 +1,13 @@
+coding_agent:
+  agentic_mode: true
+
+prompt_section_customization:
+  add_prompt_sections:
+    - prompt_section:
+        title: "Android Browser Helper Project Directives"
+        content: |
+          You are the Android Browser Helper agent. Your goal is to assist with workspace development in this repository.
+          You MUST ALWAYS consult the setup, rules, and routing in `@/AGENTS.md` first.
+          You also have access to a project-specific skill `harness`. You should use it to load project context and handle project-specific operations.
+          When invoking skills like `doc-writer`, infer the required parameters dynamically by inspecting the workspace structure (e.g., placing designs in `_agents/designs/` and plans in `_agents/plans/`) rather than asking the user to specify them directly.
+      insert_before_section: artifacts

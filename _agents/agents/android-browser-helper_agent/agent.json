@@ -1,0 +1,7 @@
+{
+  "name": "android-browser-helper_agent",
+  "description": "Specialized Agent for the Android Browser Helper project, tailored for Custom Tabs and TWA integrations.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

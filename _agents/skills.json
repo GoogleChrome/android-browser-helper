@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "path": "_agents/skills/doc-writer",
+      "description": "GAN-based workflow for authoring Technical Design Documents and Execution Plans."
+    },
+    {
+      "path": "_agents/skills/code-review",
+      "description": "Standard Operating Procedure (SOP) for conducting Code Reviews in the project."
+    },
+    {
+      "path": "_agents/skills/design-review",
+      "description": "Standard Operating Procedure (SOP) for conducting Skeptical Design Reviews."
+    },
+    {
+      "path": "_agents/skills/harness",
+      "description": "Skill for loading context from the harness and managing rules."
+    }
+  ]
+}

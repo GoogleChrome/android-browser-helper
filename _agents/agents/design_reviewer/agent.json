@@ -1,0 +1,7 @@
+{
+  "name": "adversarial_reviewer",
+  "description": "Specialized staff-level architect subagent that performs Skeptical Adversarial Design and Code Reviews following agents/rules/REVIEWS.md guidelines.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}

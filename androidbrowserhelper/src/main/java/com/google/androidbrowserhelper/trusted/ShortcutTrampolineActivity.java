@@ -78,8 +78,15 @@ public class ShortcutTrampolineActivity extends Activity {
             uri = Uri.parse(uri.toString());
 
             LauncherActivityMetadata metadata = LauncherActivityMetadata.parse(this);
-            if (!isTrusted(uri, metadata)) {
-                Log.w(TAG, "Dropping untrusted shortcut URI: " + uri);
+            boolean trusted = "https".equalsIgnoreCase(uri.getScheme())
+                    && (Utils.isTrustedOrigin(uri, metadata)
+                            || Utils.matchesTwaLauncherIntentFilter(this, uri));
+            if (!trusted) {
+                Log.e(TAG, "Dropping untrusted shortcut URI '"
+                        + Utils.uriForLog(this, uri)
+                        + "'. Shortcut URIs must use https and match DEFAULT_URL, "
+                        + "ADDITIONAL_TRUSTED_ORIGINS, or a BROWSABLE intent-filter on the "
+                        + "launcher activity.");
                 return;
             }
 
@@ -149,8 +156,8 @@ public class ShortcutTrampolineActivity extends Activity {
                             }
 
                             if ("webview".equalsIgnoreCase(metadata.fallbackStrategyType)) {
-                                Intent fallbackIntent = WebViewFallbackActivity.createLaunchIntent(context,
-                                        twaBuilder.getUri(), metadata);
+                                Intent fallbackIntent = WebViewFallbackActivity.createLaunchIntent(
+                                        context, twaBuilder.getUri(), metadata);
                                 fallbackIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 try {
                                     context.startActivity(fallbackIntent);
@@ -189,53 +196,6 @@ public class ShortcutTrampolineActivity extends Activity {
             // Must finish synchronously in onCreate() to satisfy android:noDisplay="true"
             finish();
         }
-    }
-
-    private static boolean isTrusted(Uri uri, LauncherActivityMetadata metadata) {
-        if (uri == null) {
-            return false;
-        }
-        if (metadata.defaultUrl != null) {
-            Uri defaultUri = Uri.parse(metadata.defaultUrl);
-            if (isSameOrigin(uri, defaultUri)) {
-                return true;
-            }
-        }
-        if (metadata.additionalTrustedOrigins != null) {
-            for (String originStr : metadata.additionalTrustedOrigins) {
-                Uri originUri = Uri.parse(originStr);
-                if (isSameOrigin(uri, originUri)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean isSameOrigin(Uri uri1, Uri uri2) {
-        if (uri1 == null || uri2 == null) {
-            return false;
-        }
-        String scheme1 = uri1.getScheme();
-        String scheme2 = uri2.getScheme();
-        String host1 = uri1.getHost();
-        String host2 = uri2.getHost();
-        if (scheme1 == null || scheme2 == null || host1 == null || host2 == null) {
-            return false;
-        }
-
-        int port1 = uri1.getPort();
-        int port2 = uri2.getPort();
-        if (port1 == -1) {
-            port1 = "https".equalsIgnoreCase(scheme1) ? 443 : ("http".equalsIgnoreCase(scheme1) ? 80 : -1);
-        }
-        if (port2 == -1) {
-            port2 = "https".equalsIgnoreCase(scheme2) ? 443 : ("http".equalsIgnoreCase(scheme2) ? 80 : -1);
-        }
-
-        return scheme1.equalsIgnoreCase(scheme2) &&
-                host1.equalsIgnoreCase(host2) &&
-                port1 == port2;
     }
 
     private static @Nullable Integer findRunningTwaTaskId(Context context, int currentTaskId,

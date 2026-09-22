@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -129,6 +130,12 @@ public class LauncherActivity extends Activity {
 
     private long mStartupUptimeMillis;
 
+    /** Last URL checked by {@link #isRejectedIntentUrl}, so the check runs once per launch. */
+    @Nullable
+    private Uri mCheckedIntentUrl;
+
+    private boolean mCheckedIntentUrlRejected;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -215,8 +222,15 @@ public class LauncherActivity extends Activity {
         twaBuilder.setDisplayMode(getDisplayMode());
 
         Uri intentUrl = getUrlForIntent(getIntent());
-        if (!launchUrl.equals(intentUrl) && intentUrl != null) {
-            twaBuilder.setOriginalLaunchUrl(intentUrl);
+        if (intentUrl != null) {
+            intentUrl = Uri.parse(intentUrl.toString());
+            // A rejected https URL would otherwise be forwarded here, because it no longer equals
+            // the launch URL. Before validation it was the launch URL and was never forwarded, so
+            // suppressing it adds no new data flow. Other schemes (http, custom, protocol handlers)
+            // were never used as the launch URL and are forwarded as before.
+            if (!launchUrl.equals(intentUrl) && !isRejectedIntentUrl(intentUrl)) {
+                twaBuilder.setOriginalLaunchUrl(intentUrl);
+            }
         }
 
         addShareDataIfPresent(twaBuilder);
@@ -412,15 +426,25 @@ public class LauncherActivity extends Activity {
         Uri intentUrl = getUrlForIntent(getIntent());
 
         if (intentUrl != null) {
+            intentUrl = Uri.parse(intentUrl.toString());
             Map<String, Uri> protocolHandlers = getProtocolHandlers();
             String scheme = intentUrl.getScheme();
 
-            if ("https".equals(scheme)) {
-                Log.d(TAG, "Using url from Intent: " + intentUrl);
-                return intentUrl;
+            if ("https".equalsIgnoreCase(scheme)) {
+                if (!isRejectedIntentUrl(intentUrl)) {
+                    Log.d(TAG, "Using url from Intent: " + intentUrl);
+                    return intentUrl;
+                }
+                reportRejection("Dropping untrusted Intent URI '"
+                        + Utils.uriForLog(this, intentUrl)
+                        + "', falling back to the default url. Declare the origin in "
+                        + "ADDITIONAL_TRUSTED_ORIGINS, add a BROWSABLE intent-filter for its host, "
+                        + "or override LauncherActivity.isTrustedIntentUrl(Uri).",
+                        RejectionOutcome.LAUNCH_URL_SUBSTITUTED);
+                return defaultUrl;
             }
 
-            if ("content".equals(scheme)) {
+            if ("content".equalsIgnoreCase(scheme)) {
                 // The application was launched by opening a file - return the URL configured for
                 // this file type in the manifest
                 if (mMetadata.fileHandlingActionUrl == null) {
@@ -446,12 +470,83 @@ public class LauncherActivity extends Activity {
     }
 
     /**
+     * Whether {@code intentUrl} was refused by inbound validation. A refused URL is neither used as
+     * the launch URL nor forwarded as {@code EXTRA_ORIGINAL_LAUNCH_URL}; every other URL is handled
+     * exactly as before validation was introduced.
+     */
+    private boolean isRejectedIntentUrl(@NonNull Uri intentUrl) {
+        if (!intentUrl.equals(mCheckedIntentUrl)) {
+            mCheckedIntentUrlRejected = computeIsRejectedIntentUrl(intentUrl);
+            mCheckedIntentUrl = intentUrl;
+        }
+        return mCheckedIntentUrlRejected;
+    }
+
+    private boolean computeIsRejectedIntentUrl(@NonNull Uri intentUrl) {
+        return "https".equalsIgnoreCase(intentUrl.getScheme()) && !isTrustedIntentUrl(intentUrl);
+    }
+
+    /**
+     * Returns whether {@code uri} from the inbound Intent may be used as the launch URL.
+     * Defaults to a same-origin check against DEFAULT_URL / ADDITIONAL_TRUSTED_ORIGINS, plus any
+     * https URI matching a BROWSABLE intent-filter with a concrete host declared by this Activity
+     * (or its activity-alias).
+     * Override only if you fully control the callers of this exported Activity.
+     */
+    protected boolean isTrustedIntentUrl(@Nullable Uri uri) {
+        if (Utils.isTrustedOrigin(uri, mMetadata)) return true;
+        if (uri != null && "https".equalsIgnoreCase(uri.getScheme())
+                && isColdShortcutActivity()
+                && Utils.matchesTwaLauncherIntentFilter(this, uri)) {
+            return true;
+        }
+        return uri != null
+                && "https".equalsIgnoreCase(uri.getScheme())
+                && Utils.matchesOwnIntentFilter(this, getComponentName(), uri);
+    }
+
+    /**
+     * Describes how a security rejection affected the launch. Further values may be added in
+     * later releases, so overrides of {@link #reportRejection} should not assume this set is final.
+     */
+    public enum RejectionOutcome {
+        /** An untrusted launch URL was replaced with {@code DEFAULT_URL}. */
+        LAUNCH_URL_SUBSTITUTED,
+    }
+
+    /**
+     * Reports a security-driven rejection of inbound Intent data.
+     *
+     * <p>The default implementation logs at {@code ERROR}, and additionally throws a
+     * {@link SecurityException} in debuggable builds when the rejection changed the outcome of the
+     * launch ({@link RejectionOutcome#LAUNCH_URL_SUBSTITUTED}), so that the misconfiguration is
+     * found during development. Release builds never throw.
+     *
+     * <p>Override to route these diagnostics elsewhere (for example to a crash reporter) or to
+     * suppress the debuggable-build exception. Overriding affects <em>reporting only</em>: the
+     * rejection itself has already been enforced by the caller. To change what is accepted, override
+     * {@link #isTrustedIntentUrl(Uri)} instead.
+     *
+     * @param message a human-readable diagnostic describing what was rejected and how to allow it
+     *     deliberately; its format is not part of the API contract and must not be parsed.
+     * @param outcome how the rejection affected the launch; see {@link RejectionOutcome}.
+     */
+    protected void reportRejection(@NonNull String message, @NonNull RejectionOutcome outcome) {
+        Log.e(TAG, message);
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            throw new SecurityException(message + " See "
+                    + "https://github.com/GoogleChrome/android-browser-helper#inbound-intent-validation"
+                    + " - this throws only in debuggable builds.");
+        }
+    }
+
+    /**
      * Returns the fallback strategy to be used if there's no Trusted Web Activity support on the
      * device. By default, used the "android.support.customtabs.trusted.DEFAULT_URL" metadata from
      * the manifest. If the value is not present, it uses a CustomTabs fallback.
      *
      * Override this for creating a custom fallback approach, such as launching a different WebView
-     * fallback implementation ot starting a native Activity.
+     * fallback implementation or starting a native Activity.
      */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
         if (mMetadata.launchingBrowser != null) {
@@ -473,6 +568,16 @@ public class LauncherActivity extends Activity {
      */
     protected TrustedWebActivityDisplayMode getDisplayMode() {
         return this.mMetadata.displayMode;
+    }
+
+    private boolean isColdShortcutActivity() {
+        if (this instanceof ColdShortcutActivity) return true;
+        String coldShortcutClass = mMetadata.coldShortcutActivity;
+        if (coldShortcutClass == null) return false;
+        if (coldShortcutClass.startsWith(".")) {
+            coldShortcutClass = getPackageName() + coldShortcutClass;
+        }
+        return getComponentName().getClassName().equals(coldShortcutClass);
     }
 
     private boolean restartInNewTask() {

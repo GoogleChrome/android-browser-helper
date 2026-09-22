@@ -89,7 +89,10 @@ public class WebViewFallbackActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         this.mLaunchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
-        if (!"https".equals(this.mLaunchUrl.getScheme())) {
+        if (this.mLaunchUrl != null) {
+            this.mLaunchUrl = Uri.parse(this.mLaunchUrl.toString());
+        }
+        if (this.mLaunchUrl == null || !"https".equalsIgnoreCase(this.mLaunchUrl.getScheme())) {
             throw new IllegalArgumentException("launchUrl scheme must be 'https'");
         }
 
@@ -282,9 +285,7 @@ public class WebViewFallbackActivity extends Activity {
             }
 
             private boolean uriOriginsMatch(Uri uriA, Uri uriB) {
-                return uriA.getScheme().equalsIgnoreCase(uriB.getScheme()) &&
-                        uriA.getHost().equalsIgnoreCase(uriB.getHost()) &&
-                        uriA.getPort() == uriB.getPort();
+                return Utils.isSameOrigin(uriA, uriB);
             }
         };
     }

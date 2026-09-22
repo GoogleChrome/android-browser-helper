@@ -15,23 +15,65 @@
 package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Utilities used by helper classes that are setting up and launching Trusted Web Activities.
  */
 public class Utils {
+    private static final String TAG = "TWAUtils";
+
+    static final String METADATA_DEFAULT_URL =
+            "android.support.customtabs.trusted.DEFAULT_URL";
+
+    private static final Set<String> sWarnedSchemelessOrigins =
+            Collections.synchronizedSet(new HashSet<>());
+
+    @VisibleForTesting
+    static void resetWarnedOriginsForTesting() {
+        sWarnedSchemelessOrigins.clear();
+    }
+
+    /** Full URI in debuggable builds; only scheme://host[:port] otherwise, since URIs can carry tokens. */
+    static String uriForLog(@NonNull Context context, @Nullable Uri uri) {
+        if (uri == null) return "null";
+        if ((context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            return uri.toString();
+        }
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (scheme == null || host == null) return "<redacted>";
+        int port = uri.getPort();
+        return scheme + "://" + host + (port == -1 ? "" : ":" + port) + "/...";
+    }
 
     /** 
      * Sets status bar color. Makes the icons dark if necessary. 
@@ -106,5 +148,194 @@ public class Utils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    /**
+     * Checks whether the given URI is an {@code https} URI that shares an origin with the
+     * application's configured {@code defaultUrl} or any of its {@code additionalTrustedOrigins}.
+     */
+    static boolean isTrustedOrigin(
+            @Nullable Uri uri, @NonNull LauncherActivityMetadata metadata) {
+        if (uri == null || !"https".equalsIgnoreCase(uri.getScheme())) {
+            return false;
+        }
+        if (metadata.defaultUrl != null) {
+            Uri defaultUri = Uri.parse(metadata.defaultUrl);
+            if (isSameOrigin(uri, defaultUri)) {
+                return true;
+            }
+        }
+        if (metadata.additionalTrustedOrigins != null) {
+            for (String originStr : metadata.additionalTrustedOrigins) {
+                Uri originUri = parseConfiguredOrigin(originStr);
+                if (originUri != null && isSameOrigin(uri, originUri)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Parses an ADDITIONAL_TRUSTED_ORIGINS manifest entry. Full origins ("https://example.com") are
+     * returned as-is; legacy scheme-less entries ("example.com", "example.com:8443") are normalised to
+     * https with a warning. Returns null if the entry cannot be read as an origin at all.
+     */
+    @Nullable
+    static Uri parseConfiguredOrigin(@Nullable String originStr) {
+        if (originStr == null) return null;
+        String trimmed = originStr.trim();
+        if (trimmed.isEmpty()) return null;
+
+        Uri parsed = Uri.parse(trimmed);
+        if (parsed.getScheme() != null && parsed.getHost() != null) return parsed;
+
+        // Scheme-less legacy entry. Note Uri.parse("example.com:8443") reads "example.com" as the
+        // scheme, so re-parse with an explicit https:// prefix rather than inspecting `parsed`.
+        Uri assumed = Uri.parse("https://" + trimmed);
+        if (assumed.getHost() == null) {
+            Log.w(TAG, "Ignoring unparseable ADDITIONAL_TRUSTED_ORIGINS entry: " + originStr);
+            return null;
+        }
+        if (sWarnedSchemelessOrigins.add(trimmed)) {
+            Log.w(TAG, "ADDITIONAL_TRUSTED_ORIGINS entry '" + originStr
+                    + "' has no scheme; assuming https. Declare full origins (e.g. "
+                    + "'https://example.com') - scheme-less entries are deprecated and are not "
+                    + "Digital-Asset-Links verified by the browser.");
+        }
+        return assumed;
+    }
+
+    @FunctionalInterface
+    private interface ActivityMatcher { boolean matches(ActivityInfo info); }
+
+    private static boolean matchesBrowsableFilter(
+            Context context, @Nullable Uri uri, ActivityMatcher matcher) {
+        if (uri == null) {
+            return false;
+        }
+        // IntentFilter/PackageManager compare hosts with compareToIgnoreCase(), which folds e.g.
+        // U+0131 to 'i'; browsers apply IDNA instead. Only ASCII hosts are compared.
+        if (!isAscii(uri.getScheme()) || !isAscii(uri.getHost())) {
+            return false;
+        }
+        Uri normalized = uri.normalizeScheme(); // IntentFilter scheme matching is case-sensitive
+        Intent probe = new Intent(Intent.ACTION_VIEW, normalized)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setPackage(context.getPackageName());
+        for (ResolveInfo info : context.getPackageManager().queryIntentActivities(
+                probe, PackageManager.GET_RESOLVED_FILTER | PackageManager.GET_META_DATA)) {
+            if (info.activityInfo == null || !matcher.matches(info.activityInfo)) continue;
+            if (hasConcreteMatchingAuthority(info.filter, normalized)) return true;
+        }
+        return false;
+    }
+
+    // A filter must name a concrete host that matches the URI. The wildcard host "*" matches every
+    // origin, so it never counts. Subdomain wildcards such as "*.example.com" are still accepted.
+    private static boolean hasConcreteMatchingAuthority(@Nullable IntentFilter filter, Uri uri) {
+        if (filter == null) return false;
+        Iterator<IntentFilter.AuthorityEntry> it = filter.authoritiesIterator();
+        if (it == null) return false;
+        while (it.hasNext()) {
+            IntentFilter.AuthorityEntry entry = it.next();
+            if (!"*".equals(entry.getHost()) && entry.match(uri) >= 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether {@code uri} matches one of the {@code <intent-filter>} elements declared by
+     * {@code component} (or its activity-alias target) in the app's own manifest, i.e. whether an
+     * implicit BROWSABLE Intent for this URI would have been delivered here anyway. Called by
+     * {@link LauncherActivity}.
+     */
+    static boolean matchesOwnIntentFilter(
+            @NonNull Context context, @NonNull ComponentName component, @Nullable Uri uri) {
+        if (!context.getPackageName().equals(component.getPackageName())) return false;
+        return matchesBrowsableFilter(context, uri, info ->
+                component.getClassName().equals(info.name)
+                        // activity-alias: the filter lives on the alias, we run as the target.
+                        || component.getClassName().equals(info.targetActivity));
+    }
+
+    /**
+     * Returns whether {@code uri} matches one of the {@code BROWSABLE} {@code <intent-filter>}
+     * elements with a concrete host authority declared on any TWA launcher activity (or its
+     * activity-alias target) in {@code context}'s own manifest. Called by
+     * {@link ShortcutTrampolineActivity}.
+     */
+    static boolean matchesTwaLauncherIntentFilter(
+            @NonNull Context context, @Nullable Uri uri) {
+        return matchesBrowsableFilter(context, uri, info -> isTwaLauncherActivity(context, info));
+    }
+
+    private static boolean isTwaLauncherActivity(
+            @NonNull Context context, @NonNull ActivityInfo info) {
+        if (LauncherActivity.class.getName().equals(info.name)
+                || LauncherActivity.class.getName().equals(info.targetActivity)) {
+            return true;
+        }
+        if (info.metaData != null && info.metaData.containsKey(METADATA_DEFAULT_URL)) {
+            return true;
+        }
+        if (info.targetActivity == null) {
+            return false;
+        }
+        try {
+            ActivityInfo targetInfo =
+                    context.getPackageManager().getActivityInfo(
+                            new ComponentName(context.getPackageName(), info.targetActivity),
+                            PackageManager.GET_META_DATA);
+            return targetInfo.metaData != null
+                    && targetInfo.metaData.containsKey(METADATA_DEFAULT_URL);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    /** Whether {@code s} is non-null and contains only ASCII characters. */
+    private static boolean isAscii(@Nullable String s) {
+        if (s == null) {
+            return false;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) > 0x7F) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Compares two URIs for same-origin equality (scheme, host, and normalized port). Scheme and
+     * host are compared ASCII-case-insensitively; non-ASCII schemes or hosts never match.
+     */
+    static boolean isSameOrigin(@Nullable Uri uri1, @Nullable Uri uri2) {
+        if (uri1 == null || uri2 == null) {
+            return false;
+        }
+        String scheme1 = uri1.getScheme();
+        String scheme2 = uri2.getScheme();
+        String host1 = uri1.getHost();
+        String host2 = uri2.getHost();
+        if (!isAscii(scheme1) || !isAscii(scheme2) || !isAscii(host1) || !isAscii(host2)) {
+            return false;
+        }
+
+        String s1 = scheme1.toLowerCase(Locale.ROOT);
+        String s2 = scheme2.toLowerCase(Locale.ROOT);
+        int port1 = uri1.getPort();
+        int port2 = uri2.getPort();
+        if (port1 == -1) {
+            port1 = "https".equals(s1) ? 443 : ("http".equals(s1) ? 80 : -1);
+        }
+        if (port2 == -1) {
+            port2 = "https".equals(s2) ? 443 : ("http".equals(s2) ? 80 : -1);
+        }
+
+        return s1.equals(s2)
+                && host1.toLowerCase(Locale.ROOT).equals(host2.toLowerCase(Locale.ROOT))
+                && port1 == port2;
     }
 }

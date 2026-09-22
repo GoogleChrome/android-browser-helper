@@ -1,3 +1,40 @@
+## Unreleased
+
+### Behaviour changes
+
+1. **Inbound `https` Intent origin validation:** Inbound `https` Intent URIs delivered to
+   `LauncherActivity` and `ShortcutTrampolineActivity` are validated against `DEFAULT_URL`,
+   `ADDITIONAL_TRUSTED_ORIGINS` (full origins preferred; legacy scheme-less host entries are
+   normalised to `https://` with a deprecation warning), and any `BROWSABLE` `<intent-filter>` with
+   a concrete (non-wildcard) `android:host` declared on `LauncherActivity` (or its
+   `<activity-alias>`, matching the full filter including any `android:path`, `pathPrefix`, or
+   `pathPattern` constraints; declare the origin in `ADDITIONAL_TRUSTED_ORIGINS` to trust all paths
+   on that origin). Untrusted `https` URIs fall back to `DEFAULT_URL` in `LauncherActivity`
+   (throwing `SecurityException` in debuggable builds) or cause `ShortcutTrampolineActivity` to
+   drop the launch.
+   To allow additional origins, configure `ADDITIONAL_TRUSTED_ORIGINS`, declare a matching
+   `BROWSABLE` `<intent-filter>`, or override `LauncherActivity.isTrustedIntentUrl(Uri)`.
+   `ShortcutTrampolineActivity` now also accepts scheme-less `ADDITIONAL_TRUSTED_ORIGINS` entries
+   and `https` hosts from the intent-filters of the app's TWA launcher activities; it does not
+   consult `isTrustedIntentUrl(Uri)` overrides. `https` and `content` schemes are now matched
+   case-insensitively. Schemes and hosts are compared ASCII-case-insensitively; a URI or configured
+   origin whose scheme or host contains non-ASCII characters (including percent-encoded ones) never
+   matches, so declare internationalised domains in punycode (`xn--`) form.
+2. **`EXTRA_ORIGINAL_LAUNCH_URL` suppression for rejected URIs:** An inbound `https` Intent URI
+   rejected by origin validation is no longer attached to the outbound browser Intent via
+   `TrustedWebActivityIntentBuilder.EXTRA_ORIGINAL_LAUNCH_URL`. All other Intent URIs (including
+   `http` and custom schemes) are forwarded as before.
+3. **`getUrlForIntent()` overrides subject to origin validation:** Custom `LauncherActivity`
+   subclasses that override `getUrlForIntent(Intent)` and synthesize a cross-origin `https` URL are
+   now subject to the same origin validation as `Intent.getData()`. Override
+   `LauncherActivity.isTrustedIntentUrl(Uri)` to permit trusted cross-origin targets.
+4. **Overridable rejection reporting hook (`LauncherActivity.reportRejection`):** Added
+   `protected void reportRejection(@NonNull String message, @NonNull RejectionOutcome outcome)` and
+   `LauncherActivity.RejectionOutcome` (`LAUNCH_URL_SUBSTITUTED`) so subclasses can route rejection
+   diagnostics or suppress the debuggable-build `SecurityException`. Overriding the hook affects
+   reporting only; origin enforcement is unchanged. In release builds, rejection messages include
+   only the scheme, host and port of the rejected URI.
+
 ## 2.6.2
 
 * [#520](https://github.com/GoogleChrome/android-browser-helper/pull/520). The TWA launcher will

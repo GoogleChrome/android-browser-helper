@@ -19,21 +19,25 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 
+import androidx.annotation.Nullable;
 import androidx.browser.customtabs.TrustedWebUtils;
 
 import org.junit.Before;
@@ -60,6 +64,9 @@ public class ShortcutTrampolineActivityTest {
     private ShadowActivityManager mShadowActivityManager;
 
     private static final String DEFAULT_URL = "https://www.example.com/twa/home";
+    private static final int ADDITIONAL_ORIGINS_RES_ID = 0x7f030003;
+
+    public static class SubclassLauncherActivity extends LauncherActivity {}
 
     @Before
     public void setUp() {
@@ -87,15 +94,47 @@ public class ShortcutTrampolineActivityTest {
 
         // Register a fake browser that can handle HTTP/HTTPS intents
         // so that resolveActivity() succeeds in the fallback strategy.
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com/twa/shortcut"));
+        registerBrowserForUri(Uri.parse("https://www.example.com/twa/shortcut"));
+
+        packageInfo.activities = new ActivityInfo[]{dummyLauncherActivity, trampolineActivity, coldShortcutActivity};
+        mShadowPackageManager.addPackage(packageInfo);
+    }
+
+    private void registerBrowserForUri(Uri uri) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.activityInfo = new ActivityInfo();
         resolveInfo.activityInfo.packageName = "com.android.chrome";
         resolveInfo.activityInfo.name = "com.android.chrome.ChromeTabbedActivity";
         mShadowPackageManager.addResolveInfoForIntent(browserIntent, resolveInfo);
+    }
 
-        packageInfo.activities = new ActivityInfo[]{dummyLauncherActivity, trampolineActivity, coldShortcutActivity};
-        mShadowPackageManager.addPackage(packageInfo);
+    private void registerOwnBrowsableIntentFilter(
+            String activityName,
+            @Nullable String targetActivity,
+            @Nullable Bundle metaData,
+            Uri probeUri,
+            String... hosts) {
+        Intent probe = new Intent(Intent.ACTION_VIEW, probeUri)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setPackage(mContext.getPackageName());
+        IntentFilter filter = new IntentFilter(Intent.ACTION_VIEW);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        filter.addCategory(Intent.CATEGORY_BROWSABLE);
+        if (probeUri.getScheme() != null) {
+            filter.addDataScheme(probeUri.getScheme());
+        }
+        for (String host : hosts) {
+            filter.addDataAuthority(host, null);
+        }
+        ResolveInfo ownFilterInfo = new ResolveInfo();
+        ownFilterInfo.activityInfo = new ActivityInfo();
+        ownFilterInfo.activityInfo.packageName = mContext.getPackageName();
+        ownFilterInfo.activityInfo.name = activityName;
+        ownFilterInfo.activityInfo.targetActivity = targetActivity;
+        ownFilterInfo.activityInfo.metaData = metaData;
+        ownFilterInfo.filter = filter;
+        mShadowPackageManager.addResolveInfoForIntent(probe, ownFilterInfo);
     }
 
     @Test
@@ -321,5 +360,205 @@ public class ShortcutTrampolineActivityTest {
         // Neither ColdShortcutActivity nor TwaLauncher should be started.
         assertNull(shadowOf(controller.get()).getNextStartedActivity());
         assertNull(shadowOf(RuntimeEnvironment.application).getNextStartedActivity());
+    }
+
+    @Test
+    public void launchesTwaForHostDeclaredInOwnIntentFilter() {
+        Uri secondDomainUri = Uri.parse("https://shop.example.com/deals");
+        registerOwnBrowsableIntentFilter(
+                LauncherActivity.class.getName(),
+                null,
+                null,
+                secondDomainUri,
+                "shop.example.com");
+        registerBrowserForUri(secondDomainUri);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(secondDomainUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(secondDomainUri, launchedIntent.getData());
+    }
+
+    @Test
+    public void coldShortcutActivityOnDesktop_acceptsHostDeclaredInLauncherIntentFilter() {
+        mShadowPackageManager.setSystemFeature(ChromeOsSupport.ARC_FEATURE, true);
+
+        Uri secondDomainUri = Uri.parse("https://shop.example.com/deals");
+        registerOwnBrowsableIntentFilter(
+                LauncherActivity.class.getName(),
+                null,
+                null,
+                secondDomainUri,
+                "shop.example.com");
+        registerBrowserForUri(secondDomainUri);
+        Intent httpBrowserIntent = new Intent()
+                .setData(Uri.fromParts("http", "", null))
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE);
+        ResolveInfo browserResolveInfo = new ResolveInfo();
+        browserResolveInfo.activityInfo = new ActivityInfo();
+        browserResolveInfo.activityInfo.packageName = "com.android.chrome";
+        browserResolveInfo.activityInfo.name = "com.android.chrome.ChromeTabbedActivity";
+        mShadowPackageManager.addResolveInfoForIntent(httpBrowserIntent, browserResolveInfo);
+
+        Intent shortcutIntent = new Intent(Intent.ACTION_VIEW).setData(secondDomainUri);
+        ActivityController<ShortcutTrampolineActivity> trampolineController =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, shortcutIntent);
+        trampolineController.create();
+
+        Intent coldLaunchIntent = shadowOf(trampolineController.get()).getNextStartedActivity();
+        assertNotNull(coldLaunchIntent);
+        assertEquals(new ComponentName(mContext, ColdShortcutActivity.class),
+                coldLaunchIntent.getComponent());
+        assertEquals(secondDomainUri, coldLaunchIntent.getData());
+
+        // ColdShortcutActivity itself has no <intent-filter>, so verify it accepts the URI
+        // declared on the app's launcher activity when started by ShortcutTrampolineActivity.
+        ActivityController<ColdShortcutActivity> coldController =
+                Robolectric.buildActivity(ColdShortcutActivity.class, coldLaunchIntent);
+        coldController.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertEquals(secondDomainUri, coldController.get().getLaunchingUrl());
+        Intent browserLaunched = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(browserLaunched);
+        assertEquals(secondDomainUri, browserLaunched.getData());
+        coldController.destroy();
+    }
+
+    @Test
+    public void launchesTwaForHostDeclaredOnAliasWithDefaultUrlMetadata() {
+        PackageInfo packageInfo = mShadowPackageManager.getInternalMutablePackageInfo(
+                mContext.getPackageName());
+        ActivityInfo subclassInfo = new ActivityInfo();
+        subclassInfo.packageName = mContext.getPackageName();
+        subclassInfo.name = SubclassLauncherActivity.class.getName();
+        packageInfo.activities = new ActivityInfo[]{
+                packageInfo.activities[0], packageInfo.activities[1], packageInfo.activities[2], subclassInfo
+        };
+
+        Bundle aliasMetaData = new Bundle();
+        aliasMetaData.putString("android.support.customtabs.trusted.DEFAULT_URL", DEFAULT_URL);
+
+        Uri aliasDomainUri = Uri.parse("https://alias.example.com/deals");
+        registerOwnBrowsableIntentFilter(
+                mContext.getPackageName() + ".LauncherAlias",
+                SubclassLauncherActivity.class.getName(),
+                aliasMetaData,
+                aliasDomainUri,
+                "alias.example.com");
+        registerBrowserForUri(aliasDomainUri);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(aliasDomainUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(aliasDomainUri, launchedIntent.getData());
+    }
+
+    @Test
+    public void dropsUriForHostDeclaredOnAliasWithoutDefaultUrlMetadata() {
+        PackageInfo packageInfo = mShadowPackageManager.getInternalMutablePackageInfo(
+                mContext.getPackageName());
+        ActivityInfo subclassInfo = new ActivityInfo();
+        subclassInfo.packageName = mContext.getPackageName();
+        subclassInfo.name = SubclassLauncherActivity.class.getName();
+        packageInfo.activities = new ActivityInfo[]{
+                packageInfo.activities[0], packageInfo.activities[1], packageInfo.activities[2], subclassInfo
+        };
+
+        Uri aliasDomainUri = Uri.parse("https://alias.example.com/deals");
+        registerOwnBrowsableIntentFilter(
+                mContext.getPackageName() + ".LauncherAlias",
+                SubclassLauncherActivity.class.getName(),
+                new Bundle(),
+                aliasDomainUri,
+                "alias.example.com");
+        registerBrowserForUri(aliasDomainUri);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(aliasDomainUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNull(launchedIntent);
+    }
+
+    @Test
+    public void shortcut_dropsNonHttpsUriEvenWhenItMatchesOwnIntentFilter() {
+        Uri customSchemeUri = Uri.parse("myapp://home/dashboard");
+        registerOwnBrowsableIntentFilter(
+                LauncherActivity.class.getName(),
+                null,
+                null,
+                customSchemeUri,
+                "home");
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(customSchemeUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNull(launchedIntent);
+    }
+
+    public static class HttpOriginShortcutTrampolineActivity extends ShortcutTrampolineActivity {
+        @Override
+        public Resources getResources() {
+            Resources spied = spy(super.getResources());
+            doReturn(new String[]{"http://legacy.example.com"})
+                    .when(spied).getStringArray(ADDITIONAL_ORIGINS_RES_ID);
+            return spied;
+        }
+    }
+
+    @Test
+    public void dropsHttpUriEvenWhenMatchingHttpAdditionalTrustedOrigin() {
+        PackageInfo packageInfo = mShadowPackageManager.getInternalMutablePackageInfo(
+                mContext.getPackageName());
+        packageInfo.activities[0].metaData.putInt(
+                "android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS",
+                ADDITIONAL_ORIGINS_RES_ID);
+        ActivityInfo trampolineInfo = new ActivityInfo();
+        trampolineInfo.packageName = mContext.getPackageName();
+        trampolineInfo.name = HttpOriginShortcutTrampolineActivity.class.getName();
+        packageInfo.activities = new ActivityInfo[]{
+                packageInfo.activities[0], packageInfo.activities[1], packageInfo.activities[2], trampolineInfo
+        };
+
+        Uri httpUri = Uri.parse("http://legacy.example.com/page");
+        registerBrowserForUri(httpUri);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(httpUri);
+        ActivityController<HttpOriginShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(HttpOriginShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNull(launchedIntent);
     }
 }

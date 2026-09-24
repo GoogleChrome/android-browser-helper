@@ -759,4 +759,21 @@ public class LauncherActivityOriginValidationTest {
         assertFalse(message.contains("SECRET"));
         assertFalse(message.contains("/cb"));
     }
+
+    @Test
+    public void getMetadata_returnsParsedManifestMetadataAfterOnCreate() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(DEFAULT_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        ActivityController<TestLauncherActivity> controller =
+                Robolectric.buildActivity(TestLauncherActivity.class, intent);
+        assertNull(controller.get().getMetadata());
+
+        controller.create();
+
+        LauncherActivityMetadata metadata = controller.get().getMetadata();
+        assertNotNull(metadata);
+        assertEquals(DEFAULT_URL, metadata.defaultUrl);
+        controller.destroy();
+    }
 }

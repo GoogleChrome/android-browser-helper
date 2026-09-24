@@ -17,7 +17,6 @@ package com.google.androidbrowserhelper.trusted;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,6 +43,7 @@ import com.google.androidbrowserhelper.trusted.splashscreens.PwaWrapperSplashScr
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -226,8 +226,9 @@ public class LauncherActivity extends Activity {
             intentUrl = Uri.parse(intentUrl.toString());
             // A rejected https URL would otherwise be forwarded here, because it no longer equals
             // the launch URL. Before validation it was the launch URL and was never forwarded, so
-            // suppressing it adds no new data flow. Other schemes (http, custom, protocol handlers)
-            // were never used as the launch URL and are forwarded as before.
+            // suppressing it adds no new data flow. A rejected content:// URI is not forwarded
+            // either, since it may name this app's internal files. Other schemes (http, custom,
+            // protocol handlers) were never used as the launch URL and are forwarded as before.
             if (!launchUrl.equals(intentUrl) && !isRejectedIntentUrl(intentUrl)) {
                 twaBuilder.setOriginalLaunchUrl(intentUrl);
             }
@@ -293,6 +294,43 @@ public class LauncherActivity extends Activity {
             Log.d(TAG, "Failed to share: share target not defined in the AndroidManifest");
             return;
         }
+
+        if (shareData.uris != null && !shareData.uris.isEmpty()) {
+            List<Uri> allowedUris = new ArrayList<>();
+            List<String> rejectedUris = new ArrayList<>();
+            for (Uri uri : shareData.uris) {
+                Uri parsedUri = (uri != null) ? Uri.parse(uri.toString()) : null;
+                if (isTrustedContentUri(parsedUri)) {
+                    allowedUris.add(parsedUri);
+                } else {
+                    rejectedUris.add(Utils.uriForLog(this, parsedUri));
+                }
+            }
+            boolean shareDropped = allowedUris.isEmpty()
+                    && shareData.title == null && shareData.text == null;
+            if (!shareDropped) {
+                shareData = new ShareData(shareData.title, shareData.text,
+                        allowedUris.isEmpty() ? null : allowedUris);
+            }
+            if (!rejectedUris.isEmpty()) {
+                // Report once, after filtering has been applied, and never in a way that changes
+                // the outcome being reported: throwing mid-loop made the partial-share behaviour
+                // unreachable in debuggable builds.
+                String message = (shareDropped
+                        ? "Dropping share: all shared URIs were rejected: "
+                        : "Dropping untrusted or ungranted shared URIs: ")
+                        + rejectedUris
+                        + ". Override LauncherActivity.isTrustedContentUri(Uri) if these URIs come "
+                        + "from your app's own FileProvider.";
+                reportRejection(message, shareDropped
+                        ? RejectionOutcome.PAYLOAD_DROPPED
+                        : RejectionOutcome.DATA_FILTERED);
+                if (shareDropped) {
+                    return;
+                }
+            }
+        }
+
         try {
             ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
             twaBuilder.setShareParams(shareTarget, shareData);
@@ -305,25 +343,41 @@ public class LauncherActivity extends Activity {
         List<Uri> uris;
 
         if (getIntent().hasExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA)) {
-            Bundle bundle = getIntent().getBundleExtra(TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA);
-            if (bundle == null) return;
-            uris = FileHandlingData.fromBundle(bundle).uris;
-        } else {
-            uris = Collections.singletonList(getIntent().getData());
-        }
-
-        for (Uri uri : uris) {
-            if (uri == null || !"content".equals(uri.getScheme())) return;
-
-            int granted = checkCallingOrSelfUriPermission(uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            if (granted != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Failed to open a file - no read / write permissions: " + uri);
+            Bundle bundle = getIntent().getBundleExtra(
+                    TrustedWebActivityIntentBuilder.EXTRA_FILE_HANDLING_DATA);
+            if (bundle == null) {
                 return;
             }
+            uris = FileHandlingData.fromBundle(bundle).uris;
+        } else {
+            Uri data = getIntent().getData();
+            // Not a file-handling launch. Return silently: this is the common path for launcher-icon
+            // and https deep-link launches, and must not log.
+            if (data == null || !"content".equalsIgnoreCase(data.getScheme())) {
+                return;
+            }
+            uris = Collections.singletonList(data);
         }
 
-        twaBuilder.setFileHandlingData(new FileHandlingData(uris));
+        List<Uri> safeUris = new ArrayList<>();
+        List<String> rejectedUris = new ArrayList<>();
+        for (Uri uri : uris) {
+            Uri parsedUri = (uri != null) ? Uri.parse(uri.toString()) : null;
+            if (isTrustedContentUri(parsedUri)) {
+                safeUris.add(parsedUri);
+            } else {
+                rejectedUris.add(Utils.uriForLog(this, parsedUri));
+            }
+        }
+        if (!rejectedUris.isEmpty()) {
+            // File handling is all-or-nothing: no file data is attached if any URI is rejected.
+            reportRejection("Failed to open files - no read permission: " + rejectedUris
+                    + ". Override LauncherActivity.isTrustedContentUri(Uri) if these URIs come "
+                    + "from your app's own FileProvider.", RejectionOutcome.PAYLOAD_DROPPED);
+            return;
+        }
+
+        twaBuilder.setFileHandlingData(new FileHandlingData(safeUris));
     }
 
     /**
@@ -445,8 +499,11 @@ public class LauncherActivity extends Activity {
             }
 
             if ("content".equalsIgnoreCase(scheme)) {
-                // The application was launched by opening a file - return the URL configured for
-                // this file type in the manifest
+                // The application was launched by opening a file - return the URL configured for this file
+                // type in the manifest. Deliberately not gated on Utils.isSafeExternalContentUri(): this URL
+                // is developer-declared and same-origin, so navigating to it is safe regardless. If the
+                // content URI turns out to be untrusted, addFileDataIfPresent() drops the file data and the
+                // handler simply opens with nothing attached.
                 if (mMetadata.fileHandlingActionUrl == null) {
                     return defaultUrl;
                 }
@@ -470,9 +527,10 @@ public class LauncherActivity extends Activity {
     }
 
     /**
-     * Whether {@code intentUrl} was refused by inbound validation. A refused URL is neither used as
-     * the launch URL nor forwarded as {@code EXTRA_ORIGINAL_LAUNCH_URL}; every other URL is handled
-     * exactly as before validation was introduced.
+     * Whether {@code intentUrl} was refused by inbound validation ({@code https} origin or
+     * {@code content://} URI validation). A refused URL is neither used as the launch URL nor
+     * forwarded as {@code EXTRA_ORIGINAL_LAUNCH_URL}; every other URL is handled exactly as before
+     * validation was introduced.
      */
     private boolean isRejectedIntentUrl(@NonNull Uri intentUrl) {
         if (!intentUrl.equals(mCheckedIntentUrl)) {
@@ -483,7 +541,9 @@ public class LauncherActivity extends Activity {
     }
 
     private boolean computeIsRejectedIntentUrl(@NonNull Uri intentUrl) {
-        return "https".equalsIgnoreCase(intentUrl.getScheme()) && !isTrustedIntentUrl(intentUrl);
+        String scheme = intentUrl.getScheme();
+        return ("https".equalsIgnoreCase(scheme) && !isTrustedIntentUrl(intentUrl))
+                || ("content".equalsIgnoreCase(scheme) && !isTrustedContentUri(intentUrl));
     }
 
     /**
@@ -506,10 +566,30 @@ public class LauncherActivity extends Activity {
     }
 
     /**
+     * Returns whether {@code uri} from the inbound Intent may be forwarded to the browser as shared or
+     * file-handling content.
+     *
+     * <p>Defaults to requiring a {@code content://} URI backed by an external ContentProvider plus a
+     * live read grant. Internal URIs are refused because {@code launchTrustedWebActivity()} grants the
+     * browser access using <em>this app's</em> authority, which would let any caller name an arbitrary
+     * internal file.
+     *
+     * <p>Override only if your app deliberately hands content from its own {@code FileProvider} to the
+     * Trusted Web Activity, and you have verified the URI did not originate from an untrusted caller.
+     */
+    protected boolean isTrustedContentUri(@Nullable Uri uri) {
+        return Utils.isSafeExternalContentUri(this, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+
+    /**
      * Describes how a security rejection affected the launch. Further values may be added in
      * later releases, so overrides of {@link #reportRejection} should not assume this set is final.
      */
     public enum RejectionOutcome {
+        /** Rejected items were dropped; the launch proceeds carrying the remaining data. */
+        DATA_FILTERED,
+        /** The whole share or file-handling payload was discarded. */
+        PAYLOAD_DROPPED,
         /** An untrusted launch URL was replaced with {@code DEFAULT_URL}. */
         LAUNCH_URL_SUBSTITUTED,
     }
@@ -519,13 +599,22 @@ public class LauncherActivity extends Activity {
      *
      * <p>The default implementation logs at {@code ERROR}, and additionally throws a
      * {@link SecurityException} in debuggable builds when the rejection changed the outcome of the
-     * launch ({@link RejectionOutcome#LAUNCH_URL_SUBSTITUTED}), so that the misconfiguration is
-     * found during development. Release builds never throw.
+     * launch ({@link RejectionOutcome#PAYLOAD_DROPPED} or
+     * {@link RejectionOutcome#LAUNCH_URL_SUBSTITUTED}), so that the misconfiguration is found
+     * during development. Release builds never throw.
      *
      * <p>Override to route these diagnostics elsewhere (for example to a crash reporter) or to
      * suppress the debuggable-build exception. Overriding affects <em>reporting only</em>: the
      * rejection itself has already been enforced by the caller. To change what is accepted, override
-     * {@link #isTrustedIntentUrl(Uri)} instead.
+     * {@link #isTrustedIntentUrl(Uri)} or {@link #isTrustedContentUri(Uri)} instead.
+     *
+     * <p>Implementations <strong>must not</strong> throw when {@code outcome} is
+     * {@link RejectionOutcome#DATA_FILTERED}: a development-time diagnostic must not change the
+     * behaviour it is diagnosing. Throwing from a recoverable rejection will abort the launch and
+     * discard the surviving share data. The distinction is deliberate: throwing on a recoverable
+     * rejection would discard data that survived filtering, so the diagnostic would destroy the
+     * very outcome it reports. Non-recoverable rejections have no surviving payload to protect, so
+     * they are made loud at development time.
      *
      * @param message a human-readable diagnostic describing what was rejected and how to allow it
      *     deliberately; its format is not part of the API contract and must not be parsed.
@@ -533,6 +622,9 @@ public class LauncherActivity extends Activity {
      */
     protected void reportRejection(@NonNull String message, @NonNull RejectionOutcome outcome) {
         Log.e(TAG, message);
+        if (outcome == RejectionOutcome.DATA_FILTERED) {
+            return;
+        }
         if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
             throw new SecurityException(message + " See "
                     + "https://github.com/GoogleChrome/android-browser-helper#inbound-intent-validation"

@@ -21,7 +21,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -29,6 +31,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Process;
 import android.util.Log;
 import android.view.View;
 
@@ -39,10 +42,12 @@ import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -337,5 +342,166 @@ public class Utils {
         return s1.equals(s2)
                 && host1.toLowerCase(Locale.ROOT).equals(host2.toLowerCase(Locale.ROOT))
                 && port1 == port2;
+    }
+
+    private static volatile OwnAuthoritiesCache sOwnAuthoritiesCache;
+
+    private static final class OwnAuthoritiesCache {
+        final String packageName;
+        final Set<String> authorities;
+
+        OwnAuthoritiesCache(
+                @Nullable String packageName,
+                Set<String> authorities) {
+            this.packageName = packageName;
+            this.authorities = authorities;
+        }
+    }
+
+    @VisibleForTesting
+    static void resetOwnProviderAuthoritiesCacheForTesting() {
+        sOwnAuthoritiesCache = null;
+    }
+
+    private static Set<String> getOwnProviderAuthorities(@NonNull Context context) {
+        String hostPackage = context.getPackageName();
+        OwnAuthoritiesCache cached = sOwnAuthoritiesCache;
+        if (cached != null && Objects.equals(cached.packageName, hostPackage)) {
+            return cached.authorities;
+        }
+
+        Context appContext = context.getApplicationContext();
+        PackageManager pm = (appContext != null ? appContext : context).getPackageManager();
+
+        Set<String> authorities = new HashSet<>();
+        String[] packages = pm.getPackagesForUid(Process.myUid());
+        if (packages == null || packages.length == 0) {
+            packages = hostPackage != null ? new String[]{hostPackage} : new String[0];
+        } else if (hostPackage != null) {
+            boolean foundHost = false;
+            for (String pkg : packages) {
+                if (hostPackage.equals(pkg)) {
+                    foundHost = true;
+                    break;
+                }
+            }
+            if (!foundHost) {
+                String[] expanded = Arrays.copyOf(packages, packages.length + 1);
+                expanded[packages.length] = hostPackage;
+                packages = expanded;
+            }
+        }
+
+        for (String pkg : packages) {
+            if (pkg == null) {
+                continue;
+            }
+            try {
+                PackageInfo pkgInfo =
+                        pm.getPackageInfo(pkg, PackageManager.GET_PROVIDERS);
+                if (pkgInfo != null && pkgInfo.providers != null) {
+                    for (ProviderInfo provider : pkgInfo.providers) {
+                        if (provider == null || provider.authority == null) {
+                            continue;
+                        }
+                        for (String part : provider.authority.split(";")) {
+                            String trimmed = part.trim();
+                            if (!trimmed.isEmpty()) {
+                                authorities.add(trimmed.toLowerCase(Locale.ROOT));
+                            }
+                        }
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException ignored) {
+                // Ignore packages that cannot be queried.
+            }
+        }
+
+        Set<String> unmodifiable = Collections.unmodifiableSet(authorities);
+        sOwnAuthoritiesCache = new OwnAuthoritiesCache(hostPackage, unmodifiable);
+        return unmodifiable;
+    }
+
+    /**
+     * Returns {@code authority} without Android's cross-user {@code "<userId>@"} prefix (added by
+     * Intent#fixUris for cross-profile launches), or null if the prefix is malformed. Splits on the
+     * last '@', matching ContentProvider#getAuthorityWithoutUserId.
+     */
+    @VisibleForTesting
+    @Nullable
+    static String stripContentUserId(@NonNull String authority) {
+        int at = authority.lastIndexOf('@');
+        if (at == -1) {
+            return authority;
+        }
+        String userId = authority.substring(0, at);
+        String bare = authority.substring(at + 1);
+        if (userId.isEmpty() || bare.isEmpty()) {
+            return null;
+        }
+        for (int i = 0; i < userId.length(); i++) {
+            char c = userId.charAt(i);
+            if (c < '0' || c > '9') {
+                return null;
+            }
+        }
+        try {
+            Integer.parseInt(userId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return bare;
+    }
+
+    /**
+     * Verifies that {@code uri} is a {@code content://} URI backed by an external ContentProvider
+     * (not owned by {@code context}'s package or UID, preventing confused-deputy re-grants of
+     * internal FileProviders, including cross-profile {@code content://<userId>@<authority>/...}
+     * URIs) and that this process holds a valid URI grant for {@code modeFlags}.
+     */
+    static boolean isSafeExternalContentUri(
+            @NonNull Context context, @Nullable Uri uri, int modeFlags) {
+        if (uri == null) {
+            return false;
+        }
+        Uri canonicalUri = Uri.parse(uri.toString());
+        if (!"content".equalsIgnoreCase(canonicalUri.getScheme())) {
+            return false;
+        }
+
+        String authority = canonicalUri.getAuthority();
+        if (authority == null) {
+            return false;
+        }
+        String bareAuthority = stripContentUserId(authority);
+        if (bareAuthority == null || bareAuthority.indexOf(':') != -1) {
+            return false;
+        }
+
+        if (getOwnProviderAuthorities(context).contains(
+                bareAuthority.toLowerCase(Locale.ROOT))) {
+            return false;
+        }
+
+        // Best-effort extra rejection when visible; never fail closed on null because Android 11+
+        // package visibility filtering causes resolveContentProvider() to return null for external
+        // senders not declared in <queries>.
+        ProviderInfo providerInfo =
+                context.getPackageManager().resolveContentProvider(bareAuthority, 0);
+        if (providerInfo != null) {
+            if (context.getPackageName().equals(providerInfo.packageName)) {
+                return false;
+            }
+            if (providerInfo.applicationInfo != null
+                    && providerInfo.applicationInfo.uid == Process.myUid()) {
+                return false;
+            }
+        }
+
+        // Pass the full URI (including any userId@ prefix) because ContextImpl resolves the user id
+        // from it.
+        return context.checkUriPermission(
+                canonicalUri, Process.myPid(), Process.myUid(), modeFlags)
+                == PackageManager.PERMISSION_GRANTED;
     }
 }

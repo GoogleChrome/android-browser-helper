@@ -19,7 +19,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Context;
@@ -31,6 +33,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ViewGroup;
+import android.webkit.RenderProcessGoneDetail;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -61,11 +65,19 @@ public class WebViewFallbackActivityTest {
     private static final String KEY_EXTRA_ORIGINS = KEY_PREFIX + "KEY_EXTRA_ORIGINS";
 
     public static class TestWebViewFallbackActivity extends WebViewFallbackActivity {
+        int setupWebSettingsCallCount = 0;
+
         @Override
         public Resources getResources() {
             Resources spied = spy(super.getResources());
             doReturn(new String[]{EXTRA_ORIGIN}).when(spied).getStringArray(EXTRA_ORIGINS_RES_ID);
             return spied;
+        }
+
+        @Override
+        protected void setupWebSettings(WebSettings webSettings) {
+            super.setupWebSettings(webSettings);
+            setupWebSettingsCallCount++;
         }
     }
 
@@ -194,5 +206,53 @@ public class WebViewFallbackActivityTest {
                 webView, "https://bareport.example.com:8443/inside-twa"));
         assertTrue(client.shouldOverrideUrlLoading(
                 webView, "https://www.evil.com/outside-twa"));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void setupWebSettings_disablesFileAndContentAccess() {
+        Intent intent = new Intent(mContext, TestWebViewFallbackActivity.class)
+                .putExtra(KEY_LAUNCH_URI, Uri.parse(DEFAULT_URL));
+
+        ActivityController<TestWebViewFallbackActivity> controller =
+                Robolectric.buildActivity(TestWebViewFallbackActivity.class, intent);
+        controller.create();
+
+        WebView webView = getLoadedWebView(controller.get());
+        WebSettings settings = webView.getSettings();
+        assertFalse(settings.getAllowFileAccess());
+        assertFalse(settings.getAllowContentAccess());
+        assertFalse(settings.getAllowFileAccessFromFileURLs());
+        assertFalse(settings.getAllowUniversalAccessFromFileURLs());
+
+        WebSettings mockSettings = mock(WebSettings.class);
+        controller.get().setupWebSettings(mockSettings);
+        verify(mockSettings).setAllowFileAccess(false);
+        verify(mockSettings).setAllowContentAccess(false);
+        verify(mockSettings).setAllowFileAccessFromFileURLs(false);
+        verify(mockSettings).setAllowUniversalAccessFromFileURLs(false);
+    }
+
+    @Test
+    public void onRenderProcessGone_reappliesHardenedWebSettingsAndSubclassOverride() {
+        Intent intent = new Intent(mContext, TestWebViewFallbackActivity.class)
+                .putExtra(KEY_LAUNCH_URI, Uri.parse(DEFAULT_URL));
+
+        ActivityController<TestWebViewFallbackActivity> controller =
+                Robolectric.buildActivity(TestWebViewFallbackActivity.class, intent);
+        controller.create();
+
+        assertEquals(1, controller.get().setupWebSettingsCallCount);
+        WebView initialWebView = getLoadedWebView(controller.get());
+        WebViewClient client = shadowOf(initialWebView).getWebViewClient();
+        assertNotNull(client);
+
+        assertTrue(client.onRenderProcessGone(
+                initialWebView, mock(RenderProcessGoneDetail.class)));
+        assertEquals(2, controller.get().setupWebSettingsCallCount);
+
+        WebView replacementWebView = getLoadedWebView(controller.get());
+        assertFalse(replacementWebView.getSettings().getAllowFileAccess());
+        assertFalse(replacementWebView.getSettings().getAllowContentAccess());
     }
 }

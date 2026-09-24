@@ -122,6 +122,12 @@ In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>`
 * **Transient failure and live-session revocation:** Because `SharedPreferencesTokenStore` holds a single slot, a transient bind/session failure (such as a browser updating in the background) or a secondary launch that resolves to `CUSTOM_TAB`/`BROWSER` mode while a TWA session is already active will clear the stored token for the remainder of that session until the next successful TWA-mode launch restores it.
 * **Custom `TokenStore` escape hatch and `ShortcutTrampolineActivity` limitation:** There is no manifest metadata flag to retain stale tokens across non-TWA launches. An app that needs to suppress `store(null)` on `LauncherActivity` fallback launches can override `LauncherActivity.createTwaLauncher()` (using `getMetadata()` to inspect parsed manifest metadata) and pass a `TokenStore` decorator to the 4-argument `TwaLauncher` constructor. **Limitation:** `ShortcutTrampolineActivity` constructs its `TwaLauncher` internally with `new SharedPreferencesTokenStore(context)` and does not call `LauncherActivity.createTwaLauncher()`, so a shortcut launch that falls back to a non-TWA mode will still clear the shared `SharedPreferencesTokenStore`.
 
+## WebView fallback security (`WebViewFallbackActivity`)
+
+When `android.support.customtabs.trusted.FALLBACK_STRATEGY` is set to `"webview"` and no Trusted Web Activity provider is available, `WebViewFallbackActivity` hardens its in-process `WebView`:
+
+* **`WebSettings` file and content access lockdown:** `WebViewFallbackActivity.setupWebSettings(WebSettings)` disables `file://` and `content://` access by default (`setAllowFileAccess(false)`, `setAllowContentAccess(false)`, `setAllowFileAccessFromFileURLs(false)`, and `setAllowUniversalAccessFromFileURLs(false)`), both on initial creation and when recreating the `WebView` after renderer process termination (`onRenderProcessGone`). **Opt-out:** subclasses that intentionally load local assets in a custom `WebViewFallbackActivity` can override `protected void setupWebSettings(@NonNull WebSettings webSettings)`.
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

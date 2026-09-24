@@ -219,7 +219,7 @@ public class WebViewFallbackActivity extends Activity {
                 mWebView = new WebView(view.getContext());
                 mWebView.setWebViewClient(this);
                 WebSettings webSettings = mWebView.getSettings();
-                setupWebSettings(webSettings);
+                WebViewFallbackActivity.this.setupWebSettings(webSettings);
                 vg.addView(mWebView);
 
                 // With the crash recovered, decide what to do next.
@@ -329,11 +329,16 @@ public class WebViewFallbackActivity extends Activity {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private static void setupWebSettings(WebSettings webSettings) {
+    @SuppressWarnings("deprecation")
+    protected void setupWebSettings(@NonNull WebSettings webSettings) {
         // Those settings are disabled by default.
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
+        webSettings.setAllowFileAccess(false);
+        webSettings.setAllowContentAccess(false);
+        webSettings.setAllowFileAccessFromFileURLs(false);
+        webSettings.setAllowUniversalAccessFromFileURLs(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             webSettings.setMediaPlaybackRequiresUserGesture(false);
         }

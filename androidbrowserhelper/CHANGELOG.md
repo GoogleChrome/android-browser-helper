@@ -97,6 +97,32 @@
     package directly without running `TwaProviderPicker`'s category filter (preserving enterprise
     and kiosk configurations that target a specific browser), while still requiring the package to
     establish a `CustomTabsSession` before its delegation token is stored.
+11. **Require system or Play Store installation for non-default TWA providers:**
+    When no single default browser is set (`MATCH_DEFAULT_ONLY` returning multiple
+    `CATEGORY_DEFAULT` browsers, so `defaultOrderedCount != 1`) or the user's default browser does
+    not support Trusted Web Activities, `TwaProviderPicker.pickProvider()` now requires a
+    non-authoritative TWA candidate (including `ChromeLegacyUtils` local-build package names
+    `org.chromium.chrome` and
+    `com.google.android.apps.chrome`) to be preinstalled on the system image (`FLAG_SYSTEM` /
+    `FLAG_UPDATED_SYSTEM_APP`) or installed by Google Play (`com.android.vending` via
+    `PackageManager.getInstallerPackageName()`) in order to enter `LaunchMode.TRUSTED_WEB_ACTIVITY`.
+    Unprivileged (sideloaded or alternative-store) non-default TWA candidates are excluded from
+    `LaunchMode.TRUSTED_WEB_ACTIVITY` and downgraded to `LaunchMode.CUSTOM_TAB` (`bestCctProvider`),
+    which clears `TokenStore` (`mTokenStore.store(null)`) so an unprivileged package cannot acquire
+    `DelegationService` or Play Billing capabilities. When no single default browser is set, the
+    fallback Custom Tabs provider (`LaunchMode.CUSTOM_TAB`) and plain browser (`LaunchMode.BROWSER`)
+    are also chosen preferring system- or Play-installed packages, because the chosen package
+    receives the launch URL directly; the authoritative single default browser still always wins.
+    * **Opt-outs:** (1) When the user explicitly sets a browser (including a sideloaded or
+      alternative-store build) as their default browser in Android OS settings (`MATCH_DEFAULT_ONLY`
+      returning a single authoritative entry, `defaultOrderedCount == 1`), that browser still wins
+      `LaunchMode.TRUSTED_WEB_ACTIVITY` regardless of install source. (2) Developers targeting a
+      specific browser can declare `android.support.customtabs.trusted.LAUNCHING_BROWSER` in
+      `AndroidManifest.xml` or pass `providerPackage` directly to `TwaLauncher`.
+    * **"Manage space" and site-settings shortcut:** When a launch resolves to a non-TWA mode
+      (`CUSTOM_TAB` or `BROWSER`), `LauncherActivity` no longer records that package as the
+      "Manage space" / site-settings target and clears the stored record, so a transient fallback
+      removes the site-settings shortcut until the next `TRUSTED_WEB_ACTIVITY` launch.
 
 ## 2.6.2
 

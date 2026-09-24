@@ -123,6 +123,15 @@
       (`CUSTOM_TAB` or `BROWSER`), `LauncherActivity` no longer records that package as the
       "Manage space" / site-settings target and clears the stored record, so a transient fallback
       removes the site-settings shortcut until the next `TRUSTED_WEB_ACTIVITY` launch.
+12. **`WebViewFallbackActivity` `WebSettings` file and content access disabled by default:**
+    `WebViewFallbackActivity.setupWebSettings(WebSettings)` now explicitly disables local file and
+    content provider access (`setAllowFileAccess(false)`, `setAllowContentAccess(false)`,
+    `setAllowFileAccessFromFileURLs(false)`, and `setAllowUniversalAccessFromFileURLs(false)`) both
+    when creating the `WebView` in `onCreate()` and when recreating it after a renderer crash in
+    `onRenderProcessGone()`. `setupWebSettings(@NonNull WebSettings)` has been changed from
+    `private static` to a `protected` instance method so subclasses that intentionally need custom
+    `WebSettings` can override it and have their override preserved across renderer crash
+    recovery.
 
 ## 2.6.2
 

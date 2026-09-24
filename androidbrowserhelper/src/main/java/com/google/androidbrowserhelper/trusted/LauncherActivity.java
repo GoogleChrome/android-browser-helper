@@ -253,16 +253,18 @@ public class LauncherActivity extends Activity {
             sChromeVersionChecked = true;
         }
 
+        String twaProviderPackage =
+                (mTwaLauncher.getLaunchMode() == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY)
+                        ? mTwaLauncher.getProviderPackage() : null;
         if (ChromeOsSupport.isRunningOnArc(getApplicationContext().getPackageManager())) {
             new TwaSharedPreferencesManager(this)
                     .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
         } else {
             new TwaSharedPreferencesManager(this)
-                    .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+                    .writeLastLaunchedProviderPackageName(twaProviderPackage);
         }
 
-        ManageDataLauncherActivity.addSiteSettingsShortcut(this,
-                mTwaLauncher.getProviderPackage());
+        ManageDataLauncherActivity.addSiteSettingsShortcut(this, twaProviderPackage);
     }
 
     protected CustomTabsCallback getCustomTabsCallback() {

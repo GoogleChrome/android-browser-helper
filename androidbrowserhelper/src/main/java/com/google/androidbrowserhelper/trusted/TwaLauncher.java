@@ -441,6 +441,14 @@ public class TwaLauncher {
     }
 
     /**
+     * Returns the launch mode selected for this TwaLauncher.
+     */
+    @TwaProviderPicker.LaunchMode
+    int getLaunchMode() {
+        return mLaunchMode;
+    }
+
+    /**
      * Sets the timestamp (in SystemClock.uptimeMillis()) when the TWA launcher
      * activity was created. This timestamp is used to report the full startup
      * duration to the browser.

@@ -127,6 +127,22 @@ In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>`
 When `android.support.customtabs.trusted.FALLBACK_STRATEGY` is set to `"webview"` and no Trusted Web Activity provider is available, `WebViewFallbackActivity` hardens its in-process `WebView`:
 
 * **`WebSettings` file and content access lockdown:** `WebViewFallbackActivity.setupWebSettings(WebSettings)` disables `file://` and `content://` access by default (`setAllowFileAccess(false)`, `setAllowContentAccess(false)`, `setAllowFileAccessFromFileURLs(false)`, and `setAllowUniversalAccessFromFileURLs(false)`), both on initial creation and when recreating the `WebView` after renderer process termination (`onRenderProcessGone`). **Opt-out:** subclasses that intentionally load local assets in a custom `WebViewFallbackActivity` can override `protected void setupWebSettings(@NonNull WebSettings webSettings)`.
+* **Off-origin navigation and scheme allowlist (`shouldOverrideUrlLoading`):** Only navigations to `https` URLs matching the app's configured trusted origins (`mLaunchUrl` or `mExtraOrigins`, checked via `FallbackWebViewClient.isTrustedOrigin(Uri)`), `data:` URIs (used by inline web features such as SVGOMG's Demo loader), `about:blank` / `about:srcdoc`, and `blob:` URIs whose inner origin is `https` and trusted (`isTrustedOrigin(inner)`) are loaded inside the host `WebView` (`return false`). On the main frame, untrusted `http` and `https` navigations are handed off externally via `CustomTabsIntent`, while other external schemes (`tel:`, `mailto:`, `sms:`, `geo:`, `market:`, or custom app schemes) launch an external `Intent.ACTION_VIEW` with `Intent.CATEGORY_BROWSABLE` and no Custom Tab extras. `file:`, `content:`, `javascript:`, `intent:`, untrusted `blob:`, and other `about:` URIs are blocked (`return true`) without firing an external `Intent`. Subframe navigations (`!request.isForMainFrame()`) never launch an external activity (`return true` without firing an `Intent`), and all external dispatches **fail closed** (`return true`, cancelling the in-WebView load) even if launching an external handler throws `ActivityNotFoundException` or `SecurityException`. **Opt-out:** subclasses that require custom off-origin or custom-scheme navigation handling can override `protected WebViewClient createWebViewClient()` and return a subclass of `protected class FallbackWebViewClient extends WebViewClient` overriding `protected boolean shouldOverrideUrlLoading(@NonNull Uri url, boolean isMainFrame)` (with `protected boolean isTrustedOrigin(@Nullable Uri uri)` available to inspect origin trust); `WebViewFallbackActivity` caches the returned `WebViewClient` and re-attaches it across renderer crashes in `onRenderProcessGone`:
+
+```java
+@Override
+protected WebViewClient createWebViewClient() {
+    return new FallbackWebViewClient() {
+        @Override
+        protected boolean shouldOverrideUrlLoading(@NonNull Uri url, boolean isMainFrame) {
+            if ("myapp".equalsIgnoreCase(url.getScheme())) {
+                return false;
+            }
+            return super.shouldOverrideUrlLoading(url, isMainFrame);
+        }
+    };
+}
+```
 
 ## Source Code Headers
 

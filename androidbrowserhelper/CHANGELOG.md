@@ -132,6 +132,26 @@
     `private static` to a `protected` instance method so subclasses that intentionally need custom
     `WebSettings` can override it and have their override preserved across renderer crash
     recovery.
+13. **`WebViewFallbackActivity` navigation scheme policy, main-frame gating, and override seam:**
+    `WebViewFallbackActivity`'s `WebViewClient` (now exposed as `protected class
+    FallbackWebViewClient extends WebViewClient`) restricts in-WebView navigation (`return false`)
+    to trusted `https` origins (`mLaunchUrl` and configured `mExtraOrigins`, checked via
+    `protected boolean isTrustedOrigin(@Nullable Uri uri)`), `data:` URIs (preserving inline `data:`
+    loads such as SVGOMG's Demo feature), `about:blank` / `about:srcdoc`, and `blob:` URIs whose
+    inner origin is `https` and trusted (`isTrustedOrigin(inner)`). Main-frame untrusted `http` and
+    `https` navigations are handed off externally via `CustomTabsIntent`; main-frame navigations to
+    other external schemes (`tel:`, `mailto:`, `sms:`, `geo:`, `market:`, or custom app schemes)
+    launch an `Intent.ACTION_VIEW` with `Intent.CATEGORY_BROWSABLE` and no Custom Tab extras.
+    `file:`, `content:`, `javascript:`, `intent:`, untrusted `blob:`, and other `about:` URIs are
+    blocked (`return true`) without firing an external `Intent`. Subframe navigations
+    (`!request.isForMainFrame()`) never launch external activities (`return true` without firing an
+    `Intent`), and all external dispatches **fail closed** (`return true`, cancelling the in-WebView
+    load) if `startActivity` / `launchUrl` throws `ActivityNotFoundException` or
+    `SecurityException`. `createWebViewClient()` has been widened from `private` to `protected` and
+    cached in `mWebViewClient`, and `FallbackWebViewClient` exposes
+    `protected boolean shouldOverrideUrlLoading(@NonNull Uri url, boolean isMainFrame)` and
+    `protected boolean isTrustedOrigin(@Nullable Uri uri)` so subclasses can customize navigation
+    handling and have their client preserved across renderer crashes in `onRenderProcessGone()`.
 
 ## 2.6.2
 

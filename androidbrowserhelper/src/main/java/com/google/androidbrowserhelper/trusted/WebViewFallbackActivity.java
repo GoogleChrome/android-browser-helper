@@ -40,6 +40,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
@@ -47,6 +48,7 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class WebViewFallbackActivity extends Activity {
@@ -61,6 +63,7 @@ public class WebViewFallbackActivity extends Activity {
     private Uri mLaunchUrl;
     private int mStatusBarColor;
     private WebView mWebView;
+    private WebViewClient mWebViewClient;
     private List<Uri> mExtraOrigins = new ArrayList<>();
 
     public static Intent createLaunchIntent(
@@ -141,7 +144,8 @@ public class WebViewFallbackActivity extends Activity {
         }
 
         mWebView = new WebView(this);
-        mWebView.setWebViewClient(createWebViewClient());
+        mWebViewClient = createWebViewClient();
+        mWebView.setWebViewClient(mWebViewClient);
         mWebView.setWebChromeClient(createWebViewChromeClient());
 
         WebSettings webSettings = mWebView.getSettings();
@@ -201,93 +205,167 @@ public class WebViewFallbackActivity extends Activity {
         super.onConfigurationChanged(newConfig);
     }
 
-    private WebViewClient createWebViewClient() {
-        return new WebViewClient() {
-            @Override
-            public boolean onRenderProcessGone(
-                    WebView view, RenderProcessGoneDetail detail) {
-                ViewGroup vg = (ViewGroup) view.getParent();
+    protected WebViewClient createWebViewClient() {
+        return new FallbackWebViewClient();
+    }
 
-                // Remove crashed WebView from the hierarchy
-                // and ensure it is destroyed.
-                vg.removeView(view);
-                view.destroy();
+    protected class FallbackWebViewClient extends WebViewClient {
+        @Override
+        public boolean onRenderProcessGone(
+                WebView view, RenderProcessGoneDetail detail) {
+            ViewGroup vg = (ViewGroup) view.getParent();
 
-                // Create a new instance, and ensure it also
-                // handles crashes - in this case, re-using
-                // the current WebViewClient
-                mWebView = new WebView(view.getContext());
-                mWebView.setWebViewClient(this);
-                WebSettings webSettings = mWebView.getSettings();
-                WebViewFallbackActivity.this.setupWebSettings(webSettings);
-                vg.addView(mWebView);
+            // Remove crashed WebView from the hierarchy
+            // and ensure it is destroyed.
+            vg.removeView(view);
+            view.destroy();
 
-                // With the crash recovered, decide what to do next.
-                // We are sending a toast and loading the origin
-                // URL, in this example.
-                Toast.makeText(view.getContext(), "Recovering from crash",
-                        Toast.LENGTH_LONG).show();
-                mWebView.loadUrl(mLaunchUrl.toString());
+            // Create a new instance, and ensure it also
+            // handles crashes - in this case, re-using
+            // the current WebViewClient
+            mWebView = new WebView(view.getContext());
+            mWebView.setWebViewClient(mWebViewClient != null ? mWebViewClient : this);
+            WebSettings webSettings = mWebView.getSettings();
+            WebViewFallbackActivity.this.setupWebSettings(webSettings);
+            vg.addView(mWebView);
+
+            // With the crash recovered, decide what to do next.
+            // We are sending a toast and loading the origin
+            // URL, in this example.
+            Toast.makeText(view.getContext(), "Recovering from crash",
+                    Toast.LENGTH_LONG).show();
+            mWebView.loadUrl(mLaunchUrl.toString());
+            return true;
+        }
+
+        protected boolean shouldOverrideUrlLoading(@NonNull Uri url, boolean isMainFrame) {
+            if (url == null) {
+                Log.w(TAG, "Blocked navigation to null URL in WebViewFallbackActivity");
+                return true;
+            }
+            String scheme = url.getScheme();
+            if (scheme == null) {
+                Log.w(TAG, "Blocked navigation to URL with null scheme in "
+                        + "WebViewFallbackActivity: " + url);
+                return true;
+            }
+            String normalizedScheme = scheme.toLowerCase(Locale.ROOT);
+
+            // URIs with the `data` scheme are handled in the WebView.
+            // The "Demo" item in https://jakearchibald.github.io/svgomg/ is one example of this
+            // usage
+            if ("data".equals(normalizedScheme)) {
+                return false;
+            }
+
+            if ("about".equals(normalizedScheme)) {
+                String ssp = url.getSchemeSpecificPart();
+                if ("blank".equals(ssp) || "srcdoc".equals(ssp)) {
+                    return false;
+                }
+                Log.w(TAG, "Blocked navigation to disallowed about: URI in "
+                        + "WebViewFallbackActivity: " + url);
                 return true;
             }
 
-            private boolean shouldOverrideUrlLoading(Uri navigationUrl) {
-                Uri launchUrl = WebViewFallbackActivity.this.mLaunchUrl;
-                // If the user is navigation to a different origin, use CCT to handle the navigation
-                //
-                // URIs with the `data` scheme are handled in the WebView.
-                // The "Demo" item in https://jakearchibald.github.io/svgomg/ is one example of this
-                // usage
-                if (!"data".equals(navigationUrl.getScheme()) &&
-                        !uriOriginsMatch(navigationUrl, launchUrl) &&
-                        !matchExtraOrigins(navigationUrl)) {
-                    // A Custom Tab is an ACTION_VIEW Intent with special extras that cause the
-                    // handler for that Intent to change its behaviour. This Intent should be
-                    // able to trigger both browsers or platform-specific apps that handle those
-                    // Intents.
-                    // However, some URLs, like the data:// schema must be handled by the
-                    // WebView itself. If an URL can't be handled by any app we allow the WebView
-                    // to try to handle it.
-                    try {
-                        CustomTabsIntent intent = new CustomTabsIntent.Builder()
-                                .setToolbarColor(mStatusBarColor)
-                                .build();
-                        intent.launchUrl(WebViewFallbackActivity.this, navigationUrl);
-                        return true;
-                    } catch (ActivityNotFoundException ex) {
-                        Log.e(TAG, String.format(
-                                "ActivityNotFoundException while launching '%s'", navigationUrl));
-                        return false;
-                    }
+            if ("blob".equals(normalizedScheme)) {
+                String ssp = url.getSchemeSpecificPart();
+                Uri inner = ssp != null ? Uri.parse(ssp) : null;
+                if (inner != null && isTrustedOrigin(inner)) {
+                    return false;
                 }
+                Log.w(TAG, "Blocked navigation to untrusted blob: URI in "
+                        + "WebViewFallbackActivity: " + url);
+                return true;
+            }
 
+            // Trusted https origins stay inside the WebView.
+            if (isTrustedOrigin(url)) {
                 return false;
             }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                return this.shouldOverrideUrlLoading(Uri.parse(url));
-            }
-
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return this.shouldOverrideUrlLoading(request.getUrl());
-            }
-
-            private boolean matchExtraOrigins(Uri navigationUri) {
-                for (Uri uri : mExtraOrigins) {
-                    if (uriOriginsMatch(uri, navigationUri)) {
-                        return true;
-                    }
+            // Untrusted http/https navigations are handed to an external Custom Tab from the
+            // main frame only.
+            if ("https".equals(normalizedScheme) || "http".equals(normalizedScheme)) {
+                if (!isMainFrame) {
+                    return true;
                 }
+                try {
+                    CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                            .setToolbarColor(mStatusBarColor)
+                            .build();
+                    intent.launchUrl(WebViewFallbackActivity.this, url);
+                } catch (ActivityNotFoundException | SecurityException ex) {
+                    Log.e(TAG, String.format(
+                            "Failed to launch external browser for '%s'", url), ex);
+                }
+                return true;
+            }
+
+            if ("file".equals(normalizedScheme)
+                    || "content".equals(normalizedScheme)
+                    || "javascript".equals(normalizedScheme)
+                    || "intent".equals(normalizedScheme)) {
+                Log.w(TAG, "Blocked navigation to disallowed scheme in WebViewFallbackActivity: "
+                        + scheme);
+                return true;
+            }
+
+            if (!isMainFrame) {
+                return true;
+            }
+            try {
+                Intent i = new Intent(Intent.ACTION_VIEW, url);
+                i.addCategory(Intent.CATEGORY_BROWSABLE);
+                startActivity(i);
+            } catch (ActivityNotFoundException | SecurityException ex) {
+                Log.e(TAG, String.format(
+                        "Failed to launch external activity for '%s'", url), ex);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url == null) {
+                return true;
+            }
+            return this.shouldOverrideUrlLoading(Uri.parse(url), true);
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            if (request == null || request.getUrl() == null) {
+                return true;
+            }
+            return this.shouldOverrideUrlLoading(request.getUrl(), request.isForMainFrame());
+        }
+
+        protected boolean isTrustedOrigin(@Nullable Uri uri) {
+            if (uri == null || !"https".equalsIgnoreCase(uri.getScheme())) {
                 return false;
             }
+            return uriOriginsMatch(uri, WebViewFallbackActivity.this.mLaunchUrl)
+                    || matchExtraOrigins(uri);
+        }
 
-            private boolean uriOriginsMatch(Uri uriA, Uri uriB) {
-                return Utils.isSameOrigin(uriA, uriB);
+        private boolean matchExtraOrigins(Uri navigationUri) {
+            for (Uri uri : mExtraOrigins) {
+                if (uriOriginsMatch(uri, navigationUri)) {
+                    return true;
+                }
             }
-        };
+            return false;
+        }
+
+        private boolean uriOriginsMatch(Uri uriA, Uri uriB) {
+            if (uriA == null || uriB == null
+                    || uriA.getHost() == null || uriB.getHost() == null) {
+                return false;
+            }
+            return Utils.isSameOrigin(uriA, uriB);
+        }
     }
 
     private WebChromeClient createWebViewChromeClient() {

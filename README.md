@@ -110,6 +110,13 @@ In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>`
 | App passes its own `FileProvider` content to the TWA | Override `LauncherActivity.isTrustedContentUri(Uri)` |
 | Diagnostics must not throw in a debuggable build | Override `LauncherActivity.reportRejection(String, RejectionOutcome)` |
 
+## Browser provider selection and delegation token lifecycle
+
+* **Explicit browser targeting (`LAUNCHING_BROWSER`):** `android.support.customtabs.trusted.LAUNCHING_BROWSER` is treated as a developer-declared target (for example in enterprise or kiosk deployments) and bypasses `TwaProviderPicker`'s category check, but still must bind a `CustomTabsService` and return a `CustomTabsSession` before receiving a delegation token.
+* **Delegation token lifecycle (`TwaLauncher`):** On non-ARC devices, `TwaLauncher` stores the provider's delegation `Token` in `TokenStore` (gating `DelegationService` notification delegation and Play Billing verification) inside `launchWhenSessionEstablished()` once a `CustomTabsSession` has been created. On any non-TWA launch (`CUSTOM_TAB` or `BROWSER` fallback) or when session establishment fails, `TwaLauncher` clears the stored token (`mTokenStore.store(null)`) and emits a `Log.d` diagnostic (`TwaLauncher` logcat tag) naming the provider and launch mode. Service disconnection (`onServiceDisconnected`) does not clear the token, and ChromeOS/ARC (`ChromeOsSupport.isRunningOnArc`) is untouched because `DelegationService` manages the ARC token directly.
+* **Transient failure and live-session revocation:** Because `SharedPreferencesTokenStore` holds a single slot, a transient bind/session failure (such as a browser updating in the background) or a secondary launch that resolves to `CUSTOM_TAB`/`BROWSER` mode while a TWA session is already active will clear the stored token for the remainder of that session until the next successful TWA-mode launch restores it.
+* **Custom `TokenStore` escape hatch and `ShortcutTrampolineActivity` limitation:** There is no manifest metadata flag to retain stale tokens across non-TWA launches. An app that needs to suppress `store(null)` on `LauncherActivity` fallback launches can override `LauncherActivity.createTwaLauncher()` (using `getMetadata()` to inspect parsed manifest metadata) and pass a `TokenStore` decorator to the 4-argument `TwaLauncher` constructor. **Limitation:** `ShortcutTrampolineActivity` constructs its `TwaLauncher` internally with `new SharedPreferencesTokenStore(context)` and does not call `LauncherActivity.createTwaLauncher()`, so a shortcut launch that falls back to a non-TWA mode will still clear the shared `SharedPreferencesTokenStore`.
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

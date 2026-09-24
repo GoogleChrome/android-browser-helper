@@ -52,6 +52,10 @@ This SDK does not transfer any information over the network. Web browsing inform
 stored if the WebView fallback is enabled. The permission to read the location can be managed
 via the usual Android settings.
   
+## Quality enforcement (`QualityEnforcer`)
+
+By design, `QualityEnforcer` is the default `CustomTabsCallback` wired by `LauncherActivity.getCustomTabsCallback()` (which returns `new QualityEnforcer()`), `ShortcutTrampolineActivity`, and the convenience `TwaLauncher.launch(Uri)` overload. When the connected Trusted Web Activity provider sends the `quality_enforcement.crash` extra callback (`QualityEnforcer.CRASH`, e.g. when a verified-origin navigation fails or violates TWA quality criteria), `QualityEnforcer` deliberately throws an uncaught `RuntimeException` on the host application's main thread. This behaviour is pre-existing and supported; a host application that wants to opt out of provider-triggered quality-enforcement crashes can override the `protected` `LauncherActivity.getCustomTabsCallback()` method and return a plain `CustomTabsCallback` (or pass a plain `CustomTabsCallback` to the full `TwaLauncher.launch(...)` overload). Overriding `LauncherActivity.getCustomTabsCallback()` does **not** affect shortcut launches, because `ShortcutTrampolineActivity` constructs `new QualityEnforcer()` itself.
+
 ## Using Shortcuts in Trusted Web Activities
 
 When implementing shortcuts (e.g. from `shortcuts.xml`) in a Trusted Web Activity (TWA) application, launching the TWA through `LauncherActivity` on Android Desktop (such as ChromeOS) can result in unresponsive windows due to window manager interactions with translucent activities.

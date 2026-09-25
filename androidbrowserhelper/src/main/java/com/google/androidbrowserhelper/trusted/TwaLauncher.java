@@ -128,8 +128,10 @@ public class TwaLauncher {
 
     public static final FallbackStrategy WEBVIEW_FALLBACK_STRATEGY =
             (context, twaBuilder, providerPackage, completionCallback) -> {
+        ComponentName launcherComponent =
+                (context instanceof Activity) ? ((Activity) context).getComponentName() : null;
         Intent intent = WebViewFallbackActivity.createLaunchIntent(context,
-                twaBuilder.getUri(), LauncherActivityMetadata.parse(context));
+                twaBuilder.getUri(), LauncherActivityMetadata.parse(context), launcherComponent);
         context.startActivity(intent);
         if (completionCallback != null) {
             completionCallback.run();

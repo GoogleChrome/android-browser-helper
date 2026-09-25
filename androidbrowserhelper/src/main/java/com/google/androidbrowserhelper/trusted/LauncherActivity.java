@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.net.Uri;
@@ -215,8 +216,18 @@ public class LauncherActivity extends Activity {
         twaBuilder.setDisplayMode(getDisplayMode());
 
         Uri intentUrl = getUrlForIntent(getIntent());
-        if (!launchUrl.equals(intentUrl) && intentUrl != null) {
-            twaBuilder.setOriginalLaunchUrl(intentUrl);
+        if (intentUrl != null) {
+            intentUrl = Uri.parse(intentUrl.toString());
+            String scheme = intentUrl.getScheme();
+            boolean isTrustedHttps = "https".equalsIgnoreCase(scheme)
+                    && isTrustedIntentUrl(intentUrl);
+            boolean isAcceptedTransform = isTrustedHttps
+                    || ("content".equalsIgnoreCase(scheme)
+                            && mMetadata.fileHandlingActionUrl != null)
+                    || getProtocolHandlers().containsKey(scheme);
+            if (isAcceptedTransform && !launchUrl.equals(intentUrl)) {
+                twaBuilder.setOriginalLaunchUrl(intentUrl);
+            }
         }
 
         addShareDataIfPresent(twaBuilder);
@@ -412,15 +423,24 @@ public class LauncherActivity extends Activity {
         Uri intentUrl = getUrlForIntent(getIntent());
 
         if (intentUrl != null) {
+            intentUrl = Uri.parse(intentUrl.toString());
             Map<String, Uri> protocolHandlers = getProtocolHandlers();
             String scheme = intentUrl.getScheme();
 
-            if ("https".equals(scheme)) {
-                Log.d(TAG, "Using url from Intent: " + intentUrl);
-                return intentUrl;
+            if ("https".equalsIgnoreCase(scheme)) {
+                if (isTrustedIntentUrl(intentUrl)) {
+                    Log.d(TAG, "Using url from Intent: " + intentUrl);
+                    return intentUrl;
+                }
+                reportRejection("Dropping untrusted Intent URI '" + intentUrl
+                        + "', falling back to the default url. Declare the origin in "
+                        + "ADDITIONAL_TRUSTED_ORIGINS, add a BROWSABLE intent-filter for its host, "
+                        + "or override LauncherActivity.isTrustedIntentUrl(Uri).",
+                        RejectionOutcome.LAUNCH_URL_SUBSTITUTED);
+                return defaultUrl;
             }
 
-            if ("content".equals(scheme)) {
+            if ("content".equalsIgnoreCase(scheme)) {
                 // The application was launched by opening a file - return the URL configured for
                 // this file type in the manifest
                 if (mMetadata.fileHandlingActionUrl == null) {
@@ -443,6 +463,48 @@ public class LauncherActivity extends Activity {
 
         Log.d(TAG, "Using url from Manifest: " + defaultUrl);
         return defaultUrl;
+    }
+
+    /**
+     * Returns whether {@code uri} from the inbound Intent may be used as the launch URL.
+     * Defaults to a same-origin check against DEFAULT_URL / ADDITIONAL_TRUSTED_ORIGINS, plus any
+     * https host this Activity (or its activity-alias) declares an intent-filter for.
+     * Override only if you fully control the callers of this exported Activity.
+     */
+    protected boolean isTrustedIntentUrl(@Nullable Uri uri) {
+        return Utils.isTrustedLaunchUrl(this, getComponentName(), uri, mMetadata);
+    }
+
+    /** Describes how a security rejection affected the launch. */
+    public enum RejectionOutcome {
+        /** An untrusted launch URL was replaced with {@code DEFAULT_URL}. */
+        LAUNCH_URL_SUBSTITUTED,
+    }
+
+    /**
+     * Reports a security-driven rejection of inbound Intent data.
+     *
+     * <p>The default implementation logs at {@code ERROR}, and additionally throws a
+     * {@link SecurityException} in debuggable builds when the rejection changed the outcome of the
+     * launch ({@link RejectionOutcome#LAUNCH_URL_SUBSTITUTED}), so that the misconfiguration is
+     * found during development. Release builds never throw.
+     *
+     * <p>Override to route these diagnostics elsewhere (for example to a crash reporter) or to
+     * suppress the debuggable-build exception. Overriding affects <em>reporting only</em>: the
+     * rejection itself has already been enforced by the caller. To change what is accepted, override
+     * {@link #isTrustedIntentUrl(Uri)} instead.
+     *
+     * @param message a human-readable diagnostic describing what was rejected and how to allow it
+     *     deliberately; its format is not part of the API contract and must not be parsed.
+     * @param outcome how the rejection affected the launch; see {@link RejectionOutcome}.
+     */
+    protected void reportRejection(@NonNull String message, @NonNull RejectionOutcome outcome) {
+        Log.e(TAG, message);
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            throw new SecurityException(message + " See "
+                    + "https://github.com/GoogleChrome/android-browser-helper#inbound-intent-validation"
+                    + " — this throws only in debuggable builds.");
+        }
     }
 
     /**

@@ -141,4 +141,74 @@ public class ShortcutTrampolineActivityTest {
         Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
         assertNull(launchedIntent);
     }
+
+    @Test
+    public void launchesTwaForHostDeclaredInOwnIntentFilter() {
+        Uri secondDomainUri = Uri.parse("https://shop.example.com/deals");
+
+        Intent probe = new Intent(Intent.ACTION_VIEW, secondDomainUri)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setPackage(mContext.getPackageName());
+        android.content.IntentFilter filter = new android.content.IntentFilter(Intent.ACTION_VIEW);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        filter.addCategory(Intent.CATEGORY_BROWSABLE);
+        filter.addDataScheme("https");
+        filter.addDataAuthority("shop.example.com", null);
+        ResolveInfo ownFilterInfo = new ResolveInfo();
+        ownFilterInfo.activityInfo = new ActivityInfo();
+        ownFilterInfo.activityInfo.packageName = mContext.getPackageName();
+        ownFilterInfo.activityInfo.name = LauncherActivity.class.getName();
+        ownFilterInfo.filter = filter;
+        mShadowPackageManager.addResolveInfoForIntent(probe, ownFilterInfo);
+
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, secondDomainUri);
+        ResolveInfo browserResolveInfo = new ResolveInfo();
+        browserResolveInfo.activityInfo = new ActivityInfo();
+        browserResolveInfo.activityInfo.packageName = "com.android.chrome";
+        browserResolveInfo.activityInfo.name = "com.android.chrome.ChromeTabbedActivity";
+        mShadowPackageManager.addResolveInfoForIntent(browserIntent, browserResolveInfo);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(secondDomainUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(secondDomainUri, launchedIntent.getData());
+    }
+
+    @Test
+    public void shortcut_dropsNonHttpsUriEvenWhenItMatchesOwnIntentFilter() {
+        Uri customSchemeUri = Uri.parse("myapp://home/dashboard");
+
+        Intent probe = new Intent(Intent.ACTION_VIEW, customSchemeUri)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setPackage(mContext.getPackageName());
+        android.content.IntentFilter filter = new android.content.IntentFilter(Intent.ACTION_VIEW);
+        filter.addCategory(Intent.CATEGORY_DEFAULT);
+        filter.addCategory(Intent.CATEGORY_BROWSABLE);
+        filter.addDataScheme("myapp");
+        filter.addDataAuthority("home", null);
+        ResolveInfo ownFilterInfo = new ResolveInfo();
+        ownFilterInfo.activityInfo = new ActivityInfo();
+        ownFilterInfo.activityInfo.packageName = mContext.getPackageName();
+        ownFilterInfo.activityInfo.name = LauncherActivity.class.getName();
+        ownFilterInfo.filter = filter;
+        mShadowPackageManager.addResolveInfoForIntent(probe, ownFilterInfo);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(customSchemeUri);
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNull(launchedIntent);
+    }
 }

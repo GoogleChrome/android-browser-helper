@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.trusted;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -40,6 +41,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
@@ -57,6 +59,7 @@ public class WebViewFallbackActivity extends Activity {
     private static final String KEY_NAVIGATION_BAR_COLOR = KEY_PREFIX + "KEY_NAVIGATION_BAR_COLOR";
     private static final String KEY_STATUS_BAR_COLOR = KEY_PREFIX + "KEY_STATUS_BAR_COLOR";
     private static final String KEY_EXTRA_ORIGINS = KEY_PREFIX + "KEY_EXTRA_ORIGINS";
+    private static final String KEY_LAUNCHER_COMPONENT = KEY_PREFIX + "KEY_LAUNCHER_COMPONENT";
 
     private Uri mLaunchUrl;
     private int mStatusBarColor;
@@ -67,8 +70,22 @@ public class WebViewFallbackActivity extends Activity {
             Context context,
             Uri launchUrl,
             LauncherActivityMetadata launcherActivityMetadata) {
+        ComponentName launcherComponent =
+                (context instanceof Activity) ? ((Activity) context).getComponentName() : null;
+        return createLaunchIntent(
+                context, launchUrl, launcherActivityMetadata, launcherComponent);
+    }
+
+    public static Intent createLaunchIntent(
+            Context context,
+            Uri launchUrl,
+            LauncherActivityMetadata launcherActivityMetadata,
+            @Nullable ComponentName launcherComponent) {
         Intent intent = new Intent(context, WebViewFallbackActivity.class);
         intent.putExtra(WebViewFallbackActivity.KEY_LAUNCH_URI, launchUrl);
+        if (launcherComponent != null) {
+            intent.putExtra(WebViewFallbackActivity.KEY_LAUNCHER_COMPONENT, launcherComponent);
+        }
 
         intent.putExtra(WebViewFallbackActivity.KEY_STATUS_BAR_COLOR,
                 ContextCompat.getColor(context, launcherActivityMetadata.statusBarColorId));
@@ -89,8 +106,26 @@ public class WebViewFallbackActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         this.mLaunchUrl = this.getIntent().getParcelableExtra(KEY_LAUNCH_URI);
-        if (!"https".equals(this.mLaunchUrl.getScheme())) {
+        if (this.mLaunchUrl != null) {
+            this.mLaunchUrl = Uri.parse(this.mLaunchUrl.toString());
+        }
+        if (this.mLaunchUrl == null || !"https".equalsIgnoreCase(this.mLaunchUrl.getScheme())) {
             throw new IllegalArgumentException("launchUrl scheme must be 'https'");
+        }
+
+        LauncherActivityMetadata metadata = LauncherActivityMetadata.parse(this);
+        if (!isTrustedLaunchUrl(metadata)) {
+            Log.w(TAG, "Untrusted launchUrl '" + this.mLaunchUrl
+                    + "'; falling back to defaultUrl.");
+            if (metadata.defaultUrl == null) {
+                finish();
+                return;
+            }
+            this.mLaunchUrl = Uri.parse(metadata.defaultUrl);
+            if (!"https".equalsIgnoreCase(this.mLaunchUrl.getScheme())) {
+                finish();
+                return;
+            }
         }
 
         if (
@@ -126,9 +161,15 @@ public class WebViewFallbackActivity extends Activity {
             List<String> extraOrigins = getIntent().getStringArrayListExtra(KEY_EXTRA_ORIGINS);
             if (extraOrigins != null) {
                 for (String extraOrigin : extraOrigins) {
-                    Uri extraOriginUri = Uri.parse(extraOrigin);
-                    if (!"https".equalsIgnoreCase(extraOriginUri.getScheme())) {
+                    Uri extraOriginUri = Utils.parseConfiguredOrigin(extraOrigin);
+                    if (extraOriginUri == null
+                            || !"https".equalsIgnoreCase(extraOriginUri.getScheme())) {
                         Log.w(TAG, "Only 'https' origins are accepted. Ignoring extra origin: "
+                                + extraOrigin);
+                        continue;
+                    }
+                    if (!isConfiguredExtraOrigin(extraOriginUri, metadata)) {
+                        Log.w(TAG, "Ignoring extra origin not present in manifest metadata: "
                                 + extraOrigin);
                         continue;
                     }
@@ -158,6 +199,31 @@ public class WebViewFallbackActivity extends Activity {
         Map<String, String> headers = new HashMap<>();
         headers.put("Referer", "android-app://" + getPackageName() + "/");
         mWebView.loadUrl(mLaunchUrl.toString(), headers);
+    }
+
+    private boolean isTrustedLaunchUrl(@NonNull LauncherActivityMetadata metadata) {
+        ComponentName launcherComponent = getIntent().getParcelableExtra(KEY_LAUNCHER_COMPONENT);
+        if (launcherComponent != null
+                && !getPackageName().equals(launcherComponent.getPackageName())) {
+            Log.w(TAG, "Ignoring launcherComponent outside package: " + launcherComponent);
+            launcherComponent = null;
+        }
+        return Utils.isTrustedLaunchUrl(this, launcherComponent, this.mLaunchUrl, metadata)
+                || Utils.matchesTwaLauncherIntentFilter(this, this.mLaunchUrl);
+    }
+
+    private static boolean isConfiguredExtraOrigin(
+            @NonNull Uri candidate, @NonNull LauncherActivityMetadata metadata) {
+        if (metadata.additionalTrustedOrigins == null) {
+            return false;
+        }
+        for (String configuredOrigin : metadata.additionalTrustedOrigins) {
+            Uri configuredUri = Utils.parseConfiguredOrigin(configuredOrigin);
+            if (configuredUri != null && Utils.isSameOrigin(candidate, configuredUri)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -282,9 +348,7 @@ public class WebViewFallbackActivity extends Activity {
             }
 
             private boolean uriOriginsMatch(Uri uriA, Uri uriB) {
-                return uriA.getScheme().equalsIgnoreCase(uriB.getScheme()) &&
-                        uriA.getHost().equalsIgnoreCase(uriB.getHost()) &&
-                        uriA.getPort() == uriB.getPort();
+                return Utils.isSameOrigin(uriA, uriB);
             }
         };
     }

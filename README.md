@@ -93,6 +93,20 @@ In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>`
 
 `ShortcutTrampolineActivity` runs with `Theme.NoDisplay` and will process the shortcut launch securely by validating the URL against your configured TWA domains, routing the launch asynchronously using the application context, and closing itself instantly before any window transitions are impacted.
 
+## Inbound Intent validation
+
+`LauncherActivity`, `ShortcutTrampolineActivity`, and `WebViewFallbackActivity` validate inbound `Intent` data before forwarding it to the browser:
+
+* **Inbound `https` launch URIs:** `LauncherActivity` (including URLs synthesized by `getUrlForIntent()`), `ShortcutTrampolineActivity`, and `WebViewFallbackActivity` verify that the target origin matches `android.support.customtabs.trusted.DEFAULT_URL`, an entry in `android.support.customtabs.trusted.ADDITIONAL_TRUSTED_ORIGINS`, or a `BROWSABLE` `<intent-filter>` with a concrete `android:host` declared on `LauncherActivity` (or its `<activity-alias>`—do not use a wildcard `android:host="*"`, which matches every host and would widen origin trust to arbitrary `https` origins; for `WebViewFallbackActivity`, `BROWSABLE` hosts are checked against the in-package activity named by the launcher-component extra that `createLaunchIntent(..., ComponentName)` passes, or `LauncherActivity` or its alias when no such extra is present, ignoring components outside the app's package). Untrusted `https` URIs fall back to `DEFAULT_URL` and are not forwarded via `EXTRA_ORIGINAL_LAUNCH_URL`. `WebViewFallbackActivity` likewise ignores any `EXTRA_ORIGINS` entry absent from manifest metadata.
+* **Development-time diagnostics:** `LauncherActivity` rejections are logged at `ERROR` (naming the rejected URI and the applicable remedy) in all builds, and additionally throw a `SecurityException` in debuggable builds (`ApplicationInfo.FLAG_DEBUGGABLE`) **only when the rejection changed the launch outcome** — an untrusted launch URL falling back to `DEFAULT_URL` (`RejectionOutcome.LAUNCH_URL_SUBSTITUTED`). Subclasses can override `LauncherActivity.reportRejection(String, RejectionOutcome)` to route these diagnostics elsewhere or suppress the debuggable-build exception; overriding affects reporting only and does **not** relax enforcement. `ShortcutTrampolineActivity` and `WebViewFallbackActivity` log rejections at `WARN` and never throw.
+
+| Situation | Remedy |
+| --- | --- |
+| Second web origin, inbound deep links | `ADDITIONAL_TRUSTED_ORIGINS` (full origins such as `https://sub.example.com` preferred; scheme-less entries are tolerated with a deprecation warning) |
+| Second host already in the manifest | `BROWSABLE` `<intent-filter>` with a concrete `android:host` (avoiding wildcard `android:host="*"`) on `LauncherActivity` or its `<activity-alias>` |
+| Arbitrary partner / callback origins | Override `LauncherActivity.isTrustedIntentUrl(Uri)` |
+| Diagnostics must not throw in a debuggable build | Override `LauncherActivity.reportRejection(String, RejectionOutcome)` |
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

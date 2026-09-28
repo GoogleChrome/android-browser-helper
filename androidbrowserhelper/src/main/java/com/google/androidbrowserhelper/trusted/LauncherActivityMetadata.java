@@ -202,6 +202,15 @@ public class LauncherActivityMetadata {
     private static final String METADATA_LAUNCHING_BROWSER_NAME =
             "android.support.customtabs.trusted.LAUNCHING_BROWSER_NAME";
 
+    /**
+     * Custom activity to launch on cold shortcut launches instead of ColdShortcutActivity.
+     * Allows apps with custom LauncherActivity subclasses to preserve their custom overrides
+     * while providing an opaque theme (e.g. Theme.NoTitleBar) to prevent DesktopModeCompatPolicy
+     * translucent exemptions/freezes on desktop mode.
+     */
+    private static final String METADATA_COLD_SHORTCUT_ACTIVITY =
+            "android.support.customtabs.trusted.COLD_SHORTCUT_ACTIVITY";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
@@ -227,8 +236,16 @@ public class LauncherActivityMetadata {
     public final boolean startChromeBeforeAnimationComplete;
     @Nullable public final String launchingBrowser;
     @Nullable public final String launchingBrowserName;
+    @Nullable public final String coldShortcutActivity;
+    @Nullable public final ComponentName launcherComponent;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
+        this(metaData, resources, null);
+    }
+
+    private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources,
+            @Nullable ComponentName launcherComponent) {
+        this.launcherComponent = launcherComponent;
         defaultUrl = metaData.getString(METADATA_DEFAULT_URL);
         statusBarColorId = metaData.getInt(METADATA_STATUS_BAR_COLOR_ID, DEFAULT_COLOR_ID);
         statusBarColorDarkId = metaData.getInt(METADATA_STATUS_BAR_COLOR_DARK_ID, statusBarColorId);
@@ -266,6 +283,7 @@ public class LauncherActivityMetadata {
                 metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
         launchingBrowser = metaData.getString(METADATA_LAUNCHING_BROWSER);
         launchingBrowserName = metaData.getString(METADATA_LAUNCHING_BROWSER_NAME);
+        coldShortcutActivity = metaData.getString(METADATA_COLD_SHORTCUT_ACTIVITY);
     }
 
     private @ScreenOrientation.LockType int getOrientation(String orientation) {
@@ -417,7 +435,12 @@ public class LauncherActivityMetadata {
             // installed - so should never happen.
         }
 
-        if (!metaData.containsKey(METADATA_DEFAULT_URL)) {
+        ComponentName launcherComponent = null;
+        if (metaData.containsKey(METADATA_DEFAULT_URL)) {
+            launcherComponent = (context instanceof Activity)
+                    ? ((Activity) context).getComponentName()
+                    : new ComponentName(context, context.getClass());
+        } else {
             try {
                 PackageManager pm = context.getPackageManager();
 
@@ -429,7 +452,9 @@ public class LauncherActivityMetadata {
                         queryIntent, PackageManager.GET_META_DATA);
                 for (ResolveInfo resolveInfo : resolveInfos) {
                     if (tryMergeMetadata(metaData, resolveInfo.activityInfo)) {
-                        return new LauncherActivityMetadata(metaData, resources);
+                        launcherComponent = new ComponentName(
+                                resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name);
+                        return new LauncherActivityMetadata(metaData, resources, launcherComponent);
                     }
                 }
 
@@ -441,7 +466,9 @@ public class LauncherActivityMetadata {
                 if (packageInfo.activities != null) {
                     for (ActivityInfo activityInfo : packageInfo.activities) {
                         if (tryMergeMetadata(metaData, activityInfo)) {
-                            return new LauncherActivityMetadata(metaData, resources);
+                            launcherComponent = new ComponentName(
+                                    activityInfo.packageName, activityInfo.name);
+                            return new LauncherActivityMetadata(metaData, resources, launcherComponent);
                         }
                     }
                 }
@@ -450,6 +477,6 @@ public class LauncherActivityMetadata {
             }
         }
 
-        return new LauncherActivityMetadata(metaData, resources);
+        return new LauncherActivityMetadata(metaData, resources, launcherComponent);
     }
 }

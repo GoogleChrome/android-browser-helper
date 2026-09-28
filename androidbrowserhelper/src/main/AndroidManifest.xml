@@ -25,9 +25,24 @@
     </queries>
 
     <application>
+        <!--
+            ShortcutTrampolineActivity handles static shortcuts defined in shortcuts.xml.
+            Android's ShortcutService automatically attaches FLAG_ACTIVITY_NEW_TASK and
+            FLAG_ACTIVITY_CLEAR_TASK to the first intent of every static shortcut.
+            android:taskAffinity="" is required to prevent ActivityManager from clearing an
+            existing, running TWA task that shares the app's default package task affinity.
+            android:excludeFromRecents="true" ensures that this transient, affinity-less
+            task never surfaces in the user's Recent Apps list.
+        -->
         <activity
             android:name="com.google.androidbrowserhelper.trusted.ShortcutTrampolineActivity"
             android:theme="@android:style/Theme.NoDisplay"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
             android:exported="true"/>
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.ColdShortcutActivity"
+            android:theme="@style/Theme.ColdShortcutActivity"
+            android:exported="false"/>
     </application>
 </manifest>

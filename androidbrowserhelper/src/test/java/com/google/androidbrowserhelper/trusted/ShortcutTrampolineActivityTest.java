@@ -15,11 +15,14 @@
 package com.google.androidbrowserhelper.trusted;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -31,6 +34,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 
+import androidx.browser.customtabs.TrustedWebUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,8 +45,11 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
-import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.shadows.ShadowActivityManager;
+import org.robolectric.shadows.ShadowAppTask;
 import org.robolectric.shadows.ShadowPackageManager;
+
+import java.util.Collections;
 
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
@@ -49,6 +57,7 @@ import org.robolectric.shadows.ShadowPackageManager;
 public class ShortcutTrampolineActivityTest {
     private Context mContext;
     private ShadowPackageManager mShadowPackageManager;
+    private ShadowActivityManager mShadowActivityManager;
 
     private static final String DEFAULT_URL = "https://www.example.com/twa/home";
 
@@ -56,6 +65,7 @@ public class ShortcutTrampolineActivityTest {
     public void setUp() {
         mContext = RuntimeEnvironment.application;
         mShadowPackageManager = shadowOf(mContext.getPackageManager());
+        mShadowActivityManager = shadowOf((ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE));
 
         // Set up the package info with metadata on a dummy LauncherActivity
         PackageInfo packageInfo = new PackageInfo();
@@ -71,6 +81,10 @@ public class ShortcutTrampolineActivityTest {
         trampolineActivity.packageName = mContext.getPackageName();
         trampolineActivity.name = ShortcutTrampolineActivity.class.getName();
 
+        ActivityInfo coldShortcutActivity = new ActivityInfo();
+        coldShortcutActivity.packageName = mContext.getPackageName();
+        coldShortcutActivity.name = ColdShortcutActivity.class.getName();
+
         // Register a fake browser that can handle HTTP/HTTPS intents
         // so that resolveActivity() succeeds in the fallback strategy.
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.example.com/twa/shortcut"));
@@ -80,7 +94,7 @@ public class ShortcutTrampolineActivityTest {
         resolveInfo.activityInfo.name = "com.android.chrome.ChromeTabbedActivity";
         mShadowPackageManager.addResolveInfoForIntent(browserIntent, resolveInfo);
 
-        packageInfo.activities = new ActivityInfo[]{dummyLauncherActivity, trampolineActivity};
+        packageInfo.activities = new ActivityInfo[]{dummyLauncherActivity, trampolineActivity, coldShortcutActivity};
         mShadowPackageManager.addPackage(packageInfo);
     }
 
@@ -98,7 +112,31 @@ public class ShortcutTrampolineActivityTest {
     }
 
     @Test
-    public void launchesTwaForTrustedUri() {
+    public void launchesColdShortcutActivity_whenNoTwaTaskRunningOnDesktop() {
+        mShadowPackageManager.setSystemFeature(ChromeOsSupport.ARC_FEATURE, true);
+
+        Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
+
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+
+        // The trampoline activity finishes synchronously.
+        assertTrue(controller.get().isFinishing());
+
+        // Cold launch on desktop starts ColdShortcutActivity directly in a new task.
+        Intent launchedIntent = shadowOf(controller.get()).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(new ComponentName(mContext, ColdShortcutActivity.class), launchedIntent.getComponent());
+        assertEquals(trustedUri, launchedIntent.getData());
+        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, launchedIntent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    @Test
+    public void launchesTwaViaLauncher_whenColdLaunchOnMobile() {
+        // Desktop features absent (standard mobile device environment).
         Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
         Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
 
@@ -108,20 +146,164 @@ public class ShortcutTrampolineActivityTest {
         controller.create();
         shadowOf(Looper.getMainLooper()).idle();
 
-        // The activity should finish immediately.
         assertTrue(controller.get().isFinishing());
 
-        // Since we didn't set up custom tabs service, it will use the fallback strategy.
-        // The fallback strategy uses the application context to start the intent, which
-        // should be registered in the shadow application.
+        // Mobile cold launch routes via TwaLauncher without creating an opaque ColdShortcutActivity.
         Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
         assertNotNull(launchedIntent);
+        assertNotEquals(new ComponentName(mContext, ColdShortcutActivity.class), launchedIntent.getComponent());
         assertEquals(Intent.ACTION_VIEW, launchedIntent.getAction());
         assertEquals(trustedUri, launchedIntent.getData());
-        
-        // Ensure FLAG_ACTIVITY_NEW_TASK is attached
-        int flags = launchedIntent.getFlags();
-        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, flags & Intent.FLAG_ACTIVITY_NEW_TASK);
+        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, launchedIntent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    @Test
+    public void launchesCustomColdShortcutActivity_whenConfiguredInMetadata() {
+        mShadowPackageManager.setSystemFeature(ChromeOsSupport.ARC_FEATURE, true);
+
+        String customColdActivity = ".CustomColdShortcutActivity";
+        mShadowPackageManager.addOrUpdateActivity(
+                new ActivityInfo() {{
+                    packageName = mContext.getPackageName();
+                    name = LauncherActivity.class.getName();
+                    metaData = new Bundle();
+                    metaData.putString("android.support.customtabs.trusted.DEFAULT_URL", DEFAULT_URL);
+                    metaData.putString("android.support.customtabs.trusted.COLD_SHORTCUT_ACTIVITY", customColdActivity);
+                }});
+
+        Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
+
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+
+        assertTrue(controller.get().isFinishing());
+
+        Intent launchedIntent = shadowOf(controller.get()).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(new ComponentName(mContext, mContext.getPackageName() + customColdActivity),
+                launchedIntent.getComponent());
+        assertEquals(trustedUri, launchedIntent.getData());
+        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, launchedIntent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    @Test
+    public void launchesTwaViaLauncher_whenTwaTaskAlreadyRunning() {
+        // Simulate an already-running TWA task.
+        ActivityManager.AppTask task = ShadowAppTask.newInstance();
+        ShadowAppTask shadowAppTask = shadowOf(task);
+        ActivityManager.RecentTaskInfo taskInfo = new ActivityManager.RecentTaskInfo();
+        taskInfo.id = 123;
+        taskInfo.baseIntent = new Intent().setComponent(new ComponentName(mContext, LauncherActivity.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            taskInfo.taskId = 123;
+            taskInfo.isRunning = true;
+        }
+        shadowAppTask.setTaskInfo(taskInfo);
+        mShadowActivityManager.setAppTasks(Collections.singletonList(task));
+
+        Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
+
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+
+        // Warm launch routes through TwaLauncher fallback, NOT ColdShortcutActivity.
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertNotEquals(new ComponentName(mContext, ColdShortcutActivity.class), launchedIntent.getComponent());
+        assertEquals(Intent.ACTION_VIEW, launchedIntent.getAction());
+        assertEquals(trustedUri, launchedIntent.getData());
+        assertEquals(Intent.FLAG_ACTIVITY_NEW_TASK, launchedIntent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    @Test
+    public void launchesTwaViaLauncher_whenCustomColdShortcutTaskRunningOnDesktop() {
+        mShadowPackageManager.setSystemFeature(ChromeOsSupport.ARC_FEATURE, true);
+
+        String customColdActivity = ".CustomColdShortcutActivity";
+        mShadowPackageManager.addOrUpdateActivity(
+                new ActivityInfo() {{
+                    packageName = mContext.getPackageName();
+                    name = LauncherActivity.class.getName();
+                    metaData = new Bundle();
+                    metaData.putString("android.support.customtabs.trusted.DEFAULT_URL", DEFAULT_URL);
+                    metaData.putString("android.support.customtabs.trusted.COLD_SHORTCUT_ACTIVITY", customColdActivity);
+                }});
+
+        // Simulate a TWA task that was started by the custom cold shortcut activity.
+        ComponentName customColdComponent =
+                new ComponentName(mContext, mContext.getPackageName() + customColdActivity);
+        ActivityManager.AppTask task = ShadowAppTask.newInstance();
+        ShadowAppTask shadowAppTask = shadowOf(task);
+        ActivityManager.RecentTaskInfo taskInfo = new ActivityManager.RecentTaskInfo();
+        taskInfo.id = 123;
+        taskInfo.baseIntent = new Intent().setComponent(customColdComponent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            taskInfo.taskId = 123;
+            taskInfo.isRunning = true;
+        }
+        shadowAppTask.setTaskInfo(taskInfo);
+        mShadowActivityManager.setAppTasks(Collections.singletonList(task));
+
+        Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
+
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+        shadowOf(Looper.getMainLooper()).idle();
+
+        assertTrue(controller.get().isFinishing());
+
+        // The running custom cold shortcut task is recognized, so the shortcut takes the warm
+        // TwaLauncher path instead of starting another cold shortcut activity.
+        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertNotEquals(customColdComponent, launchedIntent.getComponent());
+        assertEquals(Intent.ACTION_VIEW, launchedIntent.getAction());
+        assertEquals(trustedUri, launchedIntent.getData());
+    }
+
+    @Test
+    public void launchesColdShortcutActivity_whenRunningTaskIsNotTwa() {
+        mShadowPackageManager.setSystemFeature(ChromeOsSupport.ARC_FEATURE, true);
+
+        // Simulate a running non-TWA task (e.g. WebViewFallbackActivity).
+        ActivityManager.AppTask task = ShadowAppTask.newInstance();
+        ShadowAppTask shadowAppTask = shadowOf(task);
+        ActivityManager.RecentTaskInfo taskInfo = new ActivityManager.RecentTaskInfo();
+        taskInfo.id = 456;
+        taskInfo.baseIntent = new Intent().setComponent(new ComponentName(mContext, WebViewFallbackActivity.class));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            taskInfo.taskId = 456;
+            taskInfo.isRunning = true;
+        }
+        shadowAppTask.setTaskInfo(taskInfo);
+        mShadowActivityManager.setAppTasks(Collections.singletonList(task));
+
+        Uri trustedUri = Uri.parse("https://www.example.com/twa/shortcut");
+        Intent intent = new Intent(Intent.ACTION_VIEW).setData(trustedUri);
+
+        ActivityController<ShortcutTrampolineActivity> controller =
+                Robolectric.buildActivity(ShortcutTrampolineActivity.class, intent);
+
+        controller.create();
+
+        assertTrue(controller.get().isFinishing());
+
+        // Non-TWA task is ignored; cold launch starts ColdShortcutActivity.
+        Intent launchedIntent = shadowOf(controller.get()).getNextStartedActivity();
+        assertNotNull(launchedIntent);
+        assertEquals(new ComponentName(mContext, ColdShortcutActivity.class), launchedIntent.getComponent());
     }
 
     @Test
@@ -134,11 +316,10 @@ public class ShortcutTrampolineActivityTest {
 
         controller.create();
 
-        // The activity should finish immediately.
         assertTrue(controller.get().isFinishing());
 
-        // No activity should be launched because the URI is untrusted.
-        Intent launchedIntent = shadowOf(RuntimeEnvironment.application).getNextStartedActivity();
-        assertNull(launchedIntent);
+        // Neither ColdShortcutActivity nor TwaLauncher should be started.
+        assertNull(shadowOf(controller.get()).getNextStartedActivity());
+        assertNull(shadowOf(RuntimeEnvironment.application).getNextStartedActivity());
     }
 }

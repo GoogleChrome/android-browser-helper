@@ -253,16 +253,18 @@ public class LauncherActivity extends Activity {
             sChromeVersionChecked = true;
         }
 
+        String twaProviderPackage =
+                (mTwaLauncher.getLaunchMode() == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY)
+                        ? mTwaLauncher.getProviderPackage() : null;
         if (ChromeOsSupport.isRunningOnArc(getApplicationContext().getPackageManager())) {
             new TwaSharedPreferencesManager(this)
                     .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
         } else {
             new TwaSharedPreferencesManager(this)
-                    .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+                    .writeLastLaunchedProviderPackageName(twaProviderPackage);
         }
 
-        ManageDataLauncherActivity.addSiteSettingsShortcut(this,
-                mTwaLauncher.getProviderPackage());
+        ManageDataLauncherActivity.addSiteSettingsShortcut(this, twaProviderPackage);
     }
 
     protected CustomTabsCallback getCustomTabsCallback() {
@@ -272,6 +274,17 @@ public class LauncherActivity extends Activity {
     protected TwaLauncher createTwaLauncher() {
         return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
                 new SharedPreferencesTokenStore(this));
+    }
+
+    /**
+     * Returns the parsed {@code <meta-data>} configuration for this Activity. Available from
+     * {@link #onCreate} onwards; {@code null} before that. Exposed so that subclasses overriding
+     * {@link #createTwaLauncher()} do not have to re-parse the manifest via
+     * {@link LauncherActivityMetadata#parse(android.content.Context)}.
+     */
+    @Nullable
+    protected LauncherActivityMetadata getMetadata() {
+        return mMetadata;
     }
 
     private boolean splashScreenNeeded() {

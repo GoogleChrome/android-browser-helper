@@ -61,6 +61,68 @@
    `content://` enforcement are unchanged. Rejected shared URIs are now reported in a single
    aggregated `ERROR` log line rather than one line per URI. In release builds, rejection messages
    include only the scheme, host and port of the rejected URI.
+8. **Delegation `Token` tied to `CustomTabsSession` establishment and cleared on fallback:**
+   `TwaLauncher` now stores the delegation `Token` in `TokenStore` inside
+   `launchWhenSessionEstablished()`—only after the chosen provider has bound its `CustomTabsService`
+   and returned a non-null `CustomTabsSession`—rather than unconditionally at the end of `launch()`.
+   On any non-TWA launch (`CUSTOM_TAB` or `BROWSER` mode) or when session creation fails
+   (synchronous `bindCustomTabsServicePreservePriority()` failure or asynchronous `newSession()`
+   returning `null`/throwing), `TwaLauncher` clears the stored slot (`mTokenStore.store(null)`) and
+   logs a `Log.d` diagnostic under `TwaLauncher` so a fallback or unreachable provider does not
+   acquire or retain `DelegationService` / Play Billing rights. Transient `onServiceDisconnected()`
+   callbacks do **not** clear the token, and ChromeOS/ARC (`ChromeOsSupport.isRunningOnArc`) remains
+   untouched because `DelegationService` manages the ARC token independently.
+   * **Transient-failure and live-session revocation:** If a browser is transiently unavailable (for
+     example mid-update or under memory pressure) when a launch occurs, or if a secondary launch
+     (such as a deep link or shortcut) falls back to `CUSTOM_TAB`/`BROWSER` while a Trusted Web
+     Activity session is already running, the single `SharedPreferencesTokenStore` slot is cleared
+     out from under the live session (with a `Log.d` diagnostic), suspending notification delegation
+     for the remainder of that session until the next successful TWA-mode launch self-heals the
+     slot.
+   * **Escape hatch and `ShortcutTrampolineActivity` limitation:** There is no manifest flag to
+     retain stale delegation tokens across non-TWA launches. Apps that need to preserve the stored
+     token across `LauncherActivity` fallback launches can override
+     `LauncherActivity.createTwaLauncher()` (using the new `protected`
+     `LauncherActivity.getMetadata()` accessor) and inject a `TokenStore` decorator that drops
+     `store(null)` calls. **Note:** `ShortcutTrampolineActivity` constructs its `TwaLauncher`
+     internally with `new SharedPreferencesTokenStore(context)` and does not invoke
+     `createTwaLauncher()`, so shortcut launches that fall back to a non-TWA mode will still clear
+     the shared token store.
+9. **Added `protected LauncherActivity.getMetadata()` accessor:** Subclasses overriding
+   `LauncherActivity.createTwaLauncher()` (for example to supply a custom `TokenStore`) can now read
+   the parsed `LauncherActivityMetadata` via `getMetadata()` instead of re-parsing the manifest via
+   `LauncherActivityMetadata.parse(this)`.
+10. **`LAUNCHING_BROWSER` manifest metadata remains developer-declared:** When
+    `android.support.customtabs.trusted.LAUNCHING_BROWSER` is set, `TwaLauncher` targets that
+    package directly without running `TwaProviderPicker`'s category filter (preserving enterprise
+    and kiosk configurations that target a specific browser), while still requiring the package to
+    establish a `CustomTabsSession` before its delegation token is stored.
+11. **Require system or Play Store installation for non-default TWA providers:**
+    When no single default browser is set (`MATCH_DEFAULT_ONLY` returning multiple
+    `CATEGORY_DEFAULT` browsers, so `defaultOrderedCount != 1`) or the user's default browser does
+    not support Trusted Web Activities, `TwaProviderPicker.pickProvider()` now requires a
+    non-authoritative TWA candidate (including `ChromeLegacyUtils` local-build package names
+    `org.chromium.chrome` and
+    `com.google.android.apps.chrome`) to be preinstalled on the system image (`FLAG_SYSTEM` /
+    `FLAG_UPDATED_SYSTEM_APP`) or installed by Google Play (`com.android.vending` via
+    `PackageManager.getInstallerPackageName()`) in order to enter `LaunchMode.TRUSTED_WEB_ACTIVITY`.
+    Unprivileged (sideloaded or alternative-store) non-default TWA candidates are excluded from
+    `LaunchMode.TRUSTED_WEB_ACTIVITY` and downgraded to `LaunchMode.CUSTOM_TAB` (`bestCctProvider`),
+    which clears `TokenStore` (`mTokenStore.store(null)`) so an unprivileged package cannot acquire
+    `DelegationService` or Play Billing capabilities. When no single default browser is set, the
+    fallback Custom Tabs provider (`LaunchMode.CUSTOM_TAB`) and plain browser (`LaunchMode.BROWSER`)
+    are also chosen preferring system- or Play-installed packages, because the chosen package
+    receives the launch URL directly; the authoritative single default browser still always wins.
+    * **Opt-outs:** (1) When the user explicitly sets a browser (including a sideloaded or
+      alternative-store build) as their default browser in Android OS settings (`MATCH_DEFAULT_ONLY`
+      returning a single authoritative entry, `defaultOrderedCount == 1`), that browser still wins
+      `LaunchMode.TRUSTED_WEB_ACTIVITY` regardless of install source. (2) Developers targeting a
+      specific browser can declare `android.support.customtabs.trusted.LAUNCHING_BROWSER` in
+      `AndroidManifest.xml` or pass `providerPackage` directly to `TwaLauncher`.
+    * **"Manage space" and site-settings shortcut:** When a launch resolves to a non-TWA mode
+      (`CUSTOM_TAB` or `BROWSER`), `LauncherActivity` no longer records that package as the
+      "Manage space" / site-settings target and clears the stored record, so a transient fallback
+      removes the site-settings shortcut until the next `TRUSTED_WEB_ACTIVITY` launch.
 
 ## 2.6.2
 

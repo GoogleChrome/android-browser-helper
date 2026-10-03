@@ -153,6 +153,10 @@ public class PlayBillingWrapper implements BillingWrapper {
         BillingFlowParams.Builder builder = BillingFlowParams.newBuilder()
             .setProductDetailsParamsList(productDetailsParamsList);
 
+        if (methodData.obfuscatedAccountId != null) {
+            builder.setObfuscatedAccountId(methodData.obfuscatedAccountId);
+        }
+
         if (methodData.replacementMode != null) {
             subUpdateParamsBuilder.setSubscriptionReplacementMode(methodData.replacementMode);
         }

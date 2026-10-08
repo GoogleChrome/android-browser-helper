@@ -92,6 +92,23 @@ public class MethodDataTest {
     }
 
     @Test
+    public void fromJson_obfuscatedAccountId() {
+        String json = "{ 'sku' = 'mySku', 'obfuscatedAccountId' = 'obfuscatedId123' }"
+                .replace('\'', '\"');
+        MethodData data = MethodData.fromJson(json);
+
+        assertEquals("obfuscatedId123", data.obfuscatedAccountId);
+    }
+
+    @Test
+    public void fromJson_obfuscatedAccountId_default() {
+        String json = "{ 'sku' = 'mySku' }".replace('\'', '\"');
+        MethodData data = MethodData.fromJson(json);
+
+        assertNull(data.obfuscatedAccountId);
+    }
+
+    @Test
     public void fromJson_replacementMode() {
         replacementMode("deferred", ReplacementMode.DEFERRED);
         replacementMode("chargeProratedPrice",

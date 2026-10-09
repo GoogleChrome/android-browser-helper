@@ -383,7 +383,7 @@ public class LauncherActivityMetadata {
                         ContextCompat.getColor(context, navigationBarDividerColorDarkId))
                 .build();
 
-        builder.setDefaultColorSchemeParams(defaultColorScheme)
+        builder = builder.setDefaultColorSchemeParams(defaultColorScheme)
                 .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                 .setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, darkModeColorScheme)
                 .setDisplayMode(displayMode)
@@ -392,7 +392,7 @@ public class LauncherActivityMetadata {
                 .setLaunchHandlerClientMode(launchHandlerClientMode);
 
         if (additionalTrustedOrigins != null) {
-            builder.setAdditionalTrustedOrigins(additionalTrustedOrigins);
+            builder = builder.setAdditionalTrustedOrigins(additionalTrustedOrigins);
         }
     }
 

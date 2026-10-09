@@ -144,6 +144,79 @@ protected WebViewClient createWebViewClient() {
 }
 ```
 
+## Launching in a Specific Browser
+
+By default, Android Browser Helper uses `TwaProviderPicker` to pick an installed browser that supports Trusted Web Activities (preferring the user's default browser).
+
+You can instead require that the TWA is launched in a specific browser, and optionally verify that browser's signing certificate.
+
+### Configuring the browser in `AndroidManifest.xml`
+
+Add the following `<meta-data>` tags to your `LauncherActivity` declaration:
+
+```xml
+<activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity" ...>
+    ...
+    <!-- The package name of the browser to launch the TWA in. -->
+    <meta-data
+        android:name="android.support.customtabs.trusted.LAUNCHING_BROWSER"
+        android:value="com.example.browser" />
+
+    <!-- Optional: The browser name shown to the user if the browser can't be used. -->
+    <meta-data
+        android:name="android.support.customtabs.trusted.LAUNCHING_BROWSER_NAME"
+        android:value="Example Browser" />
+
+    <!-- Optional: The expected identity of the browser, see below. -->
+    <meta-data
+        android:name="android.support.customtabs.trusted.LAUNCHING_BROWSER_TOKEN"
+        android:value="BASE64_SERIALIZED_TOKEN" />
+</activity>
+```
+
+- If only `LAUNCHING_BROWSER` is set, the TWA is launched in the app installed under that package name.
+- If `LAUNCHING_BROWSER_TOKEN` is also set (recommended), the TWA is only launched if the app installed under the `LAUNCHING_BROWSER` package name matches the token, i.e. it has the same package name and signing certificate as the browser the token was created for.
+- `LAUNCHING_BROWSER_TOKEN` must be used together with `LAUNCHING_BROWSER`.
+
+If the browser is not installed, does not match the token, or the token is invalid or set without `LAUNCHING_BROWSER`, the TWA is not launched, and a dialog is shown to the user instead (or, for some app shortcut launches, nothing happens).
+
+> **Warning:** Test your token before releasing your app. If the token is wrong (or blank), the TWA won't launch at all, and only an app update can fix this.
+
+### Generating the `LAUNCHING_BROWSER_TOKEN`
+
+The token is a standard (not URL-safe) base64-encoded, serialized `androidx.browser.trusted.Token`. You can generate it on a device where a trusted copy of the browser is installed (e.g. from the Play Store). On Android 11 (API 30) and above, the app generating the token must be able to [see the browser package](https://developer.android.com/training/package-visibility).
+
+```java
+import android.util.Base64;
+import android.util.Log;
+import androidx.browser.trusted.Token;
+
+Token token = Token.create("com.example.browser", context.getPackageManager());
+if (token != null) {
+    String base64Token = Base64.encodeToString(token.serialize(), Base64.NO_WRAP);
+    Log.d("TokenGenerator", "LAUNCHING_BROWSER_TOKEN: " + base64Token);
+}
+```
+
+On Android 9 (API 28) and above, verification of browsers with a single signer uses `PackageManager.hasSigningCertificate()`, so it keeps working if the browser rotates its signing key using APK Signature Scheme v3. Note that this also means that the browser's original signing key keeps being accepted after a rotation. Browsers with multiple signers, and all browsers on older Android versions, must have exactly the same signing certificates as when the token was created.
+
+### Using `TwaLauncher` directly
+
+If you use `TwaLauncher` directly rather than `LauncherActivity`, pass the package name and expected `Token` to its constructor. Use the blocked dialog fallback strategy (which requires an `Activity` context), so that the URL isn't opened in a different browser if verification fails:
+
+```java
+Token expectedToken = Token.deserialize(Base64.decode(base64Token, Base64.DEFAULT));
+TwaLauncher launcher = new TwaLauncher(context, "com.example.browser", sessionId, tokenStore,
+        expectedToken);
+
+launcher.launch(
+        twaBuilder,
+        customTabsCallback,
+        splashScreenStrategy,
+        completionCallback,
+        TwaLauncher.getBlockedDialogFallbackStrategy("Example Browser"));
+```
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

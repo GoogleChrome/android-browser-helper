@@ -23,4 +23,19 @@
     <string name="provider_authority">com.google.browser.examples.twa_notification_high_priority.fileprovider</string>
     <string name="shortcut_label">TWA Shortcut</string>
     <string name="shortcut_label_long">Open TWA via Shortcut</string>
+    <string name="share_target">
+        {
+            \"action\": \"https://dp-goog.github.io/notifications-api-testing/share-target\",
+            \"method\": \"POST\",
+            \"enctype\": \"multipart/form-data\",
+            \"params\": {
+                \"title\": \"title\",
+                \"text\": \"text\",
+                \"files\": [{
+                    \"name\": \"files\",
+                    \"accept\": [\"image/*\", \"text/*\"]
+                }]
+            }
+        }
+    </string>
 </resources>

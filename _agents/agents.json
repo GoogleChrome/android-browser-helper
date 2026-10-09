@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "path": "_agents/agents/design_reviewer"
+    },
+    {
+      "path": "_agents/agents/reviewer"
+    },
+    {
+      "path": "_agents/agents/android-browser-helper_agent"
+    }
+  ]
+}

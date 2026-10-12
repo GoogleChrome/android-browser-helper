@@ -219,7 +219,7 @@ public class LauncherActivity extends Activity {
         Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder = new TrustedWebActivityIntentBuilder(launchUrl);
         mMetadata.configureIntentBuilder(twaBuilder, this);
-        twaBuilder.setDisplayMode(getDisplayMode());
+        twaBuilder = twaBuilder.setDisplayMode(getDisplayMode());
 
         Uri intentUrl = getUrlForIntent(getIntent());
         if (intentUrl != null) {
@@ -230,7 +230,7 @@ public class LauncherActivity extends Activity {
             // either, since it may name this app's internal files. Other schemes (http, custom,
             // protocol handlers) were never used as the launch URL and are forwarded as before.
             if (!launchUrl.equals(intentUrl) && !isRejectedIntentUrl(intentUrl)) {
-                twaBuilder.setOriginalLaunchUrl(intentUrl);
+                twaBuilder = twaBuilder.setOriginalLaunchUrl(intentUrl);
             }
         }
 
@@ -346,7 +346,7 @@ public class LauncherActivity extends Activity {
 
         try {
             ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
-            twaBuilder.setShareParams(shareTarget, shareData);
+            TrustedWebActivityIntentBuilder unused = twaBuilder.setShareParams(shareTarget, shareData);
         } catch (JSONException e) {
             Log.d(TAG, "Failed to parse share target json: " + e);
         }
@@ -390,7 +390,7 @@ public class LauncherActivity extends Activity {
             return;
         }
 
-        twaBuilder.setFileHandlingData(new FileHandlingData(safeUris));
+        TrustedWebActivityIntentBuilder unused = twaBuilder.setFileHandlingData(new FileHandlingData(safeUris));
     }
 
     /**

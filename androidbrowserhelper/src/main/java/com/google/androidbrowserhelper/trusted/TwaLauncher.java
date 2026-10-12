@@ -164,6 +164,8 @@ public class TwaLauncher {
 
     private final TokenStore mTokenStore;
 
+    private final boolean mTokenMismatch;
+
     private boolean mDestroyed;
 
     private long mStartupUptimeMillis;
@@ -219,6 +221,20 @@ public class TwaLauncher {
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer sessionId,
                        TokenStore tokenStore) {
+        this(context, providerPackage, sessionId, tokenStore, null);
+    }
+
+    /**
+     * Same as above, but also verifies the browser. If {@code expectedToken} is non-null, the TWA
+     * is only launched if the browser installed under {@code providerPackage} (which must then be
+     * non-null) matches it (see {@link Token#matches}). Otherwise, the fallback strategy is invoked
+     * with a {@code null} provider package ({@link #CCT_FALLBACK_STRATEGY} is replaced by
+     * {@link #getBlockedDialogFallbackStrategy}, as it could open the url in the unverified
+     * browser), and {@link #getProviderPackage()} returns {@code null}.
+     */
+    public TwaLauncher(Context context, @Nullable String providerPackage,
+                       @Nullable Integer sessionId, TokenStore tokenStore,
+                       @Nullable Token expectedToken) {
         mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;
@@ -231,6 +247,28 @@ public class TwaLauncher {
             mProviderPackage = providerPackage;
             mLaunchMode = TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY;
         }
+        mTokenMismatch = expectedToken != null
+                && !providerMatchesToken(context, providerPackage, expectedToken);
+    }
+
+    private static boolean providerMatchesToken(Context context, @Nullable String providerPackage,
+            Token expectedToken) {
+        if (providerPackage == null) {
+            Log.e(TAG, "An expected Token was provided without a provider package.");
+            return false;
+        }
+        boolean matches;
+        try {
+            matches = expectedToken.matches(providerPackage, context.getPackageManager());
+        } catch (RuntimeException e) {
+            // Token#matches may throw for malformed tokens.
+            Log.e(TAG, "Could not verify " + providerPackage + " against the expected Token.", e);
+            return false;
+        }
+        if (!matches) {
+            Log.w(TAG, providerPackage + " is not installed or does not match the expected Token.");
+        }
+        return matches;
     }
 
     /**
@@ -266,6 +304,19 @@ public class TwaLauncher {
                        FallbackStrategy fallbackStrategy) {
         if (mDestroyed) {
             throw new IllegalStateException("TwaLauncher already destroyed");
+        }
+
+        // If the browser did not match the expected Token, don't connect to it, launch it or
+        // trust it, and don't pass it to the fallback strategy either.
+        if (mTokenMismatch) {
+            clearDelegationToken();
+            if (fallbackStrategy == CCT_FALLBACK_STRATEGY) {
+                fallbackStrategy = getBlockedDialogFallbackStrategy(null);
+            }
+            if (fallbackStrategy != null) {
+                fallbackStrategy.launch(mContext, twaBuilder, null, completionCallback);
+            }
+            return;
         }
 
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
@@ -433,10 +484,15 @@ public class TwaLauncher {
     }
 
     /**
-     * Returns package name of the browser this TwaLauncher is launching.
+     * Returns package name of the browser this TwaLauncher is launching, or {@code null} if the
+     * browser did not match the expected {@link Token} (so that it is not remembered as the last
+     * launched provider).
      */
     @Nullable
     public String getProviderPackage() {
+        if (mTokenMismatch) {
+            return null;
+        }
         return mProviderPackage;
     }
 

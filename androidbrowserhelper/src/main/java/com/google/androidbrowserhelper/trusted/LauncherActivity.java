@@ -273,7 +273,7 @@ public class LauncherActivity extends Activity {
 
     protected TwaLauncher createTwaLauncher() {
         return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
-                new SharedPreferencesTokenStore(this));
+                new SharedPreferencesTokenStore(this), mMetadata.launchingBrowserToken);
     }
 
     /**
@@ -652,9 +652,13 @@ public class LauncherActivity extends Activity {
      *
      * Override this for creating a custom fallback approach, such as launching a different WebView
      * fallback implementation or starting a native Activity.
+     *
+     * If "android.support.customtabs.trusted.LAUNCHING_BROWSER" or
+     * "android.support.customtabs.trusted.LAUNCHING_BROWSER_TOKEN" is set, a dialog is shown
+     * instead, as the TWA must not be launched in another browser. Overrides should do the same.
      */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
-        if (mMetadata.launchingBrowser != null) {
+        if (mMetadata.launchingBrowser != null || mMetadata.launchingBrowserToken != null) {
             return TwaLauncher.getBlockedDialogFallbackStrategy(mMetadata.launchingBrowserName);
         }
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {

@@ -24,6 +24,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +33,7 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.trusted.LaunchHandlerClientMode;
 import androidx.browser.trusted.ScreenOrientation;
+import androidx.browser.trusted.Token;
 import androidx.browser.trusted.TrustedWebActivityDisplayMode;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.core.content.ContextCompat;
@@ -211,6 +214,15 @@ public class LauncherActivityMetadata {
     private static final String METADATA_COLD_SHORTCUT_ACTIVITY =
             "android.support.customtabs.trusted.COLD_SHORTCUT_ACTIVITY";
 
+    /**
+     * A base64-encoded, serialized {@link Token} (see {@link Token#serialize()}) identifying the
+     * browser that the TWA should be launched in. Must be used together with
+     * {@link #METADATA_LAUNCHING_BROWSER}: the TWA will only be launched if the browser installed
+     * under that package name matches the Token (package name and signing certificate).
+     */
+    private static final String METADATA_LAUNCHING_BROWSER_TOKEN =
+            "android.support.customtabs.trusted.LAUNCHING_BROWSER_TOKEN";
+
     private final static int DEFAULT_COLOR_ID = android.R.color.white;
     private final static int DEFAULT_DIVIDER_COLOR_ID = android.R.color.transparent;
 
@@ -238,6 +250,13 @@ public class LauncherActivityMetadata {
     @Nullable public final String launchingBrowserName;
     @Nullable public final String coldShortcutActivity;
     @Nullable public final ComponentName launcherComponent;
+    /**
+     * The expected identity of {@link #launchingBrowser}. If non-null, the TWA must only be
+     * launched in {@link #launchingBrowser} if the installed package matches this Token. If the
+     * metadata value is present but invalid, this is a Token that matches no package, so that
+     * launches fail closed.
+     */
+    @Nullable public final Token launchingBrowserToken;
 
     private LauncherActivityMetadata(@NonNull Bundle metaData, @NonNull Resources resources) {
         this(metaData, resources, null);
@@ -283,6 +302,7 @@ public class LauncherActivityMetadata {
                 metaData.getBoolean(METADATA_START_CHROME_BEFORE_ANIMATION_COMPLETE, true);
         launchingBrowser = metaData.getString(METADATA_LAUNCHING_BROWSER);
         launchingBrowserName = metaData.getString(METADATA_LAUNCHING_BROWSER_NAME);
+        launchingBrowserToken = parseToken(metaData);
         coldShortcutActivity = metaData.getString(METADATA_COLD_SHORTCUT_ACTIVITY);
     }
 
@@ -478,5 +498,30 @@ public class LauncherActivityMetadata {
         }
 
         return new LauncherActivityMetadata(metaData, resources, launcherComponent);
+    }
+
+    /**
+     * Decodes the value of {@link #METADATA_LAUNCHING_BROWSER_TOKEN}. Returns {@code null} if it
+     * is absent. If it is present but blank, not a string or not valid base64, returns a Token
+     * that matches no package, so that launches fail closed rather than silently skipping
+     * verification. (Other invalid values decode to Tokens that don't match either.)
+     */
+    @Nullable
+    private static Token parseToken(@NonNull Bundle metaData) {
+        if (!metaData.containsKey(METADATA_LAUNCHING_BROWSER_TOKEN)) {
+            return null;
+        }
+        // Null if the value is not a String.
+        String value = metaData.getString(METADATA_LAUNCHING_BROWSER_TOKEN);
+        if (value != null && !value.trim().isEmpty()) {
+            try {
+                return Token.deserialize(Base64.decode(value, Base64.DEFAULT));
+            } catch (IllegalArgumentException e) {
+                // Fall through.
+            }
+        }
+        Log.e(TAG, "Invalid " + METADATA_LAUNCHING_BROWSER_TOKEN
+                + ", the TWA will not be launched.");
+        return Token.deserialize(new byte[0]);
     }
 }

@@ -149,7 +149,14 @@ public class ShortcutTrampolineActivity extends Activity {
                             // Respect the metadata specified in the manifest instead of fallback.
                             if (metadata.launchingBrowser != null
                                     || metadata.launchingBrowserToken != null) {
-                                Log.w(TAG, "Launching browser " + metadata.launchingBrowser + " is not available.");
+                                if (metadata.launchingBrowser == null) {
+                                    Log.w(TAG, "LAUNCHING_BROWSER_TOKEN is set without LAUNCHING_BROWSER.");
+                                } else if (metadata.launchingBrowserToken == null) {
+                                    Log.w(TAG, "Launching browser " + metadata.launchingBrowser + " is not available.");
+                                } else {
+                                    Log.w(TAG, "Launching browser " + metadata.launchingBrowser
+                                            + " is not available or does not match LAUNCHING_BROWSER_TOKEN.");
+                                }
                                 if(completionCallback != null) {
                                     completionCallback.run();
                                 }

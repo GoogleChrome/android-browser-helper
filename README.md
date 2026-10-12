@@ -120,7 +120,7 @@ In your `AndroidManifest.xml`, reference `shortcuts.xml` within the `<activity>`
 * **Explicit browser targeting (`LAUNCHING_BROWSER`):** `android.support.customtabs.trusted.LAUNCHING_BROWSER` is treated as a developer-declared target (for example in enterprise or kiosk deployments) and bypasses `TwaProviderPicker`'s category check, but still must bind a `CustomTabsService` and return a `CustomTabsSession` before receiving a delegation token.
 * **Delegation token lifecycle (`TwaLauncher`):** On non-ARC devices, `TwaLauncher` stores the provider's delegation `Token` in `TokenStore` (gating `DelegationService` notification delegation and Play Billing verification) inside `launchWhenSessionEstablished()` once a `CustomTabsSession` has been created. On any non-TWA launch (`CUSTOM_TAB` or `BROWSER` fallback) or when session establishment fails, `TwaLauncher` clears the stored token (`mTokenStore.store(null)`) and emits a `Log.d` diagnostic (`TwaLauncher` logcat tag) naming the provider and launch mode. Service disconnection (`onServiceDisconnected`) does not clear the token, and ChromeOS/ARC (`ChromeOsSupport.isRunningOnArc`) is untouched because `DelegationService` manages the ARC token directly.
 * **Transient failure and live-session revocation:** Because `SharedPreferencesTokenStore` holds a single slot, a transient bind/session failure (such as a browser updating in the background) or a secondary launch that resolves to `CUSTOM_TAB`/`BROWSER` mode while a TWA session is already active will clear the stored token for the remainder of that session until the next successful TWA-mode launch restores it.
-* **Custom `TokenStore` escape hatch and `ShortcutTrampolineActivity` limitation:** There is no manifest metadata flag to retain stale tokens across non-TWA launches. An app that needs to suppress `store(null)` on `LauncherActivity` fallback launches can override `LauncherActivity.createTwaLauncher()` (using `getMetadata()` to inspect parsed manifest metadata) and pass a `TokenStore` decorator to the 4-argument `TwaLauncher` constructor. **Limitation:** `ShortcutTrampolineActivity` constructs its `TwaLauncher` internally with `new SharedPreferencesTokenStore(context)` and does not call `LauncherActivity.createTwaLauncher()`, so a shortcut launch that falls back to a non-TWA mode will still clear the shared `SharedPreferencesTokenStore`.
+* **Custom `TokenStore` escape hatch and `ShortcutTrampolineActivity` limitation:** There is no manifest metadata flag to retain stale tokens across non-TWA launches. An app that needs to suppress `store(null)` on `LauncherActivity` fallback launches can override `LauncherActivity.createTwaLauncher()` (using `getMetadata()` to inspect parsed manifest metadata) and pass a `TokenStore` decorator (along with `getMetadata().launchingBrowserToken`, if set) to the 5-argument `TwaLauncher` constructor. **Limitation:** `ShortcutTrampolineActivity` constructs its `TwaLauncher` internally with `new SharedPreferencesTokenStore(context)` and does not call `LauncherActivity.createTwaLauncher()`, so a shortcut launch that falls back to a non-TWA mode will still clear the shared `SharedPreferencesTokenStore`.
 
 ## WebView fallback security (`WebViewFallbackActivity`)
 
@@ -184,19 +184,34 @@ If the browser is not installed, does not match the token, or the token is inval
 
 ### Generating the `LAUNCHING_BROWSER_TOKEN`
 
-The token is a standard (not URL-safe) base64-encoded, serialized `androidx.browser.trusted.Token`. You can generate it on a device where a trusted copy of the browser is installed (e.g. from the Play Store). On Android 11 (API 30) and above, the app generating the token must be able to [see the browser package](https://developer.android.com/training/package-visibility).
+The token is a standard (not URL-safe) base64-encoded, serialized `androidx.browser.trusted.Token`, which contains the browser's package name and the SHA-256 digest of its signing certificate. To generate it from a trusted copy of the browser (e.g. installed from the Play Store):
 
-```java
-import android.util.Base64;
-import android.util.Log;
-import androidx.browser.trusted.Token;
+1. Pull the browser's APK from the device and print its signing certificate:
 
-Token token = Token.create("com.example.browser", context.getPackageManager());
-if (token != null) {
-    String base64Token = Base64.encodeToString(token.serialize(), Base64.NO_WRAP);
-    Log.d("TokenGenerator", "LAUNCHING_BROWSER_TOKEN: " + base64Token);
-}
-```
+   ```sh
+   adb shell pm path com.example.browser
+   # package:/data/app/.../base.apk
+   adb pull /data/app/.../base.apk browser.apk
+   apksigner verify --print-certs browser.apk
+   # Signer #1 certificate SHA-256 digest: <64 hex characters>
+   ```
+
+   If `apksigner` prints more than one signer, or the browser has rotated its signing key, use the certificate the browser was originally signed with: the first one printed by `apksigner lineage --print-certs --in browser.apk`.
+
+2. Serialize the token, e.g. in Python:
+
+   ```python
+   import base64, struct
+
+   package_name = b"com.example.browser"
+   digest = bytes.fromhex("<SHA-256 digest from step 1>")
+
+   token = struct.pack(">H", len(package_name)) + package_name
+   token += struct.pack(">II", 1, len(digest)) + digest
+   print(base64.b64encode(token).decode())
+   ```
+
+Alternatively, `Token.create("com.example.browser", packageManager).serialize()` produces the same bytes from within an app running on the device (on Android 11 and above, the app must be able to [see the browser package](https://developer.android.com/training/package-visibility)).
 
 On Android 9 (API 28) and above, verification of browsers with a single signer uses `PackageManager.hasSigningCertificate()`, so it keeps working if the browser rotates its signing key using APK Signature Scheme v3. Note that this also means that the browser's original signing key keeps being accepted after a rotation. Browsers with multiple signers, and all browsers on older Android versions, must have exactly the same signing certificates as when the token was created.
 

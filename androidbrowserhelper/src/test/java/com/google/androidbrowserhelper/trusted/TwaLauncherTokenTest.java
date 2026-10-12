@@ -139,23 +139,29 @@ public class TwaLauncherTokenTest {
     }
 
     @Test
-    public void launcherActivity_verifiesLaunchingBrowserTokenMetadata() throws Exception {
-        String validEncoded = Base64.encodeToString(createToken(BROWSER).serialize(),
-                Base64.NO_WRAP);
-
+    public void launcherActivity_verifiesLaunchingBrowserTokenMetadata() {
         // Valid token launches in browser.
-        assertEquals(1, launchActivity(BROWSER, validEncoded, null));
+        assertEquals(1, launchLauncherActivity(BROWSER, encodedToken(BROWSER), null));
         assertNull(ShadowAlertDialog.getLatestAlertDialog());
 
         // Mismatched or invalid token blocks with dialog, even with webview fallback configured.
-        assertEquals(0, launchActivity(BROWSER,
-                Base64.encodeToString(createToken(OTHER_BROWSER).serialize(), Base64.NO_WRAP),
-                "webview"));
+        assertEquals(0, launchLauncherActivity(BROWSER, encodedToken(OTHER_BROWSER), "webview"));
         assertNotNull(ShadowAlertDialog.getLatestAlertDialog());
 
         ShadowAlertDialog.reset();
-        assertEquals(0, launchActivity(BROWSER, "not-valid-token", null));
+        assertEquals(0, launchLauncherActivity(BROWSER, "not-valid-token", null));
         assertNotNull(ShadowAlertDialog.getLatestAlertDialog());
+    }
+
+    @Test
+    public void shortcutTrampolineActivity_verifiesLaunchingBrowserTokenMetadata() {
+        // Valid token launches in browser.
+        assertEquals(1, launchShortcutTrampolineActivity(BROWSER, encodedToken(BROWSER)));
+
+        // Mismatched token, or token without LAUNCHING_BROWSER, drops the launch.
+        assertEquals(0, launchShortcutTrampolineActivity(BROWSER, encodedToken(OTHER_BROWSER)));
+        assertEquals(0, launchShortcutTrampolineActivity(null, encodedToken(BROWSER)));
+        assertNull(shadowOf(mContext).getNextStartedActivity());
     }
 
     private void assertBlocked(@Nullable String providerPackage, Token expectedToken) {
@@ -184,7 +190,24 @@ public class TwaLauncherTokenTest {
                 .onCustomTabsServiceConnected(componentName, client);
     }
 
-    private int launchActivity(@Nullable String browser, @Nullable String encodedToken,
+    private int launchLauncherActivity(@Nullable String browser, @Nullable String encodedToken,
+            @Nullable String fallbackStrategy) {
+        // Launched from the launcher, in a new task (otherwise it restarts itself in one).
+        Intent intent = new Intent(Intent.ACTION_MAIN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return launch(LauncherActivity.class, intent, browser, encodedToken, fallbackStrategy);
+    }
+
+    private int launchShortcutTrampolineActivity(@Nullable String browser, String encodedToken) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, URL);
+        return launch(ShortcutTrampolineActivity.class, intent, browser, encodedToken, null);
+    }
+
+    /**
+     * Creates the activity with the given LauncherActivity metadata, and returns the number of
+     * browser services it bound to.
+     */
+    private int launch(Class<? extends Activity> activityClass, Intent intent,
+            @Nullable String browser, @Nullable String encodedToken,
             @Nullable String fallbackStrategy) {
         Bundle metaData = new Bundle();
         metaData.putString("android.support.customtabs.trusted.DEFAULT_URL", URL.toString());
@@ -205,12 +228,16 @@ public class TwaLauncherTokenTest {
         activityInfo.metaData = metaData;
         mShadowPackageManager.addOrUpdateActivity(activityInfo);
 
-        Intent intent = new Intent(Intent.ACTION_MAIN).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ActivityController<LauncherActivity> controller =
-                Robolectric.buildActivity(LauncherActivity.class, intent).create();
-        int bound = shadowOf(mContext).getBoundServiceConnections().size();
+        int boundBefore = shadowOf(mContext).getBoundServiceConnections().size();
+        ActivityController<? extends Activity> controller =
+                Robolectric.buildActivity(activityClass, intent).create();
+        int bound = shadowOf(mContext).getBoundServiceConnections().size() - boundBefore;
         controller.destroy();
         return bound;
+    }
+
+    private String encodedToken(String packageName) {
+        return Base64.encodeToString(createToken(packageName).serialize(), Base64.NO_WRAP);
     }
 
     private void installPackage(String packageName, String signature) {

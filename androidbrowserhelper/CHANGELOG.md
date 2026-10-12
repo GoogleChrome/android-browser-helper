@@ -152,6 +152,12 @@
     `protected boolean shouldOverrideUrlLoading(@NonNull Uri url, boolean isMainFrame)` and
     `protected boolean isTrustedOrigin(@Nullable Uri uri)` so subclasses can customize navigation
     handling and have their client preserved across renderer crashes in `onRenderProcessGone()`.
+14. **Added `LAUNCHING_BROWSER_TOKEN` manifest metadata:** a base64-encoded
+    `androidx.browser.trusted.Token` identifying the `LAUNCHING_BROWSER`. If set, the TWA is only
+    launched if the installed browser matches the token's package name and signing certificate;
+    otherwise `LauncherActivity` shows the "browser unavailable" dialog and
+    `ShortcutTrampolineActivity` drops the launch. `TwaLauncher` gains a constructor that takes the
+    expected `Token`. See the README for how to generate the token.
 
 ## 2.6.2
 

@@ -1,0 +1,44 @@
+# Gemini-CLI Specific Directives
+
+Instructions that apply only to gemini-cli.
+
+* When using the `read_file` tool:
+  * Always set the 'limit' parameter to 20000 to prevent truncation.
+* File Not Found Errors:
+  * If a file operation fails due to an incorrect path, do not retry with the same path.
+  * Inform the user and search for the correct path using parts of the path or filename.
+
+# Common Directives
+
+Instructions that are useful for Android Browser Helper development.
+
+## Paths
+
+* All files in the project's source can be read relative to the workspace root.
+
+## Building
+
+* Do not attempt a build without first establishing the correct target.
+* Build the project using Gradle:
+  * To build the entire project: `./gradlew build`
+  * To build a specific module (e.g., `androidbrowserhelper`): `./gradlew :androidbrowserhelper:assembleDebug`
+
+## Testing
+
+* Run tests using Gradle:
+  * To run all unit tests: `./gradlew test`
+  * To run unit tests for a specific module: `./gradlew :androidbrowserhelper:test`
+  * To run instrumentation tests (if emulator is available): `./gradlew connectedAndroidTest`
+
+## Coding
+
+* Stay on task: Do not address code health issues or TODOs in code unless it is required to achieve your given task.
+* Add code comments sparingly: Focus on *why* something is done, not *what* is done.
+
+## Git Operations
+
+* **Always branched:** Ensure you are not on the `main` branch if you are making commits. If you are, first do `git checkout -b {BRANCH_NAME}`.
+* **Commit messages:**
+  * Use active voice and avoid passive voice.
+  * Use present tense or imperative mood (e.g., "Change foo" instead of "Changed foo").
+  * Wrap the commit message at 72 characters when possible.

@@ -74,13 +74,18 @@ public class MethodData {
     @Nullable public final String purchaseToken;
     @Nullable public final Integer replacementMode;
 
+    // Optional account identifier forwarded to Play Billing's setObfuscatedAccountId().
+    @Nullable public final String obfuscatedAccountId;
+
     private MethodData(String sku, boolean isPriceChangeConfirmation, @Nullable String oldSku,
-                       @Nullable String purchaseToken, @Nullable Integer replacementMode) {
+                       @Nullable String purchaseToken, @Nullable Integer replacementMode,
+                       @Nullable String obfuscatedAccountId) {
         this.sku = sku;
         this.isPriceChangeConfirmation = isPriceChangeConfirmation;
         this.oldSku = oldSku;
         this.purchaseToken = purchaseToken;
         this.replacementMode = replacementMode;
+        this.obfuscatedAccountId = obfuscatedAccountId;
     }
 
     @Nullable
@@ -104,6 +109,7 @@ public class MethodData {
 
         String oldSku = getString(dataObject, "oldSku");
         String purchaseToken = getString(dataObject, "purchaseToken");
+        String obfuscatedAccountId = getString(dataObject, "obfuscatedAccountId");
 
         Integer replacementMode = getReplacementMode(dataObject);
         if (replacementMode == null) {
@@ -113,7 +119,8 @@ public class MethodData {
             }
         }
 
-        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, replacementMode);
+        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, replacementMode,
+                obfuscatedAccountId);
     }
 
     /**

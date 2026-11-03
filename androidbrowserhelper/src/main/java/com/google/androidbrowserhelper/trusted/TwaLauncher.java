@@ -53,6 +53,16 @@ import java.util.List;
 /**
  * Encapsulates the steps necessary to launch a Trusted Web Activity, such as establishing a
  * connection with {@link CustomTabsService}.
+ *
+ * <p><b>Delegation token lifecycle:</b> On non-ARC devices, {@link TwaLauncher} manages the single
+ * delegation {@link Token} in {@link TokenStore} (read by {@link DelegationService} and Play
+ * Billing verification). The token is stored in {@link #launchWhenSessionEstablished} once the
+ * chosen provider has bound its {@link CustomTabsService} and issued a {@link CustomTabsSession},
+ * and is cleared ({@code mTokenStore.store(null)}) whenever a launch proceeds in a non-TWA mode
+ * ({@code CUSTOM_TAB} / {@code BROWSER}) or when session establishment fails. It is deliberately
+ * <em>not</em> cleared on {@link CustomTabsServiceConnection#onServiceDisconnected}, which is
+ * transient. On ChromeOS/ARC ({@link ChromeOsSupport#isRunningOnArc}), {@link DelegationService}
+ * owns the token and {@link TwaLauncher} neither stores nor clears it.
  */
 public class TwaLauncher {
     private static final String TAG = "TwaLauncher";
@@ -154,6 +164,8 @@ public class TwaLauncher {
 
     private final TokenStore mTokenStore;
 
+    private final boolean mTokenMismatch;
+
     private boolean mDestroyed;
 
     private long mStartupUptimeMillis;
@@ -209,6 +221,20 @@ public class TwaLauncher {
      */
     public TwaLauncher(Context context, @Nullable String providerPackage, @Nullable Integer sessionId,
                        TokenStore tokenStore) {
+        this(context, providerPackage, sessionId, tokenStore, null);
+    }
+
+    /**
+     * Same as above, but also verifies the browser. If {@code expectedToken} is non-null, the TWA
+     * is only launched if the browser installed under {@code providerPackage} (which must then be
+     * non-null) matches it (see {@link Token#matches}). Otherwise, the fallback strategy is invoked
+     * with a {@code null} provider package ({@link #CCT_FALLBACK_STRATEGY} is replaced by
+     * {@link #getBlockedDialogFallbackStrategy}, as it could open the url in the unverified
+     * browser), and {@link #getProviderPackage()} returns {@code null}.
+     */
+    public TwaLauncher(Context context, @Nullable String providerPackage,
+                       @Nullable Integer sessionId, TokenStore tokenStore,
+                       @Nullable Token expectedToken) {
         mContext = context;
         mSessionId = sessionId;
         mTokenStore = tokenStore;
@@ -221,6 +247,28 @@ public class TwaLauncher {
             mProviderPackage = providerPackage;
             mLaunchMode = TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY;
         }
+        mTokenMismatch = expectedToken != null
+                && !providerMatchesToken(context, providerPackage, expectedToken);
+    }
+
+    private static boolean providerMatchesToken(Context context, @Nullable String providerPackage,
+            Token expectedToken) {
+        if (providerPackage == null) {
+            Log.e(TAG, "An expected Token was provided without a provider package.");
+            return false;
+        }
+        boolean matches;
+        try {
+            matches = expectedToken.matches(providerPackage, context.getPackageManager());
+        } catch (RuntimeException e) {
+            // Token#matches may throw for malformed tokens.
+            Log.e(TAG, "Could not verify " + providerPackage + " against the expected Token.", e);
+            return false;
+        }
+        if (!matches) {
+            Log.w(TAG, providerPackage + " is not installed or does not match the expected Token.");
+        }
+        return matches;
     }
 
     /**
@@ -258,20 +306,57 @@ public class TwaLauncher {
             throw new IllegalStateException("TwaLauncher already destroyed");
         }
 
+        // If the browser did not match the expected Token, don't connect to it, launch it or
+        // trust it, and don't pass it to the fallback strategy either.
+        if (mTokenMismatch) {
+            clearDelegationToken();
+            if (fallbackStrategy == CCT_FALLBACK_STRATEGY) {
+                fallbackStrategy = getBlockedDialogFallbackStrategy(null);
+            }
+            if (fallbackStrategy != null) {
+                fallbackStrategy.launch(mContext, twaBuilder, null, completionCallback);
+            }
+            return;
+        }
+
         if (mLaunchMode == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY) {
+            // The token is stored in launchWhenSessionEstablished() and cleared if the provider fails
+            // to give us a session. See TwaLauncher's class comment on the delegation token lifecycle.
             launchTwa(twaBuilder, customTabsCallback, splashScreenStrategy, completionCallback,
                     fallbackStrategy);
         } else {
+            // Non-TWA launch: the picked provider has not proven it serves a CustomTabsService, so it
+            // must not retain delegation rights. Clear before launching, so revocation happens even if
+            // the fallback throws.
+            clearDelegationToken();
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         }
+    }
 
-        // Remember who we connect to as the package that is allowed to delegate notifications
-        // to us.
-        if (!ChromeOsSupport.isRunningOnArc(mContext.getPackageManager()) && mProviderPackage != null) {
-            // Since ChromeOS may not follow this path when launching a TWA, we set the verified
-            // provider in DelegationService instead.
-            mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
-        }
+    /**
+     * ChromeOS/ARC does not follow the TWA launch path, so DelegationService owns the token there
+     * and TwaLauncher must touch neither end of it. Clearing under ARC breaks ChromeOS payments.
+     */
+    private boolean managesDelegationToken() {
+        return mContext != null
+                && !ChromeOsSupport.isRunningOnArc(mContext.getPackageManager());
+    }
+
+    private void storeDelegationToken() {
+        if (!managesDelegationToken() || mProviderPackage == null) return;
+        Log.d(TAG, "Storing delegation token for established TWA session (provider="
+                + mProviderPackage + ").");
+        mTokenStore.store(Token.create(mProviderPackage, mContext.getPackageManager()));
+    }
+
+    private void clearDelegationToken() {
+        if (!managesDelegationToken()) return;
+        // This revocation has no opt-out flag, so make it visible at development time.
+        Log.d(TAG, "Clearing delegation token (provider=" + mProviderPackage
+                + ", launchMode=" + mLaunchMode + "): no Trusted Web Activity session was"
+                + " established. Notification delegation and Play Billing are suspended until the"
+                + " next successful TWA-mode launch.");
+        mTokenStore.store(null);
     }
 
     /**
@@ -315,6 +400,7 @@ public class TwaLauncher {
             // The provider has been unable to create a session for us, we can't launch a
             // Trusted Web Activity. We launch a fallback specially designed to provide the
             // best user experience.
+            clearDelegationToken();
             fallbackStrategy.launch(mContext, twaBuilder, mProviderPackage, completionCallback);
         };
 
@@ -337,6 +423,8 @@ public class TwaLauncher {
         if (mSession == null) {
             throw new IllegalStateException("mSession is null in launchWhenSessionEstablished");
         }
+
+        storeDelegationToken();
 
         if (splashScreenStrategy != null) {
             splashScreenStrategy.configureTwaBuilder(twaBuilder, mSession,
@@ -396,11 +484,24 @@ public class TwaLauncher {
     }
 
     /**
-     * Returns package name of the browser this TwaLauncher is launching.
+     * Returns package name of the browser this TwaLauncher is launching, or {@code null} if the
+     * browser did not match the expected {@link Token} (so that it is not remembered as the last
+     * launched provider).
      */
     @Nullable
     public String getProviderPackage() {
+        if (mTokenMismatch) {
+            return null;
+        }
         return mProviderPackage;
+    }
+
+    /**
+     * Returns the launch mode selected for this TwaLauncher.
+     */
+    @TwaProviderPicker.LaunchMode
+    int getLaunchMode() {
+        return mLaunchMode;
     }
 
     /**
@@ -473,6 +574,9 @@ public class TwaLauncher {
         @Override
         public void onCustomTabsServiceConnected(@NonNull ComponentName componentName,
                 @NonNull CustomTabsClient client) {
+            if (mDestroyed || mContext == null) {
+                return;
+            }
             if (!ChromeLegacyUtils
                     .supportsLaunchWithoutWarmup(mContext.getPackageManager(), mProviderPackage)) {
                 client.warmup(0);
@@ -497,6 +601,10 @@ public class TwaLauncher {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            // Deliberately do not clear the delegation token here: service disconnection is
+            // transient (e.g. backgrounding or memory pressure) and the provider has already
+            // proven it serves a CustomTabsService for this session. Clearing on disconnect
+            // would cause notification delegation and Play Billing verification to flap.
             mSession = null;
         }
     }

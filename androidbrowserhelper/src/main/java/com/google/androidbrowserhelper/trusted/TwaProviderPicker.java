@@ -17,6 +17,7 @@ package com.google.androidbrowserhelper.trusted;
 import static androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY_CATEGORY;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -64,6 +65,7 @@ import androidx.browser.customtabs.TrustedWebUtils;
  */
 public class TwaProviderPicker {
     private static final String TAG = "TWAProviderPicker";
+    private static final String PLAY_STORE_PACKAGE = "com.android.vending";
     private static String sPackageNameForTesting;
 
     @IntDef({LaunchMode.TRUSTED_WEB_ACTIVITY, LaunchMode.CUSTOM_TAB, LaunchMode.BROWSER})
@@ -112,11 +114,23 @@ public class TwaProviderPicker {
         }
 
         String bestCctProvider = null;
+        boolean bestCctProviderIsPrivileged = false;
         String bestBrowserProvider = null;
+        boolean bestBrowserProviderIsPrivileged = false;
 
         // These packages will be in order of Android's preference.
         List<ResolveInfo> possibleProviders
                 = pm.queryIntentActivities(queryBrowsersIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        // Entries before this index came from the MATCH_DEFAULT_ONLY query. Everything after it
+        // came from MATCH_ALL, which is explicitly NOT ordered by preference -- see the comment
+        // below.
+        final int defaultOrderedCount = possibleProviders.size();
+
+        // MATCH_DEFAULT_ONLY returns a single entry when the user has an actual default browser. If it
+        // returns more than one, no default is set and the head is as unordered as the MATCH_ALL tail --
+        // require system or Play Store installation rather than taking an arbitrary first arrival.
+        final boolean headIsAuthoritative = defaultOrderedCount == 1;
 
         // According to the documentation, the flag we want to use above is MATCH_DEFAULT_ONLY.
         // This would match all the browsers installed on the user's system whose intent handler
@@ -140,7 +154,8 @@ public class TwaProviderPicker {
 
         Map<String, Integer> customTabsServices = getLaunchModesForCustomTabsServices(pm);
 
-        for (ResolveInfo possibleProvider : possibleProviders) {
+        for (int i = 0; i < possibleProviders.size(); i++) {
+            ResolveInfo possibleProvider = possibleProviders.get(i);
             String providerName = possibleProvider.activityInfo.packageName;
 
             @LaunchMode int launchMode = customTabsServices.containsKey(providerName)
@@ -148,15 +163,53 @@ public class TwaProviderPicker {
 
             switch (launchMode) {
                 case LaunchMode.TRUSTED_WEB_ACTIVITY:
-                    Log.d(TAG, "Found TWA provider, finishing search: " + providerName);
-                    return new Action(LaunchMode.TRUSTED_WEB_ACTIVITY, providerName);
+                    if (i == 0 && headIsAuthoritative) {
+                        // The user's default browser (or sole default-category browser). Authoritative:
+                        // take it and stop, as before.
+                        Log.d(TAG, "Found TWA provider, finishing search: " + providerName);
+                        return new Action(LaunchMode.TRUSTED_WEB_ACTIVITY, providerName);
+                    }
+                    // No single default browser is set (multi-entry head) or we are in the
+                    // unordered MATCH_ALL tail: require system or Play Store installation for
+                    // TRUSTED_WEB_ACTIVITY mode, and downgrade unprivileged candidates to
+                    // CUSTOM_TAB.
+                    if (isSystemOrStoreInstalled(pm, providerName)) {
+                        Log.d(TAG, "Found privileged TWA provider, finishing search: "
+                                + providerName);
+                        return new Action(LaunchMode.TRUSTED_WEB_ACTIVITY, providerName);
+                    } else if (bestCctProvider == null) {
+                        bestCctProvider = providerName;
+                        bestCctProviderIsPrivileged = false;
+                    }
+                    break;
                 case LaunchMode.CUSTOM_TAB:
                     Log.d(TAG, "Found Custom Tabs provider: " + providerName);
-                    if (bestCctProvider == null) bestCctProvider = providerName;
+                    if (i == 0 && headIsAuthoritative) {
+                        bestCctProvider = providerName;
+                        bestCctProviderIsPrivileged = true;
+                    } else if (bestCctProvider == null) {
+                        bestCctProvider = providerName;
+                        bestCctProviderIsPrivileged = isSystemOrStoreInstalled(pm, providerName);
+                    } else if (!bestCctProviderIsPrivileged
+                            && isSystemOrStoreInstalled(pm, providerName)) {
+                        bestCctProvider = providerName;
+                        bestCctProviderIsPrivileged = true;
+                    }
                     break;
                 case LaunchMode.BROWSER:
                     Log.d(TAG, "Found browser: " + providerName);
-                    if (bestBrowserProvider == null) bestBrowserProvider = providerName;
+                    if (i == 0 && headIsAuthoritative) {
+                        bestBrowserProvider = providerName;
+                        bestBrowserProviderIsPrivileged = true;
+                    } else if (bestBrowserProvider == null) {
+                        bestBrowserProvider = providerName;
+                        bestBrowserProviderIsPrivileged =
+                                isSystemOrStoreInstalled(pm, providerName);
+                    } else if (!bestBrowserProviderIsPrivileged
+                            && isSystemOrStoreInstalled(pm, providerName)) {
+                        bestBrowserProvider = providerName;
+                        bestBrowserProviderIsPrivileged = true;
+                    }
                     break;
             }
         }
@@ -169,6 +222,56 @@ public class TwaProviderPicker {
 
         Log.d(TAG, "Found no TWA providers, using first browser: " + bestBrowserProvider);
         return new Action(LaunchMode.BROWSER, bestBrowserProvider);
+    }
+
+    /**
+     * Whether {@code packageName} was preinstalled on the system image or installed by the Play
+     * Store. Used to gate Trusted Web Activity candidates when no single default browser is set or
+     * when scanning the unordered MATCH_ALL tail: non-default unprivileged candidates are excluded
+     * from {@link LaunchMode#TRUSTED_WEB_ACTIVITY} and downgraded to
+     * {@link LaunchMode#CUSTOM_TAB}.
+     *
+     * <p>Note that the installer of record is forgeable with {@code adb install -i}, though an
+     * attacker with ADB access has stronger primitives.
+     *
+     * <p>Returns false for any package we cannot resolve (and logs a warning, as candidates
+     * returned by {@link PackageManager#queryIntentActivities} are visible by construction).
+     * Callers must treat "unknown" and "not privileged" identically.
+     */
+    private static boolean isSystemOrStoreInstalled(PackageManager pm, String packageName) {
+        boolean resolved = false;
+        try {
+            ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
+            if (info != null) {
+                resolved = true;
+                if ((info.flags & (ApplicationInfo.FLAG_SYSTEM
+                        | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0) {
+                    return true;
+                }
+            }
+        } catch (PackageManager.NameNotFoundException | RuntimeException e) {
+            // Fall through: an unresolvable package is simply not privileged.
+        }
+
+        try {
+            if (PLAY_STORE_PACKAGE.equals(pm.getInstallerPackageName(packageName))) return true;
+        } catch (RuntimeException e) {
+            // getInstallerPackageName throws IllegalArgumentException for unknown packages on AOSP,
+            // but the thrown type is not guaranteed across OEM PackageManager implementations. This
+            // runs on the cold-start launch path and the method's contract is already "false when we
+            // cannot resolve", so swallow broadly rather than risk failing the launch.
+            resolved = false;
+        }
+
+        if (!resolved) {
+            // The candidate came out of queryIntentActivities(), so it is visible to us and should
+            // resolve here. If it does not, the candidate is treated as neither system- nor
+            // Play-installed. Loud on purpose: this is the one assumption in the install-source
+            // check that no unit test can cover.
+            Log.w(TAG, "Could not resolve install source for browser candidate " + packageName
+                    + "; treating it as neither system- nor Play-installed.");
+        }
+        return false;
     }
 
     /**

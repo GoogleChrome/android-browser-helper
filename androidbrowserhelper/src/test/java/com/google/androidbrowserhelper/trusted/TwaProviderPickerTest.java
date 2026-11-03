@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -31,6 +32,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
+import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowPackageManager;
 
 import androidx.browser.customtabs.CustomTabsService;
@@ -208,6 +211,286 @@ public class TwaProviderPickerTest {
         assertEquals(BROWSER2, action.provider);
     }
 
+    @Test
+    public void prefersStoreInstalledProviderInTail() {
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER2);
+        markAsSideloaded(TWA_PROVIDER2);
+        mPackageManager.setInstallerPackageName(TWA_PROVIDER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+        assertEquals(TWA_PROVIDER2, action.provider);
+    }
+
+    @Test
+    public void prefersSystemProviderInTail() {
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER2);
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = TWA_PROVIDER2;
+        packageInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+        packageInfo.applicationInfo.packageName = TWA_PROVIDER2;
+        packageInfo.applicationInfo.flags = android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+        mShadowPackageManager.addPackage(packageInfo);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+        assertEquals(TWA_PROVIDER2, action.provider);
+    }
+
+    @Test
+    public void downgradesToCustomTabWhenNoTailCandidateIsPrivileged() {
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER2);
+        markAsSideloaded(TWA_PROVIDER2);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+    }
+
+    /**
+     * When the user has an actual default browser, {@code MATCH_DEFAULT_ONLY} returns a single
+     * authoritative entry ({@code defaultOrderedCount == 1}) and that entry still wins unranked
+     * over a privileged {@code MATCH_ALL} tail candidate.
+     */
+    @Test
+    public void defaultBrowserStillWinsOverPrivilegedTailProvider() {
+        installTrustedWebActivityProvider(TWA_PROVIDER1);
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER2);
+        markAsSideloaded(TWA_PROVIDER2);
+        mPackageManager.setInstallerPackageName(TWA_PROVIDER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+    }
+
+    @Test
+    public void honorsAuthoritativeSingleDefaultBrowserEvenWhenSideloaded() {
+        installTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER2);
+        markAsSideloaded(TWA_PROVIDER2);
+        mPackageManager.setInstallerPackageName(TWA_PROVIDER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+    }
+
+    @Test
+    public void ranksHeadWhenNoDefaultBrowserIsSet() {
+        installTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTrustedWebActivityProvider(TWA_PROVIDER2);
+        mPackageManager.setInstallerPackageName(TWA_PROVIDER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY, action.launchMode);
+        assertEquals(TWA_PROVIDER2, action.provider);
+    }
+
+    @Test
+    public void downgradesToCustomTabWhenNoHeadCandidateIsPrivileged() {
+        installTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installTrustedWebActivityProvider(TWA_PROVIDER2);
+        markAsSideloaded(TWA_PROVIDER2);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+    }
+
+    @Test
+    public void prefersPrivilegedCustomTabProviderOverDowngradedSideloadedTwaProvider() {
+        installTrustedWebActivityProvider(TWA_PROVIDER1);
+        markAsSideloaded(TWA_PROVIDER1);
+        installCustomTabsProvider(CUSTOM_TABS_PROVIDER1);
+        mPackageManager.setInstallerPackageName(CUSTOM_TABS_PROVIDER1, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(CUSTOM_TABS_PROVIDER1, action.provider);
+    }
+
+    @Test
+    public void downgradesSideloadedLocalBuildChromeCloneWhenNotDefault() {
+        String localBuildChrome = "org.chromium.chrome";
+        installBrowser(BROWSER1);
+        installCustomTabsProvider(localBuildChrome);
+        markAsSideloaded(localBuildChrome);
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(localBuildChrome, action.provider);
+    }
+
+    @Test
+    public void unresolvablePackageDoesNotCrashPicker() {
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER1);
+        ShadowLog.clear();
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+        assertTrue(ShadowLog.getLogsForTag("TWAProviderPicker").stream()
+                .anyMatch(item -> item.type == Log.WARN
+                        && item.msg.contains(
+                                "Could not resolve install source for browser candidate "
+                                        + TWA_PROVIDER1
+                                        + "; treating it as neither system- nor Play-installed.")));
+    }
+
+    @Test
+    public void installerLookupRuntimeExceptionDoesNotCrashPickerAndLogsWarning() {
+        installTailOnlyTrustedWebActivityProvider(TWA_PROVIDER1);
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = TWA_PROVIDER1;
+        packageInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+        packageInfo.applicationInfo.packageName = TWA_PROVIDER1;
+        mShadowPackageManager.addPackage(packageInfo);
+
+        PackageManager spyPm = Mockito.spy(mPackageManager);
+        Mockito.doThrow(new SecurityException("OEM restriction"))
+                .when(spyPm).getInstallerPackageName(TWA_PROVIDER1);
+        ShadowLog.clear();
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(spyPm);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(TWA_PROVIDER1, action.provider);
+        assertTrue(ShadowLog.getLogsForTag("TWAProviderPicker").stream()
+                .anyMatch(item -> item.type == Log.WARN
+                        && item.msg.contains(
+                                "Could not resolve install source for browser candidate "
+                                        + TWA_PROVIDER1
+                                        + "; treating it as neither system- nor Play-installed.")));
+    }
+
+    private void markAsSideloaded(String packageName) {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+        packageInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+        packageInfo.applicationInfo.packageName = packageName;
+        packageInfo.applicationInfo.flags = 0;
+        mShadowPackageManager.addPackage(packageInfo);
+        mPackageManager.setInstallerPackageName(packageName, null);
+    }
+
+    /**
+     * Installs a TWA provider that is invisible to the MATCH_DEFAULT_ONLY query, so it appears only
+     * in the unordered MATCH_ALL tail, where non-default candidates are gated on install source.
+     */
+    private void installTailOnlyTrustedWebActivityProvider(String packageName) {
+        Intent browserIntent = new Intent()
+                .setData(Uri.fromParts("http", "", null))
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE);
+
+        ResolveInfo activityResolveInfo = new ResolveInfo();
+        activityResolveInfo.activityInfo = new ActivityInfo();
+        activityResolveInfo.activityInfo.packageName = packageName;
+
+        mShadowPackageManager.addResolveInfoForIntentNoDefaults(browserIntent, activityResolveInfo);
+
+        Intent serviceIntent = new Intent()
+                .setAction(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+
+        ResolveInfo serviceResolveInfo = new ResolveInfo();
+        serviceResolveInfo.serviceInfo = new ServiceInfo();
+        serviceResolveInfo.serviceInfo.packageName = packageName;
+        serviceResolveInfo.filter = Mockito.mock(IntentFilter.class);
+        when(serviceResolveInfo.filter.hasCategory(eq(TRUSTED_WEB_ACTIVITY_CATEGORY)))
+                .thenReturn(true);
+
+        mShadowPackageManager.addResolveInfoForIntent(serviceIntent, serviceResolveInfo);
+    }
+
+    @Test
+    public void prefersStoreInstalledBrowserWhenNoDefaultIsSet() {
+        installBrowser(BROWSER1);
+        markAsSideloaded(BROWSER1);
+        installBrowser(BROWSER2);
+        markAsSideloaded(BROWSER2);
+        mPackageManager.setInstallerPackageName(BROWSER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertEquals(BROWSER2, action.provider);
+    }
+
+    @Test
+    public void honorsAuthoritativeSingleDefaultPlainBrowserEvenWhenSideloaded() {
+        installBrowser(BROWSER1);
+        markAsSideloaded(BROWSER1);
+        installTailOnlyBrowser(BROWSER2);
+        markAsSideloaded(BROWSER2);
+        mPackageManager.setInstallerPackageName(BROWSER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.BROWSER, action.launchMode);
+        assertEquals(BROWSER1, action.provider);
+    }
+
+    @Test
+    public void honorsAuthoritativeSingleDefaultCustomTabsProviderEvenWhenSideloaded() {
+        installCustomTabsProvider(CUSTOM_TABS_PROVIDER1);
+        markAsSideloaded(CUSTOM_TABS_PROVIDER1);
+        installTailOnlyCustomTabsProvider(CUSTOM_TABS_PROVIDER2);
+        markAsSideloaded(CUSTOM_TABS_PROVIDER2);
+        mPackageManager.setInstallerPackageName(CUSTOM_TABS_PROVIDER2, "com.android.vending");
+
+        TwaProviderPicker.Action action = TwaProviderPicker.pickProvider(mPackageManager);
+
+        assertEquals(TwaProviderPicker.LaunchMode.CUSTOM_TAB, action.launchMode);
+        assertEquals(CUSTOM_TABS_PROVIDER1, action.provider);
+    }
+
+    private void installTailOnlyBrowser(String packageName) {
+        Intent browserIntent = new Intent()
+                .setData(Uri.fromParts("http", "", null))
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE);
+
+        ResolveInfo activityResolveInfo = new ResolveInfo();
+        activityResolveInfo.activityInfo = new ActivityInfo();
+        activityResolveInfo.activityInfo.packageName = packageName;
+
+        mShadowPackageManager.addResolveInfoForIntentNoDefaults(browserIntent, activityResolveInfo);
+    }
+
+    private void installTailOnlyCustomTabsProvider(String packageName) {
+        installTailOnlyBrowser(packageName);
+
+        Intent serviceIntent = new Intent()
+                .setAction(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+
+        ResolveInfo serviceResolveInfo = new ResolveInfo();
+        serviceResolveInfo.serviceInfo = new ServiceInfo();
+        serviceResolveInfo.serviceInfo.packageName = packageName;
+
+        mShadowPackageManager.addResolveInfoForIntent(serviceIntent, serviceResolveInfo);
+    }
+
     private void installNonBrowser(String packageName) {
         Intent intent = new Intent()
                 .setData(Uri.parse("http://"))
@@ -259,6 +542,13 @@ public class TwaProviderPickerTest {
         when(resolveInfo.filter.hasCategory(eq(TRUSTED_WEB_ACTIVITY_CATEGORY))).thenReturn(true);
 
         mShadowPackageManager.addResolveInfoForIntent(intent, resolveInfo);
+
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = packageName;
+        packageInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+        packageInfo.applicationInfo.packageName = packageName;
+        mShadowPackageManager.addPackage(packageInfo);
+        mPackageManager.setInstallerPackageName(packageName, "com.android.vending");
     }
 
     private void installChrome(int version) {
@@ -268,7 +558,10 @@ public class TwaProviderPickerTest {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.versionCode = version;
         packageInfo.packageName = CHROME;
+        packageInfo.applicationInfo = new android.content.pm.ApplicationInfo();
+        packageInfo.applicationInfo.packageName = CHROME;
 
         mShadowPackageManager.addPackage(packageInfo);
+        mPackageManager.setInstallerPackageName(CHROME, "com.android.vending");
     }
 }

@@ -92,6 +92,16 @@ public class MethodDataTest {
     }
 
     @Test
+    public void fromJson_offerId() {
+        String json = "{ 'sku' = 'mySku', 'offerId' = 'myOffer' }"
+                .replace('\'', '\"');
+        MethodData data = MethodData.fromJson(json);
+
+        assertEquals("myOffer", data.offerId);
+        assertNull(MethodData.fromJson("{ \"sku\": \"mySku\" }").offerId);
+    }
+
+    @Test
     public void fromJson_replacementMode() {
         replacementMode("deferred", ReplacementMode.DEFERRED);
         replacementMode("chargeProratedPrice",

@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
@@ -140,11 +141,15 @@ public class PlayBillingWrapper implements BillingWrapper {
                 .setProductDetails(productDetails);
 
         if (productDetails.getProductType().equals(BillingClient.ProductType.SUBS)) {
-            List<ProductDetails.SubscriptionOfferDetails> offerDetails =
-                productDetails.getSubscriptionOfferDetails();
-            if (offerDetails != null && !offerDetails.isEmpty()) {
-                productDetailsParamsBuilder.setOfferToken(offerDetails.get(0).getOfferToken());
+            ProductDetails.SubscriptionOfferDetails offer =
+                findOffer(productDetails.getSubscriptionOfferDetails(), methodData.offerId);
+            // The order of the offers is not defined, so the first one can be any offer the user
+            // is eligible for. Without a match we fail rather than sell another price.
+            if (offer == null) {
+                Logging.logOfferNotFound(methodData.sku, methodData.offerId);
+                return false;
             }
+            productDetailsParamsBuilder.setOfferToken(offer.getOfferToken());
         }
 
         List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
@@ -167,5 +172,19 @@ public class PlayBillingWrapper implements BillingWrapper {
         Logging.logLaunchPaymentFlow(result);
 
         return result.getResponseCode() == BillingClient.BillingResponseCode.OK;
+    }
+
+    @VisibleForTesting
+    @Nullable
+    static ProductDetails.SubscriptionOfferDetails findOffer(
+            @Nullable List<ProductDetails.SubscriptionOfferDetails> offers,
+            @Nullable String offerId) {
+        if (offers == null) return null;
+        for (ProductDetails.SubscriptionOfferDetails offer : offers) {
+            String id = offer.getOfferId();
+            boolean isBasePlan = id == null || id.isEmpty();
+            if (offerId == null ? isBasePlan : offerId.equals(id)) return offer;
+        }
+        return null;
     }
 }

@@ -245,7 +245,12 @@ public class LauncherActivity extends Activity {
                 mSplashScreenStrategy,
                 () -> {
                     mBrowserWasLaunched = true;
-                    finish();
+                    try {
+                        CustomTabsSession session = mTwaLauncher.getSession();
+                        if (session != null) onCustomTabsSessionAvailable(session);
+                    } finally {
+                        finish();
+                    }
                 },
                 getFallbackStrategy());
 
@@ -300,6 +305,18 @@ public class LauncherActivity extends Activity {
     protected CustomTabsSession getCustomTabsSession() {
         return mTwaLauncher != null ? mTwaLauncher.getSession() : null;
     }
+
+    /**
+     * Called once the Trusted Web Activity has been launched with an established
+     * CustomTabsSession, right before this Activity finishes. Not called when the launch falls
+     * back to a Custom Tab or a WebView. Override to start work that needs the session, for
+     * example to request a PostMessage channel. The connection to the browser is unbound in
+     * {@link #onDestroy}, so the session may stop working after that. The default
+     * implementation does nothing.
+     *
+     * @param session The session the Trusted Web Activity was launched with.
+     */
+    protected void onCustomTabsSessionAvailable(@NonNull CustomTabsSession session) {}
 
     private boolean splashScreenNeeded() {
         // Splash screen was not requested.

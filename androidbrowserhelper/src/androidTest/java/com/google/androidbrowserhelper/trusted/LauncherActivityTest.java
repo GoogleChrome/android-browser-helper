@@ -17,6 +17,8 @@ package com.google.androidbrowserhelper.trusted;
 import static com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity.SITE_SETTINGS_SHORTCUT_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import static androidx.browser.customtabs.TrustedWebUtils.EXTRA_LAUNCH_AS_TRUSTED_WEB_ACTIVITY;
 import android.content.Context;
@@ -28,6 +30,7 @@ import com.google.androidbrowserhelper.trusted.testutils.EnableComponentsTestRul
 import com.google.androidbrowserhelper.trusted.testcomponents.TestBrowser;
 import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsService;
 import com.google.androidbrowserhelper.trusted.testcomponents.TestCustomTabsServiceSupportsTwas;
+import com.google.androidbrowserhelper.trusted.testcomponents.TestLauncherActivity;
 import com.google.androidbrowserhelper.trusted.testutils.TestUtil;
 
 import org.junit.After;
@@ -58,6 +61,7 @@ public class LauncherActivityTest {
     @Rule
     public final EnableComponentsTestRule mEnableComponents = new EnableComponentsTestRule(
             LauncherActivity.class,
+            TestLauncherActivity.class,
             TestBrowser.class,
             TestCustomTabsServiceSupportsTwas.class,
             TestCustomTabsService.class
@@ -65,10 +69,14 @@ public class LauncherActivityTest {
     @Rule
     public final ActivityTestRule<LauncherActivity> mActivityTestRule =
             new ActivityTestRule<>(LauncherActivity.class, false, false);
+    @Rule
+    public final ActivityTestRule<TestLauncherActivity> mTestLauncherActivityRule =
+            new ActivityTestRule<>(TestLauncherActivity.class, false, false);
 
     @Before
     public void setUp() {
         TwaProviderPicker.restrictToPackageForTesting(mContext.getPackageName());
+        TestLauncherActivity.sSession = null;
     }
 
     @After
@@ -92,6 +100,23 @@ public class LauncherActivityTest {
     public void readsStatusBarColorFromManifest() {
         TestBrowser browser = launch();
         checkColor(browser);
+    }
+
+    @Test
+    public void passesSessionToHook() {
+        TestUtil.getBrowserActivityWhenLaunched(() ->
+                mTestLauncherActivityRule.launchActivity(null));
+
+        assertNotNull(TestLauncherActivity.sSession);
+    }
+
+    @Test
+    public void doesNotCallHook_whenFallingBackToCustomTab() {
+        mEnableComponents.manuallyDisable(TestCustomTabsServiceSupportsTwas.class);
+        TestUtil.getBrowserActivityWhenLaunched(() ->
+                mTestLauncherActivityRule.launchActivity(null));
+
+        assertNull(TestLauncherActivity.sSession);
     }
 
     @Test

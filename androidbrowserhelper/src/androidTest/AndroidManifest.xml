@@ -93,6 +93,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.google.androidbrowserhelper.trusted.testcomponents.TestLauncherActivity"
+                  android:theme="@style/Theme.AppCompat.Light"
+                  android:enabled="false"
+                  android:exported="false">
+
+            <meta-data android:name="android.support.customtabs.trusted.DEFAULT_URL"
+                       android:value="https://www.test.com/default_url/" />
+        </activity>
+
         <activity android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
                   android:theme="@style/Theme.AppCompat.Light"
                   android:label="Test Launcher Activity"

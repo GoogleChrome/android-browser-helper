@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 
 import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.CustomTabsSessionToken;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 import androidx.test.InstrumentationRegistry;
@@ -62,6 +63,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -218,6 +220,15 @@ public class TwaLauncherTest {
                 null, callback);
         getBrowserActivityWhenLaunched(launchRunnable);
         verify(callback).run();
+    }
+
+    @Test
+    public void sessionAvailableInCompletionCallback() {
+        AtomicReference<CustomTabsSession> session = new AtomicReference<>();
+        Runnable launchRunnable = () -> mTwaLauncher.launch(makeBuilder(), mCustomTabsCallback,
+                null, () -> session.set(mTwaLauncher.getSession()));
+        getBrowserActivityWhenLaunched(launchRunnable);
+        assertNotNull(session.get());
     }
 
     @Test

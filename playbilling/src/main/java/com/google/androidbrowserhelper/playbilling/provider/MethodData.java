@@ -74,13 +74,17 @@ public class MethodData {
     @Nullable public final String purchaseToken;
     @Nullable public final Integer replacementMode;
 
+    @Nullable public final String offerId;
+
     private MethodData(String sku, boolean isPriceChangeConfirmation, @Nullable String oldSku,
-                       @Nullable String purchaseToken, @Nullable Integer replacementMode) {
+                       @Nullable String purchaseToken, @Nullable Integer replacementMode,
+                       @Nullable String offerId) {
         this.sku = sku;
         this.isPriceChangeConfirmation = isPriceChangeConfirmation;
         this.oldSku = oldSku;
         this.purchaseToken = purchaseToken;
         this.replacementMode = replacementMode;
+        this.offerId = offerId;
     }
 
     @Nullable
@@ -113,7 +117,10 @@ public class MethodData {
             }
         }
 
-        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, replacementMode);
+        String offerId = getString(dataObject, "offerId");
+
+        return new MethodData(sku, isPriceChangeConfirmation, oldSku, purchaseToken, replacementMode,
+                offerId);
     }
 
     /**

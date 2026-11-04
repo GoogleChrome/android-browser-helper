@@ -34,6 +34,11 @@ public class Logging {
         logResult(result, "Payment flow launch:");
     }
 
+    static void logOfferNotFound(String sku, @Nullable String offerId) {
+        Log.w(TAG, "No subscription offer " + (offerId == null ? "(base plan)" : offerId)
+                + " for " + sku);
+    }
+
     static void logPurchasesUpdate(BillingResult result, @Nullable List<Purchase> list) {
         logResult(result, "Purchases updated:");
 

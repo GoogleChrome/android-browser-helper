@@ -30,6 +30,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.Process;
 
 import org.junit.After;
@@ -49,7 +51,9 @@ import java.util.List;
 /** Unit tests for {@link BrowserIdentityVerifier}. */
 @RunWith(RobolectricTestRunner.class)
 @DoNotInstrument
-@Config(sdk = {Build.VERSION_CODES.Q})
+@Config(
+        sdk = {Build.VERSION_CODES.Q},
+        manifest = Config.NONE)
 public class BrowserIdentityVerifierTest {
     private static final int REMOTE_UID = Process.myUid() + 1000;
 
@@ -96,6 +100,19 @@ public class BrowserIdentityVerifierTest {
         assertThrows(
                 IllegalStateException.class,
                 () -> BrowserIdentityVerifier.isTrustedChromeCaller(mMockContext));
+    }
+
+    @Test
+    public void callerChecks_outsideBinderTransactionDefaultState_throwIllegalStateException() {
+        ShadowBinder.reset();
+        assertThrows(
+                IllegalStateException.class,
+                () -> BrowserIdentityVerifier.isTrustedChromeCaller(mMockContext));
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        BrowserIdentityVerifier.isCallerSignedBy(
+                                mMockContext, Collections.singletonList(CERT_OTHER_BROWSER)));
     }
 
     @Test
@@ -191,7 +208,10 @@ public class BrowserIdentityVerifierTest {
     @Test
     public void isTrustedChromeCaller_multiplePackagesInUidMatchesValidChromePackage() {
         when(mMockPackageManager.getPackagesForUid(REMOTE_UID))
-                .thenReturn(new String[] {null, "com.example.helper", "com.chrome.beta"});
+                .thenReturn(
+                        new String[] {
+                            null, "com.example.helper", "com.android.chrome", "com.chrome.beta"
+                        });
         when(mMockPackageManager.hasSigningCertificate(
                         eq("com.chrome.beta"),
                         eq(CERT_CHROME_BETA),
@@ -222,7 +242,9 @@ public class BrowserIdentityVerifierTest {
 
     @Test
     public void isCallerSignedBy_malformedDigestLength_throwsIllegalArgumentException() {
-        for (byte[] malformed : Arrays.asList(new byte[0], new byte[31], new byte[33], new byte[64])) {
+        List<byte[]> malformedDigests =
+                Arrays.asList(new byte[0], new byte[31], new byte[33], new byte[64]);
+        for (byte[] malformed : malformedDigests) {
             assertThrows(
                     IllegalArgumentException.class,
                     () ->
@@ -241,6 +263,11 @@ public class BrowserIdentityVerifierTest {
                 () ->
                         BrowserIdentityVerifier.isCallerSignedBy(
                                 mMockContext, Collections.singletonList(CERT_OTHER_BROWSER)));
+        assertThrows(
+                IllegalStateException.class,
+                () ->
+                        BrowserIdentityVerifier.isCallerSignedBy(
+                                mMockContext, Collections.emptyList()));
     }
 
     @Test
@@ -310,8 +337,36 @@ public class BrowserIdentityVerifierTest {
         assertFalse(BrowserIdentityVerifier.isVerifiedExtension(wrongTypeIntBundle));
 
         Bundle verifiedBundle = new Bundle();
-        verifiedBundle.putBoolean("isVerified", true);
-        assertTrue(BrowserIdentityVerifier.isVerifiedExtension(verifiedBundle));
+        verifiedBundle.putBoolean(BrowserIdentityVerifier.EXTRA_IS_VERIFIED, true);
+        Parcel parcel = Parcel.obtain();
+        final Bundle unparceledVerifiedBundle;
+        try {
+            verifiedBundle.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            unparceledVerifiedBundle = parcel.readBundle(getClass().getClassLoader());
+        } finally {
+            parcel.recycle();
+        }
+        assertTrue(BrowserIdentityVerifier.isVerifiedExtension(unparceledVerifiedBundle));
+    }
+
+    @Test
+    public void isVerifiedExtension_malformedParcelableBundle_returnsFalse() {
+        Bundle source = new Bundle();
+        source.putBoolean(BrowserIdentityVerifier.EXTRA_IS_VERIFIED, true);
+        source.putParcelable("unreadable", new ThrowingParcelable());
+
+        Parcel parcel = Parcel.obtain();
+        final Bundle lazyUnparceledBundle;
+        try {
+            source.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            lazyUnparceledBundle = parcel.readBundle(ThrowingParcelable.class.getClassLoader());
+        } finally {
+            parcel.recycle();
+        }
+
+        assertFalse(BrowserIdentityVerifier.isVerifiedExtension(lazyUnparceledBundle));
     }
 
     @Test
@@ -330,6 +385,8 @@ public class BrowserIdentityVerifierTest {
                 IllegalArgumentException.class, () -> BrowserIdentityVerifier.hexToBytes("abc"));
         assertThrows(
                 IllegalArgumentException.class, () -> BrowserIdentityVerifier.hexToBytes("00gg"));
+        assertThrows(
+                IllegalArgumentException.class, () -> BrowserIdentityVerifier.hexToBytes("000g"));
     }
 
     private void assertPackageRejectsCerts(String packageName, List<byte[]> rejectedCerts) {
@@ -355,6 +412,31 @@ public class BrowserIdentityVerifierTest {
                         eq(certSha256),
                         eq(PackageManager.CERT_INPUT_SHA256)))
                 .thenReturn(true);
+    }
+
+    private static final class ThrowingParcelable implements Parcelable {
+        public static final Creator<ThrowingParcelable> CREATOR =
+                new Creator<ThrowingParcelable>() {
+                    @Override
+                    public ThrowingParcelable createFromParcel(Parcel in) {
+                        throw new android.os.BadParcelableException("Corrupt parcel payload");
+                    }
+
+                    @Override
+                    public ThrowingParcelable[] newArray(int size) {
+                        return new ThrowingParcelable[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(1);
+        }
     }
 
     private static byte[] decodeHex(String hex) {

@@ -23,13 +23,10 @@ def VERSION = "1.0.0"
 
 android {
     namespace "com.google.androidbrowserhelper.extensions.messaging"
+    compileSdk 36
 
     defaultConfig {
         minSdkVersion 29
-        compileSdk 36
-        targetSdkVersion 31
-        versionCode 1
-        versionName VERSION
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -47,9 +44,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    testOptions {
-        unitTests {
-            includeAndroidResources = true
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
         }
     }
 }
@@ -60,41 +57,26 @@ dependencies {
     testImplementation libs.junit
     testImplementation libs.mockito.core
     testImplementation libs.robolectric
-    testImplementation libs.androidx.test.core
 }
 
-publishing {
-    publications {
-        Production(MavenPublication) {
-            pom {
-                name = 'android-browser-helper-extensionsmessaging'
-                url = 'https://github.com/GoogleChrome/android-browser-helper/tree/main/extensionsmessaging'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-            }
+afterEvaluate {
+    publishing {
+        publications {
+            Production(MavenPublication) {
+                from components.release
 
-            artifact("$buildDir/outputs/aar/extensionsmessaging-release.aar")
+                groupId = 'com.google.androidbrowserhelper'
+                artifactId = 'extensionsmessaging'
+                version = VERSION
 
-            groupId 'com.google.androidbrowserhelper'
-            artifactId 'extensionsmessaging'
-            version VERSION
-
-            // This ensures that the generated POM file contains the correct Android dependencies.
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                // Iterate over the implementation dependencies (we don't want the test ones),
-                // adding a <dependency> node for each.
-                configurations.implementation.allDependencies.each {
-                    if (it.name != 'unspecified') {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+                pom {
+                    name = 'android-browser-helper-extensionsmessaging'
+                    url = 'https://github.com/GoogleChrome/android-browser-helper/tree/main/extensionsmessaging'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
                     }
                 }
             }

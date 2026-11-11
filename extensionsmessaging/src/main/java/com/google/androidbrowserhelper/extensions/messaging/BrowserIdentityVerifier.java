@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,13 @@ import java.util.Objects;
  * calling {@link Binder#clearCallingIdentity()} or posting work to another thread or executor.
  */
 public final class BrowserIdentityVerifier {
+    /**
+     * Boolean extra key in the {@code extensionInfo} {@link Bundle} passed to {@code
+     * connectExtension} indicating whether the browser verified the extension's contents against a
+     * trusted store or policy source.
+     */
+    public static final String EXTRA_IS_VERIFIED = "isVerified";
+
     private static final String CHROME_STABLE_PACKAGE = "com.android.chrome";
     private static final String CHROME_BETA_PACKAGE = "com.chrome.beta";
     private static final String CHROME_DEV_PACKAGE = "com.chrome.dev";
@@ -62,7 +70,6 @@ public final class BrowserIdentityVerifier {
     private static final String CERT_SHA256_CHROME_LEGACY_CHANNEL =
             "3d7a1223019aa39d9ea0e3436ab7c0896bfb4fb679f4de5fe7c23f326c8f994a";
 
-    private static final String EXTRA_IS_VERIFIED = "isVerified";
     private static final int SHA256_BYTE_LENGTH = 32;
 
     // Trusted Chrome packages -> SHA-256 digests of acceptable signing certs (any match suffices).
@@ -82,6 +89,7 @@ public final class BrowserIdentityVerifier {
      * @param context Application or Service {@link Context} used to access {@link PackageManager}.
      * @return {@code true} if the calling UID belongs to an official Chrome package signed with a
      *     pinned Google release certificate; {@code false} otherwise.
+     * @throws NullPointerException if {@code context} is {@code null}.
      * @throws IllegalStateException if not called during an incoming cross-process Binder call
      *     (i.e. {@code Binder.getCallingUid() == Process.myUid()}).
      */
@@ -96,6 +104,9 @@ public final class BrowserIdentityVerifier {
             return false;
         }
         for (String pkg : packages) {
+            if (pkg == null) {
+                continue;
+            }
             List<byte[]> certs = TRUSTED_CHROME_CERTIFICATES.get(pkg);
             if (certs == null) {
                 continue;
@@ -140,7 +151,8 @@ public final class BrowserIdentityVerifier {
             @NonNull Context context, @NonNull List<byte[]> certSha256s) {
         Objects.requireNonNull(context, "context must not be null");
         Objects.requireNonNull(certSha256s, "certSha256s must not be null");
-        for (byte[] cert : certSha256s) {
+        List<byte[]> certsSnapshot = new ArrayList<>(certSha256s);
+        for (byte[] cert : certsSnapshot) {
             Objects.requireNonNull(cert, "certSha256s elements must not be null");
             if (cert.length != SHA256_BYTE_LENGTH) {
                 throw new IllegalArgumentException(
@@ -149,11 +161,11 @@ public final class BrowserIdentityVerifier {
         }
         int callingUid = requireCrossProcessCallingUid();
 
-        if (certSha256s.isEmpty()) {
+        if (certsSnapshot.isEmpty()) {
             return false;
         }
         PackageManager pm = context.getPackageManager();
-        for (byte[] cert : certSha256s) {
+        for (byte[] cert : certsSnapshot) {
             if (pm.hasSigningCertificate(callingUid, cert, PackageManager.CERT_INPUT_SHA256)) {
                 return true;
             }
@@ -166,17 +178,29 @@ public final class BrowserIdentityVerifier {
      * rather than an unverified local/unpacked install (which can choose an arbitrary extension ID
      * via its manifest {@code key}).
      *
-     * <p><strong>Security note:</strong> This check only inspects the {@code "isVerified"} boolean
-     * in {@code extensionInfo}. It is only meaningful <em>after</em> verifying the calling browser
-     * via {@link #isTrustedChromeCaller(Context)} (or {@link #isCallerSignedBy(Context, List)}),
-     * and callers must still validate the {@code extensionId} against their own allowlist.
+     * <p><strong>Security note:</strong> Do not call this method (or inspect {@code extensionInfo})
+     * until <em>after</em> authenticating the calling browser via {@link
+     * #isTrustedChromeCaller(Context)} (or {@link #isCallerSignedBy(Context, List)}), both because
+     * {@link #EXTRA_IS_VERIFIED} is populated by the caller and to avoid unparceling {@link Bundle}
+     * payloads from untrusted local apps. This flag assumes Chrome's extension verification model
+     * (other browsers must enforce equivalent content verification for this flag to be meaningful),
+     * and callers must still validate {@code extensionId} against their own allowlist.
      *
      * @param extensionInfo The {@link Bundle} passed to {@code connectExtension}, or {@code null}.
-     * @return {@code true} if {@code extensionInfo} is non-null and {@code "isVerified"} is {@code
-     *     true}; {@code false} otherwise.
+     * @return {@code true} if {@code extensionInfo} is non-null, readable, and {@link
+     *     #EXTRA_IS_VERIFIED} is {@code true}; {@code false} otherwise.
      */
     public static boolean isVerifiedExtension(@Nullable Bundle extensionInfo) {
-        return extensionInfo != null && extensionInfo.getBoolean(EXTRA_IS_VERIFIED, false);
+        if (extensionInfo == null) {
+            return false;
+        }
+        try {
+            return extensionInfo.getBoolean(EXTRA_IS_VERIFIED, false);
+        } catch (RuntimeException e) {
+            // Fail closed if a malformed or unreadable Bundle throws (e.g. BadParcelableException)
+            // during lazy unparceling.
+            return false;
+        }
     }
 
     private static int requireCrossProcessCallingUid() {

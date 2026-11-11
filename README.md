@@ -58,9 +58,8 @@ Android permission dialogs and the System settings.
 when the Google Play billing library is used. Only purchases made within the application are
 shared.
 
-**Extensions Messaging (Optional):** The standalone `extensionsmessaging` library only verifies
-the calling browser's package and signing certificate locally via Android's `PackageManager` and
-inspects the incoming `Bundle` metadata; it does not collect, store, or share any user data.
+**Extensions Messaging (Optional):** The standalone `extensionsmessaging` library verifies the
+calling browser locally and does not collect, store, or share any user data.
 
 This SDK does not transfer any information over the network. Web browsing information may be
 stored if the WebView fallback is enabled. The permission to read the location can be managed

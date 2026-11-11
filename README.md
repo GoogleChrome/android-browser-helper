@@ -24,6 +24,16 @@ dependencies {
 
 ``` 
 
+### Standalone Extension Native Messaging Verification (`extensionsmessaging`)
+
+For Android apps (`minSdkVersion 29`) receiving native messages from browser extensions via `IBrowserNativeMessageService`, the standalone [`extensionsmessaging`](extensionsmessaging/README.md) module provides caller certificate verification (`BrowserIdentityVerifier`) with no dependency on `:androidbrowserhelper`:
+
+```gradle
+dependencies {
+    implementation 'com.google.androidbrowserhelper:extensionsmessaging:1.0.0'
+}
+```
+
 ## Information for Google Play's data disclosure requirements
 
 The Android Browser Helper library is intended to allow Android applications to interact with
@@ -47,6 +57,9 @@ Android permission dialogs and the System settings.
 **Purchase History (Optional):** The SDK may share purchase history data with the host browser
 when the Google Play billing library is used. Only purchases made within the application are
 shared.
+
+**Extensions Messaging (Optional):** The standalone `extensionsmessaging` library verifies the
+calling browser locally and does not collect, store, or share any user data.
 
 This SDK does not transfer any information over the network. Web browsing information may be
 stored if the WebView fallback is enabled. The permission to read the location can be managed

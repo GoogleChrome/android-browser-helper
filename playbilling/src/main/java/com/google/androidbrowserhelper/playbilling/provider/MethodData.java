@@ -147,6 +147,8 @@ public class MethodData {
     }
 
     private static @Nullable String getString(JSONObject object, String key) {
+        if (object.isNull(key)) return null;
+
         String value = object.optString(key);
         if (TextUtils.isEmpty(value)) return null;
         return value;

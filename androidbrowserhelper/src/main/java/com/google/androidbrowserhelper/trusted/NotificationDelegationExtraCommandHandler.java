@@ -46,10 +46,9 @@ public class NotificationDelegationExtraCommandHandler implements ExtraCommandHa
                 if (TextUtils.isEmpty(channelName)) break;
 
                 boolean enabled = NotificationUtils.areNotificationsEnabled(context, channelName);
-                @PermissionStatus int status = enabled ? PermissionStatus.ALLOW : PermissionStatus.BLOCK;
-                if (status == PermissionStatus.BLOCK && !PrefUtils.hasRequestedNotificationPermission(context)) {
-                    status = PermissionStatus.ASK;
-                }
+                @PermissionStatus int status = enabled ? PermissionStatus.ALLOW
+                        : PrefUtils.isNotificationPermissionDenied(context) ? PermissionStatus.BLOCK
+                        : PermissionStatus.ASK;
                 commandResult.putInt(NotificationPermissionRequestActivity.KEY_PERMISSION_STATUS, status);
                 commandResult.putBoolean(EXTRA_COMMAND_SUCCESS, true);
                 break;

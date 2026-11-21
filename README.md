@@ -22,7 +22,17 @@ dependencies {
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.8.0'
 }
 
-``` 
+```
+
+### Standalone Extension Native Messaging Verification (`extensionsmessaging`)
+
+For Android apps (`minSdkVersion 29`) receiving native messages from browser extensions via `IBrowserNativeMessageService`, the standalone [`extensionsmessaging`](extensionsmessaging/README.md) module provides caller certificate verification (`BrowserIdentityVerifier`) with no dependency on `:androidbrowserhelper`:
+
+```gradle
+dependencies {
+    implementation 'com.google.androidbrowserhelper:extensionsmessaging:1.0.0'
+}
+```
 
 ## Information for Google Play's data disclosure requirements
 
@@ -42,7 +52,7 @@ navigation history and browser storage, like cookies on the device.
 
 **User location (Optional):** The SDK may share location data with the host browser, when the
 location delegation library is used. Users can control sharing of the location using the
-Android permission dialogs and the System settings. 
+Android permission dialogs and the System settings.
 
 **Purchase History (Optional):** The SDK may share purchase history data with the host browser
 when the Google Play billing library is used. Only purchases made within the application are
@@ -51,7 +61,7 @@ shared.
 This SDK does not transfer any information over the network. Web browsing information may be
 stored if the WebView fallback is enabled. The permission to read the location can be managed
 via the usual Android settings.
-  
+
 ## Quality enforcement (`QualityEnforcer`)
 
 By design, `QualityEnforcer` is the default `CustomTabsCallback` wired by `LauncherActivity.getCustomTabsCallback()` (which returns `new QualityEnforcer()`), `ShortcutTrampolineActivity`, and the convenience `TwaLauncher.launch(Uri)` overload. When the connected Trusted Web Activity provider sends the `quality_enforcement.crash` extra callback (`QualityEnforcer.CRASH`, e.g. when a verified-origin navigation fails or violates TWA quality criteria), `QualityEnforcer` deliberately throws an uncaught `RuntimeException` on the host application's main thread. This behaviour is pre-existing and supported; a host application that wants to opt out of provider-triggered quality-enforcement crashes can override the `protected` `LauncherActivity.getCustomTabsCallback()` method and return a plain `CustomTabsCallback` (or pass a plain `CustomTabsCallback` to the full `TwaLauncher.launch(...)` overload). Overriding `LauncherActivity.getCustomTabsCallback()` does **not** affect shortcut launches, because `ShortcutTrampolineActivity` constructs `new QualityEnforcer()` itself.

@@ -16,6 +16,7 @@ package com.google.androidbrowserhelper.trusted.splashscreens;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -124,6 +125,12 @@ public class SplashImageTransferTask {
         }
 
         private boolean transferToCustomTabsProvider(File file) {
+            // Chrome 152+ only accepts the file if the calling app holds a grant on its URI, but
+            // Android records no grant for the provider's own package unless it is persistable.
+            mContext.grantUriPermission(mContext.getPackageName(),
+                    FileProvider.getUriForFile(mContext, mAuthority, file),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             return TrustedWebUtils.transferSplashImage(mContext, file, mAuthority, mProviderPackage,
                     mSession);
         }

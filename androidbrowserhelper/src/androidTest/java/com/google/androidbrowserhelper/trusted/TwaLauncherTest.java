@@ -103,6 +103,7 @@ public class TwaLauncherTest {
 
     @After
     public void tearDown() {
+        new SharedPreferencesTokenStore(mActivity).store(null);
         TwaProviderPicker.restrictToPackageForTesting(null);
         TwaLauncher.setDialogStrategyForTesting(null);
         mTwaLauncher.destroy();
@@ -336,6 +337,37 @@ public class TwaLauncherTest {
 
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mockStrategy).show(any(), eq(false), eq(null));
+    }
+
+    @Test
+    public void storesDelegationToken_whenSessionEstablished() {
+        androidx.browser.trusted.TokenStore tokenStore = new SharedPreferencesTokenStore(mActivity);
+        tokenStore.store(null);
+
+        TwaLauncher launcher = new TwaLauncher(mActivity, null, 101, tokenStore);
+        Runnable launchRunnable = () -> launcher.launch(makeBuilder(), mCustomTabsCallback,
+                null, null);
+        getBrowserActivityWhenLaunched(launchRunnable);
+        launcher.destroy();
+
+        assertNotNull(tokenStore.load());
+    }
+
+    @Test
+    public void clearsDelegationToken_whenFallingBackToCustomTab() {
+        androidx.browser.trusted.TokenStore tokenStore = new SharedPreferencesTokenStore(mActivity);
+        tokenStore.store(androidx.browser.trusted.Token.create(
+                mContext.getPackageName(), mContext.getPackageManager()));
+        assertNotNull(tokenStore.load());
+
+        mEnableComponents.manuallyDisable(TestCustomTabsServiceSupportsTwas.class);
+        TwaLauncher launcher = new TwaLauncher(mActivity, null, 102, tokenStore);
+        Runnable launchRunnable = () -> launcher.launch(makeBuilder(), mCustomTabsCallback,
+                null, null, TwaLauncher.CCT_FALLBACK_STRATEGY);
+        getBrowserActivityWhenLaunched(launchRunnable);
+        launcher.destroy();
+
+        assertEquals(null, tokenStore.load());
     }
 
     private TrustedWebActivityIntentBuilder makeBuilder() {

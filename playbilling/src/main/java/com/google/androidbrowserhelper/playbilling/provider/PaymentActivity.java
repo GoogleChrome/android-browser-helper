@@ -38,6 +38,9 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
 
     static final String PROXY_PACKAGE_KEY = "PROXY_PACKAGE";
 
+    // Limit enforced by Play Billing.
+    private static final int MAX_OBFUSCATED_ACCOUNT_ID_LENGTH = 64;
+
     private BillingWrapper mWrapper;
     private MethodData mMethodData;
 
@@ -80,6 +83,14 @@ public class PaymentActivity extends Activity implements BillingWrapper.Listener
                 && replacementMode == ReplacementMode.WITHOUT_PRORATION) {
             fail("This proration mode is currently disabled. Check " +
                     "chromeos.dev/publish/pwa-play-billing for more info");
+            return;
+        }
+
+        String obfuscatedAccountId = mMethodData.obfuscatedAccountId;
+        if (obfuscatedAccountId != null
+                && obfuscatedAccountId.length() > MAX_OBFUSCATED_ACCOUNT_ID_LENGTH) {
+            fail("obfuscatedAccountId is limited to " + MAX_OBFUSCATED_ACCOUNT_ID_LENGTH +
+                    " characters.");
             return;
         }
 

@@ -219,7 +219,7 @@ public class LauncherActivity extends Activity {
         Uri launchUrl = getLaunchingUrl();
         TrustedWebActivityIntentBuilder twaBuilder = new TrustedWebActivityIntentBuilder(launchUrl);
         mMetadata.configureIntentBuilder(twaBuilder, this);
-        twaBuilder.setDisplayMode(getDisplayMode());
+        twaBuilder = twaBuilder.setDisplayMode(getDisplayMode());
 
         Uri intentUrl = getUrlForIntent(getIntent());
         if (intentUrl != null) {
@@ -230,7 +230,7 @@ public class LauncherActivity extends Activity {
             // either, since it may name this app's internal files. Other schemes (http, custom,
             // protocol handlers) were never used as the launch URL and are forwarded as before.
             if (!launchUrl.equals(intentUrl) && !isRejectedIntentUrl(intentUrl)) {
-                twaBuilder.setOriginalLaunchUrl(intentUrl);
+                twaBuilder = twaBuilder.setOriginalLaunchUrl(intentUrl);
             }
         }
 
@@ -253,16 +253,18 @@ public class LauncherActivity extends Activity {
             sChromeVersionChecked = true;
         }
 
+        String twaProviderPackage =
+                (mTwaLauncher.getLaunchMode() == TwaProviderPicker.LaunchMode.TRUSTED_WEB_ACTIVITY)
+                        ? mTwaLauncher.getProviderPackage() : null;
         if (ChromeOsSupport.isRunningOnArc(getApplicationContext().getPackageManager())) {
             new TwaSharedPreferencesManager(this)
                     .writeLastLaunchedProviderPackageName(ChromeOsSupport.ARC_PAYMENT_APP);
         } else {
             new TwaSharedPreferencesManager(this)
-                    .writeLastLaunchedProviderPackageName(mTwaLauncher.getProviderPackage());
+                    .writeLastLaunchedProviderPackageName(twaProviderPackage);
         }
 
-        ManageDataLauncherActivity.addSiteSettingsShortcut(this,
-                mTwaLauncher.getProviderPackage());
+        ManageDataLauncherActivity.addSiteSettingsShortcut(this, twaProviderPackage);
     }
 
     protected CustomTabsCallback getCustomTabsCallback() {
@@ -271,7 +273,18 @@ public class LauncherActivity extends Activity {
 
     protected TwaLauncher createTwaLauncher() {
         return new TwaLauncher(this, mMetadata.launchingBrowser, SessionStore.makeSessionId(getTaskId()),
-                new SharedPreferencesTokenStore(this));
+                new SharedPreferencesTokenStore(this), mMetadata.launchingBrowserToken);
+    }
+
+    /**
+     * Returns the parsed {@code <meta-data>} configuration for this Activity. Available from
+     * {@link #onCreate} onwards; {@code null} before that. Exposed so that subclasses overriding
+     * {@link #createTwaLauncher()} do not have to re-parse the manifest via
+     * {@link LauncherActivityMetadata#parse(android.content.Context)}.
+     */
+    @Nullable
+    protected LauncherActivityMetadata getMetadata() {
+        return mMetadata;
     }
 
     private boolean splashScreenNeeded() {
@@ -333,7 +346,7 @@ public class LauncherActivity extends Activity {
 
         try {
             ShareTarget shareTarget = SharingUtils.parseShareTargetJson(mMetadata.shareTarget);
-            twaBuilder.setShareParams(shareTarget, shareData);
+            TrustedWebActivityIntentBuilder unused = twaBuilder.setShareParams(shareTarget, shareData);
         } catch (JSONException e) {
             Log.d(TAG, "Failed to parse share target json: " + e);
         }
@@ -377,7 +390,7 @@ public class LauncherActivity extends Activity {
             return;
         }
 
-        twaBuilder.setFileHandlingData(new FileHandlingData(safeUris));
+        TrustedWebActivityIntentBuilder unused = twaBuilder.setFileHandlingData(new FileHandlingData(safeUris));
     }
 
     /**
@@ -639,9 +652,13 @@ public class LauncherActivity extends Activity {
      *
      * Override this for creating a custom fallback approach, such as launching a different WebView
      * fallback implementation or starting a native Activity.
+     *
+     * If "android.support.customtabs.trusted.LAUNCHING_BROWSER" or
+     * "android.support.customtabs.trusted.LAUNCHING_BROWSER_TOKEN" is set, a dialog is shown
+     * instead, as the TWA must not be launched in another browser. Overrides should do the same.
      */
     protected TwaLauncher.FallbackStrategy getFallbackStrategy() {
-        if (mMetadata.launchingBrowser != null) {
+        if (mMetadata.launchingBrowser != null || mMetadata.launchingBrowserToken != null) {
             return TwaLauncher.getBlockedDialogFallbackStrategy(mMetadata.launchingBrowserName);
         }
         if (FALLBACK_TYPE_WEBVIEW.equalsIgnoreCase(mMetadata.fallbackStrategyType)) {

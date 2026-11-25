@@ -126,7 +126,7 @@ public class ShortcutTrampolineActivity extends Activity {
 
             Integer sessionId = SessionStore.makeSessionId(runningTaskId);
             TwaLauncher twaLauncher = new TwaLauncher(appContext, metadata.launchingBrowser, sessionId,
-                    new SharedPreferencesTokenStore(appContext)) {
+                    new SharedPreferencesTokenStore(appContext), metadata.launchingBrowserToken) {
                 @Override
                 protected TrustedWebActivityIntent onPrepareIntent(TrustedWebActivityIntent intent) {
                     intent.getIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -147,8 +147,16 @@ public class ShortcutTrampolineActivity extends Activity {
                         public void launch(Context context, TrustedWebActivityIntentBuilder twaBuilder,
                                            @Nullable String providerPackage, @Nullable Runnable completionCallback) {
                             // Respect the metadata specified in the manifest instead of fallback.
-                            if (metadata.launchingBrowser != null) {
-                                Log.w(TAG, "Launching browser " + metadata.launchingBrowser + " is not available.");
+                            if (metadata.launchingBrowser != null
+                                    || metadata.launchingBrowserToken != null) {
+                                if (metadata.launchingBrowser == null) {
+                                    Log.w(TAG, "LAUNCHING_BROWSER_TOKEN is set without LAUNCHING_BROWSER.");
+                                } else if (metadata.launchingBrowserToken == null) {
+                                    Log.w(TAG, "Launching browser " + metadata.launchingBrowser + " is not available.");
+                                } else {
+                                    Log.w(TAG, "Launching browser " + metadata.launchingBrowser
+                                            + " is not available or does not match LAUNCHING_BROWSER_TOKEN.");
+                                }
                                 if(completionCallback != null) {
                                     completionCallback.run();
                                 }

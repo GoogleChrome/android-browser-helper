@@ -759,4 +759,73 @@ public class LauncherActivityOriginValidationTest {
         assertFalse(message.contains("SECRET"));
         assertFalse(message.contains("/cb"));
     }
+
+    @Test
+    public void getMetadata_returnsParsedManifestMetadataAfterOnCreate() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(DEFAULT_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        ActivityController<TestLauncherActivity> controller =
+                Robolectric.buildActivity(TestLauncherActivity.class, intent);
+        assertNull(controller.get().getMetadata());
+
+        controller.create();
+
+        LauncherActivityMetadata metadata = controller.get().getMetadata();
+        assertNotNull(metadata);
+        assertEquals(DEFAULT_URL, metadata.defaultUrl);
+        controller.destroy();
+    }
+
+    private void registerCustomTabsService(String packageName, boolean supportsTwa) {
+        Intent serviceIntent = new Intent(
+                androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+        IntentFilter filter = new IntentFilter(
+                androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+        if (supportsTwa) {
+            filter.addCategory(
+                    androidx.browser.customtabs.CustomTabsService.TRUSTED_WEB_ACTIVITY_CATEGORY);
+        }
+        ResolveInfo serviceResolveInfo = new ResolveInfo();
+        serviceResolveInfo.serviceInfo = new android.content.pm.ServiceInfo();
+        serviceResolveInfo.serviceInfo.packageName = packageName;
+        serviceResolveInfo.serviceInfo.name = packageName + ".CustomTabsService";
+        serviceResolveInfo.filter = filter;
+        mShadowPackageManager.addResolveInfoForIntent(serviceIntent, serviceResolveInfo);
+    }
+
+    @Test
+    public void launchTwa_inCustomTabModeClearsLastLaunchedProviderAndDisablesManageDataActivity() {
+        TwaSharedPreferencesManager prefs = new TwaSharedPreferencesManager(mContext);
+        prefs.writeLastLaunchedProviderPackageName("com.android.chrome");
+        registerCustomTabsService("com.android.chrome", false);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(DEFAULT_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ActivityController<TestLauncherActivity> controller =
+                Robolectric.buildActivity(TestLauncherActivity.class, intent);
+        controller.create();
+
+        assertNull(prefs.readLastLaunchedProviderPackageName());
+        assertEquals(
+                android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                mContext.getPackageManager().getComponentEnabledSetting(
+                        new ComponentName(mContext, ManageDataLauncherActivity.class)));
+        controller.destroy();
+    }
+
+    @Test
+    public void launchTwa_inTrustedWebActivityModeRecordsProviderPackage() {
+        TwaSharedPreferencesManager prefs = new TwaSharedPreferencesManager(mContext);
+        registerCustomTabsService("com.android.chrome", true);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(DEFAULT_URL))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ActivityController<TestLauncherActivity> controller =
+                Robolectric.buildActivity(TestLauncherActivity.class, intent);
+        controller.create();
+
+        assertEquals("com.android.chrome", prefs.readLastLaunchedProviderPackageName());
+        controller.destroy();
+    }
 }

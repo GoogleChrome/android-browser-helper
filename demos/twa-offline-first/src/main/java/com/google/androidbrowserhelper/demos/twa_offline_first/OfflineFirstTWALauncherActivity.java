@@ -20,12 +20,12 @@ import com.google.androidbrowserhelper.trusted.QualityEnforcer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsCallback;
 
@@ -121,39 +121,76 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
 
     @Override
     protected CustomTabsCallback getCustomTabsCallback() {
-        // Set the preference "twa_launched_successfully" only once the browser reports a finished
-        // page load. Setting it when the launch starts would skip the offline fallback screen on
-        // later launches, although an interrupted first launch never loaded the page that
-        // registers the service worker. Extending `QualityEnforcer` keeps the default behaviour.
-        SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
-                getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE);
-        String key = getString(R.string.twa_launched_successfully);
-        return new QualityEnforcer() {
-            @Override
-            public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
-                super.onNavigationEvent(navigationEvent, extras);
-                if (navigationEvent == NAVIGATION_FINISHED) {
-                    sharedPref.edit().putBoolean(key, true).apply();
-                }
-            }
-        };
+        if (hasTwaLaunchedSuccessfully()) {
+            return super.getCustomTabsCallback();
+        }
+        return new LaunchRecorder(getApplicationContext().getSharedPreferences(
+                getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE),
+                getString(R.string.twa_launched_successfully));
     }
 
-    // An always-on VPN is the active network and reports internet access even when no network
-    // carries it, so only networks that are not a VPN count. `getAllNetworks()` is deprecated
-    // without a synchronous replacement.
-    @SuppressWarnings("deprecation")
+    // Sets the preference "twa_launched_successfully" only once the browser reports a finished
+    // page load. Setting it when the launch starts would skip the offline fallback screen on later
+    // launches, although an interrupted first launch never loaded the page that registers the
+    // service worker. A failed navigation still finishes loading the browser's error page, so a
+    // failure since the last navigation start keeps the preference unset. The class is static so
+    // the browser's binder does not keep the Activity alive, and it extends `QualityEnforcer` to
+    // keep the default quality enforcement.
+    private static class LaunchRecorder extends QualityEnforcer {
+        // Matches the package-private `QualityEnforcer.CRASH`.
+        private static final String CRASH = "quality_enforcement.crash";
+
+        private final SharedPreferences mSharedPref;
+        private final String mKey;
+        private boolean mFailed;
+
+        LaunchRecorder(SharedPreferences sharedPref, String key) {
+            mSharedPref = sharedPref;
+            mKey = key;
+        }
+
+        @Override
+        public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
+            switch (navigationEvent) {
+                case NAVIGATION_STARTED:
+                    mFailed = false;
+                    break;
+                case NAVIGATION_FAILED:
+                case NAVIGATION_ABORTED:
+                    mFailed = true;
+                    break;
+                case NAVIGATION_FINISHED:
+                    if (!mFailed) {
+                        mSharedPref.edit().putBoolean(mKey, true).apply();
+                    }
+                    break;
+            }
+        }
+
+        @Nullable
+        @Override
+        public Bundle extraCallbackWithResult(@NonNull String callbackName,
+                @Nullable Bundle args) {
+            if (CRASH.equals(callbackName)) {
+                mFailed = true;
+            }
+            return super.extraCallbackWithResult(callbackName, args);
+        }
+    }
+
+    // An always-on VPN reports internet access even when no network carries it, so the active
+    // network must also have been validated, which Android checks through the VPN tunnel.
     private boolean isOnline() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        for (Network network : connectivityManager.getAllNetworks()) {
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-            if (capabilities != null
-                    && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                    && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
-                return true;
-            }
+        if (connectivityManager == null) {
+            return false;
         }
-        return false;
+        NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(
+                connectivityManager.getActiveNetwork());
+        return capabilities != null
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
     }
 }

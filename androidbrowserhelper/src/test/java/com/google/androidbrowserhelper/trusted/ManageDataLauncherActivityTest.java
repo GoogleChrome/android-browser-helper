@@ -138,6 +138,7 @@ public class ManageDataLauncherActivityTest {
     @Test
     @Config(sdk = Build.VERSION_CODES.N_MR1)
     public void disablesComponentWhenSiteSettingsNotSupported() {
+        declareManageDataLauncherActivity();
         String provider = TWA_PROVIDER_PACKAGE;
         installTrustedWebActivityProvider(provider);
 
@@ -152,6 +153,7 @@ public class ManageDataLauncherActivityTest {
     @Test
     @Config(sdk = Build.VERSION_CODES.N_MR1)
     public void enablesComponentWhenSiteSettingsSupported() {
+        declareManageDataLauncherActivity();
         String provider = TWA_PROVIDER_PACKAGE;
         installTrustedWebActivityProviderWithSiteSettingsCategory(provider);
 
@@ -167,6 +169,7 @@ public class ManageDataLauncherActivityTest {
     @Test
     @Config(sdk = Build.VERSION_CODES.N_MR1)
     public void reenablesComponentWhenSiteSettingsSupported() {
+        declareManageDataLauncherActivity();
         String provider = TWA_PROVIDER_PACKAGE;
         // Install a TWA, with no support for site settings. Component should be disabled.
         installTrustedWebActivityProvider(provider);
@@ -183,6 +186,26 @@ public class ManageDataLauncherActivityTest {
 
         componentState = mPackageManager.getComponentEnabledSetting(component);
         assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED, componentState);
+    }
+
+    @Test
+    @Config(sdk = Build.VERSION_CODES.N_MR1)
+    public void leavesComponentAloneWhenNotDeclared() {
+        String provider = TWA_PROVIDER_PACKAGE;
+        installTrustedWebActivityProvider(provider);
+
+        ManageDataLauncherActivity.addSiteSettingsShortcut(mContext, provider);
+
+        ComponentName component = new ComponentName(mContext, ManageDataLauncherActivity.class);
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                mPackageManager.getComponentEnabledSetting(component));
+    }
+
+    private void declareManageDataLauncherActivity() {
+        ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.packageName = mContext.getPackageName();
+        activityInfo.name = ManageDataLauncherActivity.class.getName();
+        mShadowPackageManager.addOrUpdateActivity(activityInfo);
     }
 
     private void installBrowser(String packageName) {

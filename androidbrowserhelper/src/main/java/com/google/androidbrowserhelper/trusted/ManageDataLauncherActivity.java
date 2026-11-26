@@ -377,6 +377,14 @@ public class ManageDataLauncherActivity extends Activity {
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return;
 
         PackageManager packageManager = context.getPackageManager();
+        ComponentName component = new ComponentName(context, ManageDataLauncherActivity.class);
+        try {
+            packageManager.getActivityInfo(component, PackageManager.MATCH_DISABLED_COMPONENTS);
+        } catch (PackageManager.NameNotFoundException e) {
+            // setComponentEnabledSetting() throws for an Activity the app does not declare, which
+            // would crash every launch of such an app.
+            return;
+        }
         ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
 
         // Remove potentially existing shortcut if package does not support shortcuts.
@@ -384,13 +392,13 @@ public class ManageDataLauncherActivity extends Activity {
             shortcutManager.removeDynamicShortcuts(Collections.singletonList(ManageDataLauncherActivity
                     .SITE_SETTINGS_SHORTCUT_ID));
             // Disable if Site settings are not supported.
-            packageManager.setComponentEnabledSetting(new ComponentName(context, ManageDataLauncherActivity.class),
+            packageManager.setComponentEnabledSetting(component,
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
             return;
         }
 
         // Ensure the ManageDataLauncherActivity is enabled.
-        packageManager.setComponentEnabledSetting(new ComponentName(context, ManageDataLauncherActivity.class),
+        packageManager.setComponentEnabledSetting(component,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
         ShortcutInfo shortcut = getSiteSettingsShortcutOrNull(

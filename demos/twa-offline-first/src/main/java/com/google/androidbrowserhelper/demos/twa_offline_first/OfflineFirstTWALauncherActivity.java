@@ -20,6 +20,7 @@ import com.google.androidbrowserhelper.trusted.QualityEnforcer;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -179,16 +180,36 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
         }
     }
 
-    // An always-on VPN reports internet access even when no network carries it, so the active
-    // network must also have been validated, which Android checks through the VPN tunnel.
+    // An always-on VPN stays the active network and keeps reporting validated internet access
+    // after the network underneath it is gone, so a VPN only counts as online while a validated
+    // network that is not a VPN exists. `getAllNetworks()` is deprecated without a synchronous
+    // replacement.
+    @SuppressWarnings("deprecation")
     private boolean isOnline() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null) {
             return false;
         }
-        NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(
+        NetworkCapabilities active = connectivityManager.getNetworkCapabilities(
                 connectivityManager.getActiveNetwork());
+        if (!hasValidatedInternet(active)) {
+            return false;
+        }
+        if (!active.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+            return true;
+        }
+        for (Network network : connectivityManager.getAllNetworks()) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+            if (hasValidatedInternet(capabilities)
+                    && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasValidatedInternet(@Nullable NetworkCapabilities capabilities) {
         return capabilities != null
                 && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);

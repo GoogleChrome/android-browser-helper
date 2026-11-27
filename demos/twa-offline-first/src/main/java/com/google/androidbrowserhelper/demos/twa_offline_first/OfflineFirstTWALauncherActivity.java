@@ -15,16 +15,26 @@
 package com.google.androidbrowserhelper.demos.twa_offline_first;
 
 import com.google.androidbrowserhelper.trusted.LauncherActivity;
+import com.google.androidbrowserhelper.trusted.QualityEnforcer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsCallback;
+
+import java.lang.ref.WeakReference;
+
 public class OfflineFirstTWALauncherActivity extends LauncherActivity {
+    // The instance showing the offline fallback screen, if any.
+    private static WeakReference<OfflineFirstTWALauncherActivity> sOfflineFallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +44,24 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
         if (isFinishing()) {
             return;
         }
+
+        // A share or link that arrives while the offline fallback screen is shown starts a new
+        // instance of this Activity. Finish the previous one, so the fallback screens don't stack.
+        OfflineFirstTWALauncherActivity offlineFallback =
+                sOfflineFallback == null ? null : sOfflineFallback.get();
+        if (offlineFallback != null) {
+            offlineFallback.finish();
+        }
+
         tryLaunchTwa();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (sOfflineFallback != null && sOfflineFallback.get() == this) {
+            sOfflineFallback = null;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -54,7 +81,7 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
         }
 
         if (isOnline()) {
-            firstTimeLaunchTwa();
+            launchTwa();
             return;
         }
 
@@ -62,7 +89,8 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     }
 
     private boolean hasTwaLaunchedSuccessfully() {
-        // Return `true` if the preference "twa_launched_successfully" has already been set.
+        // Return `true` if the preference "twa_launched_successfully" has already been set, which
+        // happens once the browser finished loading a page (see `getCustomTabsCallback()`).
         // The code to access shared preferences is surrounded by additional `ThreadPolicy` code to
         // avoid the app breaking the first time it runs (as it requires a disk read, which might be
         // slower the first time).
@@ -79,6 +107,7 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
     }
 
     private void renderOfflineFallback() {
+        sOfflineFallback = new WeakReference<>(this);
         setContentView(R.layout.activity_offline_first_twa);
 
         Button retryBtn = this.findViewById(R.id.retry_btn);
@@ -86,27 +115,103 @@ public class OfflineFirstTWALauncherActivity extends LauncherActivity {
             // Check connection status. If online, launch the Trusted Web Activity for the first
             // time.
             if (isOnline()) {
-                firstTimeLaunchTwa();
+                launchTwa();
             }
         });
     }
 
-    private void firstTimeLaunchTwa() {
-        // Launch the TWA and set the preference "twa_launched_successfully" to true, to indicate
-        // that it has launched successfully, at least, once.
-        launchTwa();
-
-        SharedPreferences sharedPref = getSharedPreferences(
-                getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean(getString(R.string.twa_launched_successfully), true);
-        editor.apply();
+    @Override
+    protected CustomTabsCallback getCustomTabsCallback() {
+        if (hasTwaLaunchedSuccessfully()) {
+            return super.getCustomTabsCallback();
+        }
+        return new LaunchRecorder(getApplicationContext().getSharedPreferences(
+                getString(R.string.twa_offline_first_preferences_file_key), Context.MODE_PRIVATE),
+                getString(R.string.twa_launched_successfully));
     }
 
+    // Sets the preference "twa_launched_successfully" only once the browser reports a finished
+    // page load. Setting it when the launch starts would skip the offline fallback screen on later
+    // launches, although an interrupted first launch never loaded the page that registers the
+    // service worker. A failed navigation still finishes loading the browser's error page, so a
+    // failure since the last navigation start keeps the preference unset. The class is static so
+    // the browser's binder does not keep the Activity alive, and it extends `QualityEnforcer` to
+    // keep the default quality enforcement.
+    private static class LaunchRecorder extends QualityEnforcer {
+        // Matches the package-private `QualityEnforcer.CRASH`.
+        private static final String CRASH = "quality_enforcement.crash";
+
+        private final SharedPreferences mSharedPref;
+        private final String mKey;
+        private boolean mFailed;
+
+        LaunchRecorder(SharedPreferences sharedPref, String key) {
+            mSharedPref = sharedPref;
+            mKey = key;
+        }
+
+        @Override
+        public void onNavigationEvent(int navigationEvent, @Nullable Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
+            switch (navigationEvent) {
+                case NAVIGATION_STARTED:
+                    mFailed = false;
+                    break;
+                case NAVIGATION_FAILED:
+                case NAVIGATION_ABORTED:
+                    mFailed = true;
+                    break;
+                case NAVIGATION_FINISHED:
+                    if (!mFailed) {
+                        mSharedPref.edit().putBoolean(mKey, true).apply();
+                    }
+                    break;
+            }
+        }
+
+        @Nullable
+        @Override
+        public Bundle extraCallbackWithResult(@NonNull String callbackName,
+                @Nullable Bundle args) {
+            if (CRASH.equals(callbackName)) {
+                mFailed = true;
+            }
+            return super.extraCallbackWithResult(callbackName, args);
+        }
+    }
+
+    // An always-on VPN stays the active network and keeps reporting validated internet access
+    // after the network underneath it is gone, so a VPN only counts as online while a validated
+    // network that is not a VPN exists. `getAllNetworks()` is deprecated without a synchronous
+    // replacement.
+    @SuppressWarnings("deprecation")
     private boolean isOnline() {
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if (connectivityManager == null) {
+            return false;
+        }
+        NetworkCapabilities active = connectivityManager.getNetworkCapabilities(
+                connectivityManager.getActiveNetwork());
+        if (!hasValidatedInternet(active)) {
+            return false;
+        }
+        if (!active.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+            return true;
+        }
+        for (Network network : connectivityManager.getAllNetworks()) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
+            if (hasValidatedInternet(capabilities)
+                    && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasValidatedInternet(@Nullable NetworkCapabilities capabilities) {
+        return capabilities != null
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
     }
 }

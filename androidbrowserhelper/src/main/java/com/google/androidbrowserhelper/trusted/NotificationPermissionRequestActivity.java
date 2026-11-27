@@ -48,6 +48,7 @@ public class NotificationPermissionRequestActivity extends Activity {
 
     private String mChannelName;
     private Messenger mMessenger;
+    private boolean mShouldShowRationaleBefore;
 
     /**
      * Creates a {@link PendingIntent} for launching this activity to request the notification permission. It is mutable
@@ -79,6 +80,8 @@ public class NotificationPermissionRequestActivity extends Activity {
             NotificationUtils.createNotificationChannel(this, mChannelName);
         }
 
+        mShouldShowRationaleBefore =
+                ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION_POST_NOTIFICATIONS);
         ActivityCompat.requestPermissions(this, new String[]{PERMISSION_POST_NOTIFICATIONS}, 0);
     }
 
@@ -88,7 +91,6 @@ public class NotificationPermissionRequestActivity extends Activity {
         for (int i = 0; i < permissions.length; i++) {
             if (!permissions[i].equals(PERMISSION_POST_NOTIFICATIONS)) continue;
 
-            PrefUtils.setHasRequestedNotificationPermission(this);
             enabled = grantResults[i] == PackageManager.PERMISSION_GRANTED;
             break;
         }
@@ -100,16 +102,37 @@ public class NotificationPermissionRequestActivity extends Activity {
             enabled = NotificationUtils.areNotificationsEnabled(this, mChannelName);
         }
 
-        sendPermissionMessage(mMessenger, enabled);
+        @PermissionStatus int status = getPermissionStatus(enabled);
+        PrefUtils.setNotificationPermissionDenied(this, status == PermissionStatus.BLOCK);
+        sendPermissionMessage(mMessenger, status);
         finish();
+    }
+
+    /**
+     * Chrome stores the status it receives and only forwards later requests while it is
+     * {@link PermissionStatus#ASK}, so a denial that Android would still ask about again must not
+     * be reported as {@link PermissionStatus#BLOCK}.
+     */
+    private @PermissionStatus int getPermissionStatus(boolean enabled) {
+        if (enabled) return PermissionStatus.ALLOW;
+
+        boolean shouldShowRationaleAfter =
+                ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSION_POST_NOTIFICATIONS);
+        // Android shows the dialog again while it suggests a rationale.
+        if (shouldShowRationaleAfter) return PermissionStatus.ASK;
+        // The suggestion ends when the user denies a second time, so the dialog will not show again.
+        if (mShouldShowRationaleBefore) return PermissionStatus.BLOCK;
+        // Neither before nor after means the user dismissed the first dialog without choosing, or
+        // the dialog did not show because of an earlier denial.
+        return PrefUtils.isNotificationPermissionDenied(this)
+                ? PermissionStatus.BLOCK : PermissionStatus.ASK;
     }
 
     /**
      * Sends a message to the messenger containing the permission status.
      */
-    private static void sendPermissionMessage(Messenger messenger, boolean enabled) {
+    private static void sendPermissionMessage(Messenger messenger, @PermissionStatus int status) {
         Bundle data = new Bundle();
-        @PermissionStatus int status = enabled ? PermissionStatus.ALLOW : PermissionStatus.BLOCK;
         data.putInt(KEY_PERMISSION_STATUS, status);
         Message message = Message.obtain();
         message.setData(data);

@@ -1,0 +1,7 @@
+{
+  "name": "reviewer",
+  "description": "Senior SWE subagent for identifying code issues, enforcing Android/Java standards, and producing Dashboard-First code review reports.",
+  "configPath": {
+    "relativePathToConfig": "config.yaml"
+  }
+}
